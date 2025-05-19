@@ -16,7 +16,7 @@ var trackballControls = new TrackballControls( camera, renderer.domElement );
 initDefaultBasicLight(scene);
 
 // Set angles of rotation
-let angle = [-1.57, 0];
+let angle = [-1.57, 0, 0];
 
 // Show world axes
 var axesHelper = new THREE.AxesHelper( 12 );
@@ -33,6 +33,12 @@ c1.add(s2);
 
 var c2 = createCylinder();
 s2.add(c2);
+
+var s3 = createSphere();
+c2.add(s3);
+
+var c3 = createCylinder();
+s3.add(c3);
 
 // Listen window size changes
 window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
@@ -67,11 +73,15 @@ function rotateCylinder()
   c1.matrixAutoUpdate = false;
   s2.matrixAutoUpdate = false;
   c2.matrixAutoUpdate = false;
+  s3.matrixAutoUpdate = false;
+  c3.matrixAutoUpdate = false;
 
   // resetting matrices
   c1.matrix.identity();
   s2.matrix.identity();
   c2.matrix.identity();
+  s3.matrix.identity();
+  c3.matrix.identity();
 
   // Auxiliar matrix
   var mat4 = new THREE.Matrix4();
@@ -86,6 +96,11 @@ function rotateCylinder()
   // Will execute T2 and then R2
   c2.matrix.multiply(mat4.makeRotationZ(angle[1])); // R2
   c2.matrix.multiply(mat4.makeTranslation(0.0, 1.0, 0.0)); // T2
+
+  s3.matrix.multiply(mat4.makeTranslation(0.0, 1.0, 0.0)) // se nao colocar isso, o s3 estaria até o momento posicionado em relação ao centro do c2
+
+  c3.matrix.multiply(mat4.makeRotationZ(angle[2]))
+  c3.matrix.multiply(mat4.makeTranslation(0.0, 1.0, 0.0))
 }
 
 function buildInterface()
@@ -94,10 +109,12 @@ function buildInterface()
   {
     this.joint1 = 270;
     this.joint2 = 0;
+    this.joint3 = 0;
 
     this.rotate = function(){
       angle[0] = THREE.MathUtils.degToRad(this.joint1);
       angle[1] = THREE.MathUtils.degToRad(this.joint2);
+      angle[2] = THREE.MathUtils.degToRad(this.joint3);
       rotateCylinder();
     };
   };
@@ -110,6 +127,9 @@ function buildInterface()
   gui.add(controls, 'joint2', 0, 360)
     .onChange(function() { controls.rotate() })
     .name("Second Joint");
+  gui.add(controls, 'joint3', 0, 360)
+    .onChange(function() { controls.rotate() })
+    .name("Third Joint");
 }
 
 function render()
