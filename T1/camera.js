@@ -55,6 +55,7 @@ const controls = new PointerLockControls(cameraHolder, renderer.domElement);
 
 const blocker = document.getElementById('blocker');
 const instructions = document.getElementById('instructions');
+const crosshair = document.getElementById('crosshair');
 
 //controlam se o mouse está travado ou não
 instructions.addEventListener('click', function () {
@@ -67,11 +68,13 @@ instructions.addEventListener('click', function () {
 controls.addEventListener('lock', function () {
     instructions.style.display = 'none';
     blocker.style.display = 'none';
+    crosshair.style.display = 'block'; // Mostra a mira
 });
 
 controls.addEventListener('unlock', function () {
     blocker.style.display = 'block';
     instructions.style.display = '';
+    crosshair.style.display = 'none'; // Esconde a mira
 });
 
 scene.add(controls.getObject());
