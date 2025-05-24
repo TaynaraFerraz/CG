@@ -1,4 +1,6 @@
 import * as THREE from  'three';
+import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
+import { Box3 } from '../build/three.module.js';
 import Stats from '../build/jsm/libs/stats.module.js';
 import {PointerLockControls} from '../build/jsm/controls/PointerLockControls.js';
 import {initRenderer, 
@@ -10,6 +12,10 @@ import {initRenderer,
         createGroundPlaneXZ,
         createGroundPlane} from "../libs/util/util.js";
 
+
+
+const collidableArea = [];
+const collidableWalls = [];
 
 export class Area {
 
@@ -67,6 +73,7 @@ export class Area {
       cube.rotation.y = Math.PI;
     scene.add(cube);
 
+    
     //cubos laterais
     let cubeGeometry2 = new THREE.BoxGeometry(leftLength, height, height);
     let cubeLeft = new THREE.Mesh(cubeGeometry2, material);
@@ -79,7 +86,13 @@ export class Area {
     cubeRight.position.set((length-rightLength)/2, 0.0, 60.0);
     cube.add(cubeRight);
     
-    
+    //colisão
+    let boxCube = new THREE.Box3().setFromObject(cube);
+    let leftBoxCube = new THREE.Box3().setFromObject(cubeLeft);
+    let rightBoxCube = new THREE.Box3().setFromObject(cubeRight);
+    collidableArea.push(boxCube);
+    collidableArea.push(leftBoxCube);
+    collidableArea.push(rightBoxCube);
     //escadas
     let stairHeight = height/8;
     //calculo da posição da escada em relação ao cubo principal
@@ -127,6 +140,8 @@ export class Area {
 
     for(let i = 0; i < walls.length; ++i){
       scene.add(walls[i]);
+      let wallBox = new THREE.Box3().setFromObject(walls[i]);
+      collidableWalls.push(wallBox);
     }
 
     // create the ground plane
