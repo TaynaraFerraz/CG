@@ -36,7 +36,7 @@ export class Area {
     let material = setDefaultMaterial();
     //criação da base da plataforma
     //inicialização com valores padrão (plataforma pequena com escada ao centro)
-    const heigh = 24.0;
+    const height = 24.0;
     let length = 120.0;
     let leftLength = 48.0;
     let rightLength = 48.0;
@@ -60,7 +60,7 @@ export class Area {
     }
 
 
-    let cubeGeometry = new THREE.BoxGeometry(length, heigh, 96.0);
+    let cubeGeometry = new THREE.BoxGeometry(length, height, 96.0);
     let cube = new THREE.Mesh(cubeGeometry, material);
     cube.position.copy(position);
     if(i == 3)
@@ -68,20 +68,20 @@ export class Area {
     scene.add(cube);
 
     //cubos laterais
-    let cubeGeometry2 = new THREE.BoxGeometry(leftLength, heigh, heigh);
+    let cubeGeometry2 = new THREE.BoxGeometry(leftLength, height, height);
     let cubeLeft = new THREE.Mesh(cubeGeometry2, material);
     //calculo da posição do cubo esquerdo em relação ao cubo principal
     cubeLeft.position.set(-(length-leftLength)/2, 0.0, 60.0);
     cube.add(cubeLeft);
 
-    let cubeGeometry3 = new THREE.BoxGeometry(rightLength, heigh, heigh);
+    let cubeGeometry3 = new THREE.BoxGeometry(rightLength, height, height);
     let cubeRight = new THREE.Mesh(cubeGeometry3, material);
     cubeRight.position.set((length-rightLength)/2, 0.0, 60.0);
     cube.add(cubeRight);
     
     
     //escadas
-    let stairHeigh = heigh/8;
+    let stairHeight = height/8;
     //calculo da posição da escada em relação ao cubo principal
     let stairPositionX = 0.0;
     if(leftLength < length/2){
@@ -92,12 +92,12 @@ export class Area {
     //reescrever/deixar mais legivel se possivel
     //os numeros são correções para a escada ficar alinhada ao cubo principal
     for (let i = 0; i < 8; i++) {
-      let stairStepGeometry = new THREE.BoxGeometry( 25.0, stairHeigh, stairHeigh * (1 + 7 - i));
+      let stairStepGeometry = new THREE.BoxGeometry( 25.0, stairHeight, stairHeight * (1 + 7 - i));
       let stairStep = new THREE.Mesh(stairStepGeometry, material);
       if (i == 0) {
         stairStep.position.set(stairPositionX, -10.5, 60);
       } else {
-        stairStep.position.set(stairPositionX, -10.5+stairHeigh * i, 60 - (stairHeigh * i) / 2);
+        stairStep.position.set(stairPositionX, -10.5+stairHeight * i, 60 - (stairHeight * i) / 2);
       }
       cube.add(stairStep);
     }
