@@ -37,14 +37,6 @@ cameraHolder.position.set(0, 17.5, 50);
 
 scene.add(cameraHolder);
 
-//colisores
-
-let collidables = scene.children.map((child) => {
-    let boundingBox = new THREE.Box3();
-    boundingBox.setFromObject(child);
-    return boundingBox;
-})
-let playerCollisionHandler = new PlayerCollisionHandler(scene, cameraHolder, collidables);
 
 cameraHolder.add(camera);
 
@@ -59,9 +51,9 @@ const crosshair = document.getElementById('crosshair');
 
 //controlam se o mouse está travado ou não
 instructions.addEventListener('click', function () {
-
+    
     controls.lock();
-
+    
 }, false);
 
 //controlam a notificação de que o mouse está travado ou não
@@ -95,17 +87,17 @@ window.addEventListener('keyup', (event) => movementControls(event.keyCode, fals
 function movementControls(key, value) {
     switch (key) {
         case 87: // W
-            moveForward = value;
-            break;
+        moveForward = value;
+        break;
         case 83: // S
-            moveBackward = value;
-            break;
+        moveBackward = value;
+        break;
         case 65: // A
-            moveLeft = value;
-            break;
+        moveLeft = value;
+        break;
         case 68: // D
-            moveRight = value;
-            break;
+        moveRight = value;
+        break;
     }
 }
 
@@ -117,7 +109,7 @@ function moveAnimate(delta) {
     else if (moveBackward) {
         controls.moveForward(speed * -1 * delta);
     }
-
+    
     if (moveRight) {
         controls.moveRight(speed * delta);
     }
@@ -128,6 +120,20 @@ function moveAnimate(delta) {
 
 //testeMashs()
 Area.createMap(scene);
+
+//colisores
+
+/* let collidables = scene.children.map((child) => {
+    let boundingBox = new THREE.Box3();
+    boundingBox.setFromObject(child);
+    return boundingBox;
+}) */
+let collidables = {
+    areas: Area.collidableAreas,
+    walls: Area.collidableWalls
+}
+let playerCollisionHandler = new PlayerCollisionHandler(scene, cameraHolder, collidables);
+
 
 // Listen window size changes
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);

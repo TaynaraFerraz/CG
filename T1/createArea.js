@@ -1,39 +1,41 @@
-import * as THREE from  'three';
+import * as THREE from 'three';
 import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
 import { Box3 } from '../build/three.module.js';
 import Stats from '../build/jsm/libs/stats.module.js';
-import {PointerLockControls} from '../build/jsm/controls/PointerLockControls.js';
-import {initRenderer, 
-        initCamera,
-        initDefaultBasicLight,
-        setDefaultMaterial,
-        InfoBox,
-        onWindowResize,
-        createGroundPlaneXZ,
-        createGroundPlane} from "../libs/util/util.js";
+import { PointerLockControls } from '../build/jsm/controls/PointerLockControls.js';
+import {
+  initRenderer,
+  initCamera,
+  initDefaultBasicLight,
+  setDefaultMaterial,
+  InfoBox,
+  onWindowResize,
+  createGroundPlaneXZ,
+  createGroundPlane
+} from "../libs/util/util.js";
 
 
 
-const collidableArea = [];
-const collidableWalls = [];
 
 export class Area {
+  static collidableAreas = [];
+  static collidableWalls = [];
 
-  constructor (scene){
+  constructor(scene) {
     this.scene = scene;
   }
 
-  static createMap(scene){
+  static createMap(scene) {
     let positions = [];
-    
+
     positions.push(new THREE.Vector3(-160.0, 12.0, -172.0));
     positions.push(new THREE.Vector3(0.0, 12.0, -172.0));
     positions.push(new THREE.Vector3(160.0, 12.0, -172.0));
     positions.push(new THREE.Vector3(0.0, 12.0, 172.0));
-    
+
     this.createTerrain(scene);
 
-    for(let i = 0; i < positions.length; i++){
+    for (let i = 0; i < positions.length; i++) {
       this.createArea(scene, positions[i], i);
     }
   }
@@ -46,20 +48,20 @@ export class Area {
     let length = 120.0;
     let leftLength = 48.0;
     let rightLength = 48.0;
-    
-    if(i == 0){
+
+    if (i == 0) {
       leftLength = 16.0;
       rightLength = 80.0;
     }
-    if(i == 1){
+    if (i == 1) {
       leftLength = 80.0;
       rightLength = 16.0;
     }
-    if(i == 2){
+    if (i == 2) {
       leftLength = 48.0;
       rightLength = 48.0;
     }
-    if(i == 3){
+    if (i == 3) {
       length = 360.0;
       leftLength = 167.5;
       rightLength = 167.5;
@@ -69,35 +71,35 @@ export class Area {
     let cubeGeometry = new THREE.BoxGeometry(length, height, 96.0);
     let cube = new THREE.Mesh(cubeGeometry, material);
     cube.position.copy(position);
-    if(i == 3)
+    if (i == 3)
       cube.rotation.y = Math.PI;
     scene.add(cube);
 
-    
+
     //cubos laterais
     let cubeGeometry2 = new THREE.BoxGeometry(leftLength, height, height);
     let cubeLeft = new THREE.Mesh(cubeGeometry2, material);
     //calculo da posição do cubo esquerdo em relação ao cubo principal
-    cubeLeft.position.set(-(length-leftLength)/2, 0.0, 60.0);
+    cubeLeft.position.set(-(length - leftLength) / 2, 0.0, 60.0);
     cube.add(cubeLeft);
 
     let cubeGeometry3 = new THREE.BoxGeometry(rightLength, height, height);
     let cubeRight = new THREE.Mesh(cubeGeometry3, material);
-    cubeRight.position.set((length-rightLength)/2, 0.0, 60.0);
+    cubeRight.position.set((length - rightLength) / 2, 0.0, 60.0);
     cube.add(cubeRight);
-    
+
     //colisão
     let boxCube = new THREE.Box3().setFromObject(cube);
     let leftBoxCube = new THREE.Box3().setFromObject(cubeLeft);
     let rightBoxCube = new THREE.Box3().setFromObject(cubeRight);
-    collidableArea.push(boxCube);
-    collidableArea.push(leftBoxCube);
-    collidableArea.push(rightBoxCube);
+    this.collidableAreas.push({box: boxCube, mesh: cube});
+    this.collidableAreas.push({box: leftBoxCube, mesh: cubeLeft});
+    this.collidableAreas.push({box: rightBoxCube, mesh: cubeRight});
     //escadas
-    let stairHeight = height/8;
+    let stairHeight = height / 8;
     //calculo da posição da escada em relação ao cubo principal
     let stairPositionX = 0.0;
-    if(leftLength < length/2){
+    if (leftLength < length / 2) {
       stairPositionX = -(length - leftLength) / 2 + leftLength / 2 + 12.5;
     } else {
       stairPositionX = (length - rightLength) / 2 - rightLength / 2 - 12.5;
@@ -105,26 +107,26 @@ export class Area {
     //reescrever/deixar mais legivel se possivel
     //os numeros são correções para a escada ficar alinhada ao cubo principal
     for (let i = 0; i < 8; i++) {
-      let stairStepGeometry = new THREE.BoxGeometry( 25.0, stairHeight, stairHeight * (1 + 7 - i));
+      let stairStepGeometry = new THREE.BoxGeometry(25.0, stairHeight, stairHeight * (1 + 7 - i));
       let stairStep = new THREE.Mesh(stairStepGeometry, material);
       if (i == 0) {
         stairStep.position.set(stairPositionX, -10.5, 60);
       } else {
-        stairStep.position.set(stairPositionX, -10.5+stairHeight * i, 60 - (stairHeight * i) / 2);
+        stairStep.position.set(stairPositionX, -10.5 + stairHeight * i, 60 - (stairHeight * i) / 2);
       }
       cube.add(stairStep);
     }
   }
 
-  static createTerrain(scene){
+  static createTerrain(scene) {
     //create walls
-    let wallGeometry = new THREE.PlaneGeometry(500, 72); 
+    let wallGeometry = new THREE.PlaneGeometry(500, 72);
     let wallMaterial = new THREE.MeshBasicMaterial();
 
     let walls = [];
 
-    for(let i = 0; i < 4; ++i){
-        walls.push(new THREE.Mesh(wallGeometry,wallMaterial));
+    for (let i = 0; i < 4; ++i) {
+      walls.push(new THREE.Mesh(wallGeometry, wallMaterial));
     }
 
     walls[0].position.set(0, 36, -250);
@@ -138,10 +140,10 @@ export class Area {
     walls[3].position.set(0, 36, 250);
     walls[3].rotation.y = Math.PI
 
-    for(let i = 0; i < walls.length; ++i){
+    for (let i = 0; i < walls.length; ++i) {
       scene.add(walls[i]);
       let wallBox = new THREE.Box3().setFromObject(walls[i]);
-      collidableWalls.push(wallBox);
+      this.collidableWalls.push({box: wallBox, mesh: walls[i]});
     }
 
     // create the ground plane
