@@ -131,7 +131,8 @@ Area.createMap(scene);
 }) */
 let collidables = {
     areas: Area.collidableAreas,
-    walls: Area.collidableWalls
+    walls: Area.collidableWalls,
+    stairs: Area.collidableStairs
 }
 let playerCollisionHandler = new PlayerCollisionHandler(scene, cameraHolder, collidables);
 
