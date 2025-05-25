@@ -20,6 +20,7 @@ import {
 export class Area {
   static collidableAreas = [];
   static collidableWalls = [];
+  static collidableStairs = [];
 
   constructor(scene) {
     this.scene = scene;
@@ -75,6 +76,8 @@ export class Area {
       cube.rotation.y = Math.PI;
     scene.add(cube);
 
+    let boxCube = new THREE.Box3().setFromObject(cube, true);
+    this.collidableAreas.push({box: boxCube, mesh: cube});
 
     //cubos laterais
     let cubeGeometry2 = new THREE.BoxGeometry(leftLength, height, height);
@@ -89,12 +92,11 @@ export class Area {
     cube.add(cubeRight);
 
     //colisão
-    let boxCube = new THREE.Box3().setFromObject(cube, true);
     let leftBoxCube = new THREE.Box3().setFromObject(cubeLeft, true);
     let rightBoxCube = new THREE.Box3().setFromObject(cubeRight, true);
-    this.collidableAreas.push({box: boxCube, mesh: cube});
     this.collidableAreas.push({box: leftBoxCube, mesh: cubeLeft});
     this.collidableAreas.push({box: rightBoxCube, mesh: cubeRight});
+
     //escadas
     let stairHeight = height / 8;
     //calculo da posição da escada em relação ao cubo principal
@@ -104,6 +106,15 @@ export class Area {
     } else {
       stairPositionX = (length - rightLength) / 2 - rightLength / 2 - 12.5;
     }
+    
+    // colisão da escada
+    let stair = new THREE.Mesh(new THREE.BoxGeometry(25, 24*Math.sqrt(2), 24*Math.sqrt(2)), setDefaultMaterial());
+    stair.position.set(stairPositionX, -12.0, 48.0);
+    stair.rotateX(Math.PI / 4);
+    cube.add(stair);
+    let box = new THREE.Box3().setFromObject(stair, true);
+    this.collidableStairs.push({ box: box, mesh: stair });
+
     //reescrever/deixar mais legivel se possivel
     //os numeros são correções para a escada ficar alinhada ao cubo principal
     for (let i = 0; i < 8; i++) {
@@ -116,6 +127,8 @@ export class Area {
       }
       cube.add(stairStep);
     }
+
+
   }
 
   static createTerrain(scene) {

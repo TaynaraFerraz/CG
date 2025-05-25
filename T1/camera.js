@@ -34,6 +34,7 @@ camera.lookAt(new THREE.Vector3(0.0, 17.5, 0.0));
 let cameraHolderGeometry = new THREE.BoxGeometry(4, 4, 4);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, material);
 cameraHolder.position.set(200, 50.5, -80);
+cameraHolder.visible = false; // Esconde o cameraHolder
 
 scene.add(cameraHolder);
 
