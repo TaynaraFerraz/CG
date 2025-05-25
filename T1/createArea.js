@@ -89,9 +89,9 @@ export class Area {
     cube.add(cubeRight);
 
     //colisão
-    let boxCube = new THREE.Box3().setFromObject(cube);
-    let leftBoxCube = new THREE.Box3().setFromObject(cubeLeft);
-    let rightBoxCube = new THREE.Box3().setFromObject(cubeRight);
+    let boxCube = new THREE.Box3().setFromObject(cube, true);
+    let leftBoxCube = new THREE.Box3().setFromObject(cubeLeft, true);
+    let rightBoxCube = new THREE.Box3().setFromObject(cubeRight, true);
     this.collidableAreas.push({box: boxCube, mesh: cube});
     this.collidableAreas.push({box: leftBoxCube, mesh: cubeLeft});
     this.collidableAreas.push({box: rightBoxCube, mesh: cubeRight});
@@ -140,9 +140,11 @@ export class Area {
     walls[3].position.set(0, 36, 250);
     walls[3].rotation.y = Math.PI
 
-    for (let i = 0; i < walls.length; ++i) {
+    for (let i = 0; i < walls.length; i++) {
       scene.add(walls[i]);
-      let wallBox = new THREE.Box3().setFromObject(walls[i]);
+      let wallBox = new THREE.Box3().setFromObject(walls[i], true);
+      console.log(wallBox.min, wallBox.max);
+      
       this.collidableWalls.push({box: wallBox, mesh: walls[i]});
     }
 
