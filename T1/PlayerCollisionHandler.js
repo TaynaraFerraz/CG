@@ -3,7 +3,7 @@ import { degreesToRadians } from '../libs/util/util.js';
 import { Vector3 } from '../build/three.module.js';
 
 export class PlayerCollisionHandler {
-    #fallingConstant = 0.2;
+    #fallingConstant = 0.5;
     #scene;
     #player;
     #collidables = {};
@@ -19,16 +19,14 @@ export class PlayerCollisionHandler {
         this.#oldPos = new THREE.Vector3();
         this.#player.getWorldPosition(this.#oldPos);
         this.#raycaster = new THREE.Raycaster();
-        this.#raycaster.far = 20;
+        this.#raycaster.far = 4;
 
         this.#boundingBox = new THREE.Box3();
         this.#boundingBox.setFromObject(this.#player);
-
-        //this.#player.add(this.#boundingBox);
     }
 
-    #handleGroupCollisions(collidables, isStair = false) {
-        let collided = false;
+    #handleGroupCollisions(collidables) {
+        let isAbove = false;
         let currentPos = new THREE.Vector3();
         this.#boundingBox.setFromObject(this.#player);
         this.#player.getWorldPosition(currentPos);
@@ -36,12 +34,11 @@ export class PlayerCollisionHandler {
 
         collidables.forEach((object) => {
             if (this.#boundingBox.intersectsBox(object.box)) {
-                collided = true; //colidiu(útil pra gravidade)
-
                 let deltaMovement = new THREE.Vector3(0, 0, 0);
 
 
                 if ((this.#oldPos.x != currentPos.x ||
+                    this.#oldPos.y != currentPos.y ||
                     this.#oldPos.z != currentPos.z)
                 ) {
 
@@ -56,16 +53,10 @@ export class PlayerCollisionHandler {
 
                     this.#raycaster.set(this.#player.position, normalizedMovementDirection); //apontando o raio para a direção do movimento
 
-                    if (isStair) {
-                        this.#raycaster.set(this.#player.position, new Vector3(0, -1, 0));
-                    }
 
                     let normalToIntersection = new THREE.Vector3();
                     let intersectionResult = this.#raycaster.intersectObject(object.mesh, false)[0] // pega a interseção com o objeto mais próxima no raio
 
-                    if (isStair) {
-                        if (intersectionResult?.distance > this.#fallingConstant) this.#player.position.y -= this.#fallingConstant;
-                    }
 
                     if (intersectionResult) { //se houver interseção
                         normalToIntersection = intersectionResult.normal.transformDirection(object.mesh.matrixWorld); //pega o vetor normal com a transformação para a normal do mundo
@@ -82,27 +73,23 @@ export class PlayerCollisionHandler {
                         posAfterCollision.add(deltaMovement); //adiciona o movimento apenas na direção correta
 
                         //seta as coordenadas para o resultado
-                        if (normalToIntersection.x != 0 &&
-                            normalToIntersection.y != 1 &&
-                            normalToIntersection.z != 0 &&
-                            this.#player.position.y > 2) {
-                            this.#player.position.y -= this.#fallingConstant;
-                        } else {
-                            this.#player.position.x = posAfterCollision.x;
-                            this.#player.position.y = posAfterCollision.y;
-                            this.#player.position.z = posAfterCollision.z;
-                        }
+                        this.#player.position.x = posAfterCollision.x;
+                        this.#player.position.y = posAfterCollision.y;
+                        this.#player.position.z = posAfterCollision.z;
+
+
+
                         /* 
-                                                var distance = 100; // at what distance to determine pointB
+                        var distance = 100; // at what distance to determine pointB
                         
-                                                //linha para ver o raio
-                                                var pointB = new THREE.Vector3();
-                                                pointB.addVectors(this.#oldPos, normalToIntersection);
+                        //linha para ver o raio
+                        var pointB = new THREE.Vector3();
+                        pointB.addVectors(this.#oldPos, normalToIntersection);
                         
-                                                let points = [this.#oldPos, pointB]
+                        let points = [this.#oldPos, pointB]
                         
-                                                const material = new THREE.LineBasicMaterial({
-                                                    color: 0x0110ff
+                        const material = new THREE.LineBasicMaterial({
+                            color: 0x0110ff
                                                 });
                                                 const geometry = new THREE.BufferGeometry().setFromPoints(points);
                         
@@ -111,8 +98,13 @@ export class PlayerCollisionHandler {
                     }
                 }
             }
+            this.#raycaster.set(this.#player.position, new Vector3(0, -1, 0));
+
+            if (this.#raycaster.intersectObject(object.mesh, false).length > 0) {
+                isAbove = true;
+            }
         })
-        return collided;
+        return isAbove;
     }
 
     handleCollisions() {
@@ -120,12 +112,12 @@ export class PlayerCollisionHandler {
             this.#handleGroupCollisions(this.#collidables.walls);
         }
 
-        let collidedWithArea = this.#handleGroupCollisions(this.#collidables.areas);
-        let collidedWithStairs = this.#handleGroupCollisions(this.#collidables.stairs, true);
+        let isAboveArea = this.#handleGroupCollisions(this.#collidables.areas);
+        let isAboveStair = this.#handleGroupCollisions(this.#collidables.stairs);
 
 
         //queda
-        if (!collidedWithArea && this.#player.position.y > 2 && !collidedWithStairs) {
+        if (!isAboveArea && this.#player.position.y > 2 && !isAboveStair) {
             this.#player.position.y -= this.#fallingConstant;
         }
 

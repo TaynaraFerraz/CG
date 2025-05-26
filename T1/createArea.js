@@ -110,12 +110,12 @@ export class Area {
     // colisão da escada
     //25, 24*Math.sqrt(2), 24*Math.sqrt(2)
     
-    let stair = new THREE.Mesh(new THREE.PlaneGeometry(24, 25*Math.sqrt(2)), setDefaultMaterial('green'));
+    let stair = new THREE.Mesh(new THREE.PlaneGeometry(26, 27*Math.sqrt(2)), setDefaultMaterial('green'));
     stair.visible = false;
     stair.position.set(stairPositionX, 0, 60.0);
     stair.rotateX(-1 * Math.PI / 4);
-    //stair.translateZ(2.5);
-    stair.translateY(-1.5);
+    //stair.translateZ(2);
+    stair.translateY(-1);
 
     cube.add(stair);
     let box = new THREE.Box3().setFromObject(stair, true);
@@ -133,8 +133,6 @@ export class Area {
       }
       cube.add(stairStep);
     }
-
-
   }
 
   static createTerrain(scene) {
