@@ -74,6 +74,7 @@ scene.add(controls.getObject());
 
 //auxiliares para a movimentação
 const speed = 20;
+let shift = false;
 let moveForward = false;
 let moveBackward = false;
 let moveLeft = false;
@@ -87,6 +88,9 @@ window.addEventListener('keyup', (event) => movementControls(event.keyCode, fals
 //mapeia as teclas para os movimentos
 function movementControls(key, value) {
     switch (key) {
+        case 16: // SHIFT
+        shift = value;
+        break;
         case 87: // W
         moveForward = value;
         break;
@@ -104,18 +108,20 @@ function movementControls(key, value) {
 
 //realiza a movimentação utilizando metodos do PointerLockControls
 function moveAnimate(delta) {
+    let moveSpeed = shift? 3 * speed * delta : speed * delta;
+
     if (moveForward) {
-        controls.moveForward(speed * delta);
+        controls.moveForward(moveSpeed);
     }
     else if (moveBackward) {
-        controls.moveForward(speed * -1 * delta);
+        controls.moveForward(-moveSpeed);
     }
     
     if (moveRight) {
-        controls.moveRight(speed * delta);
+        controls.moveRight(moveSpeed);
     }
     else if (moveLeft) {
-        controls.moveRight(speed * -1 * delta);
+        controls.moveRight(-moveSpeed);
     }
 }
 

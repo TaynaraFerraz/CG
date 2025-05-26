@@ -19,13 +19,13 @@ export class PlayerCollisionHandler {
         this.#oldPos = new THREE.Vector3();
         this.#player.getWorldPosition(this.#oldPos);
         this.#raycaster = new THREE.Raycaster();
-        this.#raycaster.far = 4;
+        this.#raycaster.far = 10;
 
         this.#boundingBox = new THREE.Box3();
         this.#boundingBox.setFromObject(this.#player);
     }
 
-    #handleGroupCollisions(collidables) {
+    #handleGroupCollisions(collidables, isStairs) {
         let isAbove = false;
         let currentPos = new THREE.Vector3();
         this.#boundingBox.setFromObject(this.#player);
@@ -39,7 +39,7 @@ export class PlayerCollisionHandler {
 
                 if ((this.#oldPos.x != currentPos.x ||
                     this.#oldPos.y != currentPos.y ||
-                    this.#oldPos.z != currentPos.z)
+                    this.#oldPos.z != currentPos.z) //se tiver variação de posição
                 ) {
 
                     deltaMovement.addVectors(currentPos, this.#oldPos.multiplyScalar(-1)); //pegando o vetor da direção do movimento subtraindo posição antiga da nova
@@ -52,6 +52,10 @@ export class PlayerCollisionHandler {
 
 
                     this.#raycaster.set(this.#player.position, normalizedMovementDirection); //apontando o raio para a direção do movimento
+
+                    if(isStairs){
+                        this.#raycaster.set(this.#player.position, new Vector3(0, -1, 0));
+                    }
 
 
                     let normalToIntersection = new THREE.Vector3();
@@ -76,32 +80,16 @@ export class PlayerCollisionHandler {
                         this.#player.position.x = posAfterCollision.x;
                         this.#player.position.y = posAfterCollision.y;
                         this.#player.position.z = posAfterCollision.z;
-
-
-
-                        /* 
-                        var distance = 100; // at what distance to determine pointB
-                        
-                        //linha para ver o raio
-                        var pointB = new THREE.Vector3();
-                        pointB.addVectors(this.#oldPos, normalToIntersection);
-                        
-                        let points = [this.#oldPos, pointB]
-                        
-                        const material = new THREE.LineBasicMaterial({
-                            color: 0x0110ff
-                                                });
-                                                const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                        
-                                                const line = new THREE.Line(geometry, material);
-                                                this.#scene.add(line); */
+                    } else if(isStairs) {
+                        this.#player.position.y+=(this.#fallingConstant+1); //caso caia embaixo da escada, espero que nunca mais rode
                     }
                 }
             }
             this.#raycaster.set(this.#player.position, new Vector3(0, -1, 0));
 
-            if (this.#raycaster.intersectObject(object.mesh, false).length > 0) {
-                isAbove = true;
+            let isAboveCheckingRay = this.#raycaster.intersectObject(object.mesh, false);
+            if (isAboveCheckingRay.length > 0) {
+                if(isAboveCheckingRay[0].distance<3) isAbove = true;
             }
         })
         return isAbove;
@@ -113,7 +101,7 @@ export class PlayerCollisionHandler {
         }
 
         let isAboveArea = this.#handleGroupCollisions(this.#collidables.areas);
-        let isAboveStair = this.#handleGroupCollisions(this.#collidables.stairs);
+        let isAboveStair = this.#handleGroupCollisions(this.#collidables.stairs, true);
 
 
         //queda
@@ -121,7 +109,25 @@ export class PlayerCollisionHandler {
             this.#player.position.y -= this.#fallingConstant;
         }
 
-
         this.#player.getWorldPosition(this.#oldPos);
     }
 }
+
+
+
+/*
+var distance = 100; // at what distance to determine pointB
+ 
+//linha para ver o raio
+var pointB = new THREE.Vector3();
+pointB.addVectors(this.#oldPos, normalToIntersection);
+ 
+let points = [this.#oldPos, pointB]
+ 
+const material = new THREE.LineBasicMaterial({
+    color: 0x0110ff
+                        });
+                        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+ 
+                        const line = new THREE.Line(geometry, material);
+                        this.#scene.add(line); */
