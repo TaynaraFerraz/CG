@@ -23,18 +23,18 @@ material = setDefaultMaterial(); // create a basic material
 light = initDefaultBasicLight(scene); // Create a basic light to illuminate the scene
 
 //inicio da configuração da camera
-//consigo usar o pointerLockcontrol junto com um camera Holder?
 camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 3); //posição no mundo
-camera.lookAt(new THREE.Vector3(0.0, 17.5, 0.0));
+camera.position.set(0, 17, 0); //posição no mundo
+camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 
 
 //criando o camera holder
 
-let cameraHolderGeometry = new THREE.BoxGeometry(4, 4, 4);
+let cameraHolderGeometry = new THREE.CylinderGeometry(4, 4, 17);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, material);
-cameraHolder.position.set(200, 50.5, -80);
+cameraHolder.position.set(0, 20, 50);
 cameraHolder.visible = false; // Esconde o cameraHolder
+
 
 scene.add(cameraHolder);
 
@@ -80,7 +80,6 @@ let moveLeft = false;
 let moveRight = false;
 
 //melhorar isso aqui
-//se tu consegue de algum jeito clicar fora ele trava kkkkkk
 window.addEventListener('keydown', (event) => movementControls(event.keyCode, true));
 window.addEventListener('keyup', (event) => movementControls(event.keyCode, false));
 
