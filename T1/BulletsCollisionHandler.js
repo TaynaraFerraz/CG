@@ -14,7 +14,13 @@ import {
 const spheres = []; 
 
 class Sphere {
-    constructor() {
+
+    sphere
+    destination
+    alpha
+    move
+
+    constructor(position) {
         const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 16);
         const materialSphere = setDefaultMaterial('lightblue')
         this.sphere = new THREE.Mesh(sphereGeometry, materialSphere);
@@ -43,7 +49,7 @@ class Sphere {
 
 let scene, renderer, light, camera, keyboard;
 scene = new THREE.Scene();    // Create main scene
-renderer = initRenderer();    // View function in util/utils
+renderer = initRenderer();   
 light = initDefaultSpotlight(scene, new THREE.Vector3(5.0, 5.0, 5.0)); // Use default light    
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
 keyboard = new KeyboardState();
