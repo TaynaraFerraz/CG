@@ -1,26 +1,14 @@
 import * as THREE from 'three';
-import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
-import { Box3 } from '../build/three.module.js';
-import Stats from '../build/jsm/libs/stats.module.js';
-import { PointerLockControls } from '../build/jsm/controls/PointerLockControls.js';
 import {
-  initRenderer,
-  initCamera,
-  initDefaultBasicLight,
   setDefaultMaterial,
-  InfoBox,
-  onWindowResize,
   createGroundPlaneXZ,
-  createGroundPlane
 } from "../libs/util/util.js";
-
-
-
-
+import { BoxGeometry } from '../build/three.module.js';
 export class Area {
   static collidableAreas = [];
   static collidableWalls = [];
   static collidableStairs = [];
+  static collidableFloor = [];
 
   constructor(scene) {
     this.scene = scene;
@@ -77,7 +65,7 @@ export class Area {
     scene.add(cube);
 
     let boxCube = new THREE.Box3().setFromObject(cube, true);
-    this.collidableAreas.push({box: boxCube, mesh: cube});
+    this.collidableAreas.push({ box: boxCube, mesh: cube });
 
     //cubos laterais
     let cubeGeometry2 = new THREE.BoxGeometry(leftLength, height, height);
@@ -94,8 +82,8 @@ export class Area {
     //colisão
     let leftBoxCube = new THREE.Box3().setFromObject(cubeLeft, true);
     let rightBoxCube = new THREE.Box3().setFromObject(cubeRight, true);
-    this.collidableAreas.push({box: leftBoxCube, mesh: cubeLeft});
-    this.collidableAreas.push({box: rightBoxCube, mesh: cubeRight});
+    this.collidableAreas.push({ box: leftBoxCube, mesh: cubeLeft });
+    this.collidableAreas.push({ box: rightBoxCube, mesh: cubeRight });
 
     //escadas
     let stairHeight = height / 8;
@@ -106,9 +94,9 @@ export class Area {
     } else {
       stairPositionX = (length - rightLength) / 2 - rightLength / 2 - 12.5;
     }
-    
+
     // colisão da escada
-    let stair = new THREE.Mesh(new THREE.BoxGeometry(25, 24*Math.sqrt(2), 24*Math.sqrt(2)), setDefaultMaterial());
+    let stair = new THREE.Mesh(new THREE.BoxGeometry(25, 24 * Math.sqrt(2), 24 * Math.sqrt(2)), setDefaultMaterial());
     stair.position.set(stairPositionX, -12.0, 48.0);
     stair.rotateX(Math.PI / 4);
     cube.add(stair);
@@ -133,7 +121,7 @@ export class Area {
 
   static createTerrain(scene) {
     //create walls
-    let wallGeometry = new THREE.PlaneGeometry(500, 72);
+    let wallGeometry = new THREE.BoxGeometry(500, 72, 2); // mudança de planeGeometry por BoxGeometry porque sendo um plano a esfera não estava identificando colisão, quando coloquei uma leve espessura, ela colide com a esfera  
     let wallMaterial = new THREE.MeshBasicMaterial();
 
     let walls = [];
@@ -157,12 +145,18 @@ export class Area {
       scene.add(walls[i]);
       let wallBox = new THREE.Box3().setFromObject(walls[i], true);
       console.log(wallBox.min, wallBox.max);
-      
-      this.collidableWalls.push({box: wallBox, mesh: walls[i]});
+
+      this.collidableWalls.push({ box: wallBox, mesh: walls[i] });
     }
 
     // create the ground plane
-    let plane = createGroundPlaneXZ(510, 510);
+    let planeGeometry = new THREE.BoxGeometry(510, 0.1, 510);
+    let planeMaterial = setDefaultMaterial('lightgray')
+    let plane = new THREE.Mesh(planeGeometry, planeMaterial)
+
+    let planeBox = new THREE.Box3().setFromObject(plane)
+
+    this.collidableFloor.push({box: planeBox, mesh: plane})
     scene.add(plane);
   }
 }
