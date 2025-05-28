@@ -140,67 +140,72 @@ const clock = new THREE.Clock();
 
 render();
 
-document.addEventListener('mousedown', (event) => {
-    if (!controls.isLocked) return; // jogador não está no jogo ainda
-    // event.button === 0 -> botão esquerdo
-    // event.button === 2 -> botão direito
-    if (event.button === 0 || event.button === 2) {
-        const armaMundo = new THREE.Vector3();
+let shoot = false
+let intervalShoot 
+
+function shootBall(){
+    const armaMundo = new THREE.Vector3();
         arma.getWorldPosition(armaMundo); // pega as coordenadas globais da arma
-    
+
         console.log(armaMundo, 'arma')
-    
+
         const novaSphere = new Sphere(scene, armaMundo, camera);
         spheres.push(novaSphere);
-    
+
         console.log(spheres.length)
+}
+
+document.addEventListener('mousedown', (event) => {
+    if (!controls.isLocked) return; // jogador não está no jogo ainda
+    // event.button === 0 -> botão esquerdo, event.button === 2 -> botão direito
+    if (event.button !== 0 && event.button !== 2) return;
+
+    if (!shoot) {
+        shoot = true
+        shootBall()
+        intervalShoot = setInterval(shootBall, 500)
     }
 });
 
+document.addEventListener('mouseup', (event) => {
+    if (event.button !== 0 && event.button !== 2) return;
+
+    // Para o disparo contínuo
+    shoot = false;
+    clearInterval(intervalShoot);
+});
+
+//lista de todos os meshs de colidíveis
+const collidableMeshes = [
+    ...collidables.areas.map(obj => obj.mesh),
+    ...collidables.walls.map(obj => obj.mesh),
+    ...collidables.floor.map(obj => obj.mesh)
+];
+
 function checkCollisionSphere() {
-    for (let i = spheres.length - 1; i >= 0; i--) {
+    for (let i = spheres.length - 1; i >=0 ; i--) {
         const s = spheres[i];
-        s.update();
-        const boundingSphere = new THREE.Sphere(s.sphere.position.clone(), 0.2);
-        let collided = false;
 
-        for (const area of collidables.areas) {
-            if (area.box.intersectsSphere(boundingSphere)) {
-                collided = true;
-                console.log("colidiu com a area")
-                break;
-            }
-        }
+        // Salvar posição anterior e atualizar posição da esfera para utilizar no raycaster
+        const prevPositionBall = s.prevPosition.clone();
+        s.update(); 
+        const currPositionBall = s.sphere.position.clone();
+        const directionBall = new THREE.Vector3().subVectors(currPositionBall, prevPositionBall).normalize();
+        const distanceBall = prevPositionBall.distanceTo(currPositionBall);
 
-        if (!collided) {
-            for (const wall of collidables.walls) {
-                console.log(collidables.walls)
-                if (wall.box.intersectsSphere(boundingSphere)) {
-                    console.log("colidiu com a parede")
-                    collided = true;
-                    break;
-                }
-            }
-        }
+        const raycasterBall = new THREE.Raycaster(prevPositionBall, directionBall, 0, distanceBall);
+        const intersectsBall = raycasterBall.intersectObjects(collidableMeshes, true);
 
-        if (!collided) {
-            for (const floor of collidables.floor) {
-                console.log(collidables.floor)
-                if (floor.box.intersectsSphere(boundingSphere)) {
-                    console.log("colidiu com o chão")
-                    collided = true;
-                    break;
-                }
-            }
-        }
-
-        if (collided) {
-            s.remove(scene)
-            spheres.splice(i, 1)
+        // Se colidiu com algum mesh, remover a esfera
+        if (intersectsBall.length > 0) {
+            console.log("Colidiu via raycaster");
+            s.remove(scene);
+            spheres.splice(i, 1);
         }
         console.log(spheres.length)
     }
 }
+
 
 function render() {
     if (controls.isLocked) {

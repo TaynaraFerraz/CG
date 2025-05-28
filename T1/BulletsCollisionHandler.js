@@ -4,10 +4,13 @@ import {
 } from "../libs/util/util.js";
 
 export class Sphere {
+
     sphere
+    position
     direction
     move
-    speed = 3;
+    speed = 4;
+    prevPosition
 
     constructor(scene, position, camera) {
         const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 16);
@@ -22,11 +25,13 @@ export class Sphere {
         const dir = new THREE.Vector3();
         this.direction = camera.getWorldDirection(dir);
 
+        this.prevPosition = position.clone();
         this.move = true;
     }
 
     update() {
         if (this.move) {
+            this.prevPosition.copy(this.sphere.position);
             const velocity = this.direction.clone().multiplyScalar(this.speed);
             this.sphere.position.add(velocity);    // this.sphere.translateZ(-2) fez com que a bolinha seja disparada para uma unica direção, bolinha não estava girando junto com a câmera
             console.log(this.sphere.position)
