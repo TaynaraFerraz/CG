@@ -1,20 +1,14 @@
 import * as THREE from 'three';
-import Stats from '../build/jsm/libs/stats.module.js';
 import KeyboardState from '../libs/util/KeyboardState.js'
 import { PointerLockControls } from '../build/jsm/controls/PointerLockControls.js'
 import { Area } from './createArea.js';
 import {
     initRenderer,
-    initCamera,
     initDefaultBasicLight,
     setDefaultMaterial,
-    InfoBox,
     onWindowResize,
-    createGroundPlaneXZ,
-    createGroundPlane
 } from "../libs/util/util.js";
 import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
-import { Box3 } from '../build/three.module.js';
 import { Sphere } from './BulletsCollisionHandler.js';
 
 const spheres = [];
@@ -146,42 +140,42 @@ const clock = new THREE.Clock();
 
 render();
 
-function keyboardUpdate() {
-    keyboard.update();
-    if (keyboard.down("space")) {  //A função pressed retorna true enquanto a tecla estiver segurada, o que pode ser dezenas de frames (ou seja, gera vários disparos muito rápidos).Já a função down retorna true só uma vez no frame em que a tecla foi pressionada, evitando múltiplas bolinhas criadas.
-        
+document.addEventListener('mousedown', (event) => {
+    if (!controls.isLocked) return; // jogador não está no jogo ainda
+    // event.button === 0 -> botão esquerdo
+    // event.button === 2 -> botão direito
+    if (event.button === 0 || event.button === 2) {
         const armaMundo = new THREE.Vector3();
         arma.getWorldPosition(armaMundo); // pega as coordenadas globais da arma
-        
+    
         console.log(armaMundo, 'arma')
-        
+    
         const novaSphere = new Sphere(scene, armaMundo, camera);
         spheres.push(novaSphere);
-
+    
         console.log(spheres.length)
     }
+});
 
-}
-
-function checkCollisionSphere(){
+function checkCollisionSphere() {
     for (let i = spheres.length - 1; i >= 0; i--) {
         const s = spheres[i];
         s.update();
         const boundingSphere = new THREE.Sphere(s.sphere.position.clone(), 0.2);
         let collided = false;
-        
-        for(const area of collidables.areas){
-            if(area.box.intersectsSphere(boundingSphere)){
+
+        for (const area of collidables.areas) {
+            if (area.box.intersectsSphere(boundingSphere)) {
                 collided = true;
                 console.log("colidiu com a area")
                 break;
             }
         }
-        
-        if(!collided){
-            for(const wall of collidables.walls){
+
+        if (!collided) {
+            for (const wall of collidables.walls) {
                 console.log(collidables.walls)
-                if(wall.box.intersectsSphere(boundingSphere)){
+                if (wall.box.intersectsSphere(boundingSphere)) {
                     console.log("colidiu com a parede")
                     collided = true;
                     break;
@@ -189,18 +183,18 @@ function checkCollisionSphere(){
             }
         }
 
-        if(!collided){
-            for(const floor of collidables.floor){
+        if (!collided) {
+            for (const floor of collidables.floor) {
                 console.log(collidables.floor)
-                if(floor.box.intersectsSphere(boundingSphere)){
+                if (floor.box.intersectsSphere(boundingSphere)) {
                     console.log("colidiu com o chão")
                     collided = true;
                     break;
                 }
             }
         }
-        
-        if(collided){
+
+        if (collided) {
             s.remove(scene)
             spheres.splice(i, 1)
         }
@@ -213,7 +207,7 @@ function render() {
         moveAnimate(clock.getDelta());
     }
 
-    keyboardUpdate()
+    //keyboardUpdate()
     checkCollisionSphere()
 
     //lidando com as colisões
