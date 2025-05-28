@@ -9,6 +9,7 @@ export class PlayerCollisionHandler {
     #collidables = {};
     #oldPos;
     #raycaster;
+    #raycasterOrigin;
     #boundingBox;
     iteracoes = 0;
 
@@ -19,24 +20,25 @@ export class PlayerCollisionHandler {
         this.#oldPos = new THREE.Vector3();
         this.#player.getWorldPosition(this.#oldPos);
         this.#raycaster = new THREE.Raycaster();
-        this.#raycaster.far = 10;
+        this.#raycaster.far = 20;
+        this.#raycasterOrigin = new Vector3();
 
         this.#boundingBox = new THREE.Box3();
         this.#boundingBox.setFromObject(this.#player);
     }
 
-    #handleGroupCollisions(collidables, isStairs) {
+    #handleGroupCollisions(collidables, isStairs, log) {
         let isAbove = false;
         let currentPos = new THREE.Vector3();
         this.#boundingBox.setFromObject(this.#player);
         this.#player.getWorldPosition(currentPos);
-
-
+        
+        
         collidables.forEach((object) => {
             if (this.#boundingBox.intersectsBox(object.box)) {
                 let deltaMovement = new THREE.Vector3(0, 0, 0);
-
-
+                
+                
                 if ((this.#oldPos.x != currentPos.x ||
                     this.#oldPos.y != currentPos.y ||
                     this.#oldPos.z != currentPos.z) //se tiver variação de posição
@@ -45,27 +47,30 @@ export class PlayerCollisionHandler {
                     deltaMovement.addVectors(currentPos, this.#oldPos.multiplyScalar(-1)); //pegando o vetor da direção do movimento subtraindo posição antiga da nova
                     this.#oldPos.multiplyScalar(-1) //voltando com a posição antiga pro valor original
 
-
+                    
                     let normalizedMovementDirection = new THREE.Vector3(0, 0, 0);
                     normalizedMovementDirection.copy(deltaMovement);
                     normalizedMovementDirection.normalize(); //direção normalizada
+                    
+                    this.#raycasterOrigin.copy(this.#player.position);
+                    this.#raycasterOrigin.y+=0;
 
-
-                    this.#raycaster.set(this.#player.position, normalizedMovementDirection); //apontando o raio para a direção do movimento
-
+                    this.#raycaster.set(this.#raycasterOrigin, normalizedMovementDirection); //apontando o raio para a direção do movimento
+                    
                     if(isStairs){
-                        this.#raycaster.set(this.#player.position, new Vector3(0, -1, 0));
+                        this.#raycaster.set(this.#raycasterOrigin, new Vector3(0, -1, 0));
                     }
-
-
+                    
+                    
                     let normalToIntersection = new THREE.Vector3();
                     let intersectionResult = this.#raycaster.intersectObject(object.mesh, false)[0] // pega a interseção com o objeto mais próxima no raio
-
-
+                    
+                    
                     if (intersectionResult) { //se houver interseção
                         normalToIntersection = intersectionResult.normal.transformDirection(object.mesh.matrixWorld); //pega o vetor normal com a transformação para a normal do mundo
-
-
+                        console.log(log, normalToIntersection);
+                        
+                        
                         let posAfterCollision = new THREE.Vector3();
 
                         posAfterCollision = currentPos; //pega posição atual
@@ -81,7 +86,7 @@ export class PlayerCollisionHandler {
                         this.#player.position.y = posAfterCollision.y;
                         this.#player.position.z = posAfterCollision.z;
                     } else if(isStairs) {
-                        this.#player.position.y+=(this.#fallingConstant+1); //caso caia embaixo da escada, espero que nunca mais rode
+                        this.#player.position.y+=(this.#fallingConstant); //caso caia embaixo da escada, espero que nunca mais rode
                     }
                 }
             }
@@ -89,7 +94,9 @@ export class PlayerCollisionHandler {
 
             let isAboveCheckingRay = this.#raycaster.intersectObject(object.mesh, false);
             if (isAboveCheckingRay.length > 0) {
-                if(isAboveCheckingRay[0].distance<3) isAbove = true;
+                console.log(isAboveCheckingRay[0].distance);
+                
+                if(isAboveCheckingRay[0].distance<17/2) isAbove = true;
             }
         })
         return isAbove;
@@ -100,12 +107,12 @@ export class PlayerCollisionHandler {
             this.#handleGroupCollisions(this.#collidables.walls);
         }
 
-        let isAboveArea = this.#handleGroupCollisions(this.#collidables.areas);
+        let isAboveArea = this.#handleGroupCollisions(this.#collidables.areas, false, "colidiu");
         let isAboveStair = this.#handleGroupCollisions(this.#collidables.stairs, true);
 
 
         //queda
-        if (!isAboveArea && this.#player.position.y > 2 && !isAboveStair) {
+        if (!isAboveArea && this.#player.position.y > 17/2 && !isAboveStair) {
             this.#player.position.y -= this.#fallingConstant;
         }
 
