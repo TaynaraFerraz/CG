@@ -33,27 +33,31 @@ export class Area {
   }
 
   static createArea(scene, position, i) {
-    let material = setDefaultMaterial();
+    let material;
     //criação da base da plataforma
     //inicialização com valores padrão (plataforma pequena com escada ao centro)
     const height = 24.0;
     let length = 120.0;
-    let leftLength = 48.0;
-    let rightLength = 48.0;
+    let leftLength = 47.5;
+    let rightLength = 47.5;
 
     if (i == 0) {
-      leftLength = 16.0;
+      material = setDefaultMaterial('lightblue');
+      leftLength = 15.0;
       rightLength = 80.0;
     }
     if (i == 1) {
+      material = setDefaultMaterial('red');
       leftLength = 80.0;
-      rightLength = 16.0;
+      rightLength = 15.0;
     }
     if (i == 2) {
-      leftLength = 48.0;
-      rightLength = 48.0;
+      material = setDefaultMaterial('blue');
+      leftLength = 47.5;
+      rightLength = 47.5;
     }
     if (i == 3) {
+      material = setDefaultMaterial('green');
       length = 360.0;
       leftLength = 167.5;
       rightLength = 167.5;
@@ -62,7 +66,7 @@ export class Area {
 
     //criação do cubo principal
     let cubeGeometry = new THREE.BoxGeometry(length, height, 96.0);
-    let cube = new THREE.Mesh(cubeGeometry, setDefaultMaterial('blue'));
+    let cube = new THREE.Mesh(cubeGeometry, material);
     cube.position.copy(position);
     //inverte a posição para a area maior ficar voltada para o centro
     if (i == 3)
