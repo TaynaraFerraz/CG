@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { degreesToRadians } from '../libs/util/util.js';
 import { Vector3 } from '../build/three.module.js';
+import { PLAYER_HEIGHT } from './constants.js';
 
 export class PlayerCollisionHandler {
     #fallingConstant = 0.5;
@@ -32,11 +32,12 @@ export class PlayerCollisionHandler {
         let currentPos = new THREE.Vector3();
         this.#boundingBox.setFromObject(this.#player);
         this.#player.getWorldPosition(currentPos);
+
+        let deltaMovement = new THREE.Vector3(0, 0, 0);
         
         
         collidables.forEach((object) => {
             if (this.#boundingBox.intersectsBox(object.box)) {
-                let deltaMovement = new THREE.Vector3(0, 0, 0);
                 
                 
                 if ((this.#oldPos.x != currentPos.x ||
@@ -51,14 +52,11 @@ export class PlayerCollisionHandler {
                     let normalizedMovementDirection = new THREE.Vector3(0, 0, 0);
                     normalizedMovementDirection.copy(deltaMovement);
                     normalizedMovementDirection.normalize(); //direção normalizada
-                    
-                    this.#raycasterOrigin.copy(this.#player.position);
-                    this.#raycasterOrigin.y+=0;
 
-                    this.#raycaster.set(this.#raycasterOrigin, normalizedMovementDirection); //apontando o raio para a direção do movimento
+                    this.#raycaster.set(this.#player.position, normalizedMovementDirection); //apontando o raio para a direção do movimento
                     
                     if(isStairs){
-                        this.#raycaster.set(this.#raycasterOrigin, new Vector3(0, -1, 0));
+                        this.#raycaster.set(this.#player.position, new Vector3(0, -1, 0));
                     }
                     
                     
@@ -68,7 +66,7 @@ export class PlayerCollisionHandler {
                     
                     if (intersectionResult) { //se houver interseção
                         normalToIntersection = intersectionResult.normal.transformDirection(object.mesh.matrixWorld); //pega o vetor normal com a transformação para a normal do mundo
-                        console.log(log, normalToIntersection);
+                        //console.log(log, normalToIntersection);
                         
                         
                         let posAfterCollision = new THREE.Vector3();
@@ -90,13 +88,25 @@ export class PlayerCollisionHandler {
                     }
                 }
             }
-            this.#raycaster.set(this.#player.position, new Vector3(0, -1, 0));
+
+            let isAboveTestPosition = new Vector3();
+            isAboveTestPosition.copy(this.#player.position);
+            deltaMovement.normalize();
+
+            if(isStairs){
+                //isAboveTestPosition.add(deltaMovement.multiplyScalar(3));
+            }
+
+            this.#raycaster.set(isAboveTestPosition, new Vector3(0, -1, 0));
 
             let isAboveCheckingRay = this.#raycaster.intersectObject(object.mesh, false);
             if (isAboveCheckingRay.length > 0) {
                 console.log(isAboveCheckingRay[0].distance);
                 
-                if(isAboveCheckingRay[0].distance<17/2) isAbove = true;
+                if(isAboveCheckingRay[0].distance<PLAYER_HEIGHT/2+1) {
+                    console.log(isAbove);
+                    isAbove = true;
+                }
             }
         })
         return isAbove;
@@ -112,8 +122,9 @@ export class PlayerCollisionHandler {
 
 
         //queda
-        if (!isAboveArea && this.#player.position.y > 17/2 && !isAboveStair) {
+        if (this.#player.position.y > PLAYER_HEIGHT/2 && !isAboveArea && !isAboveStair) {
             this.#player.position.y -= this.#fallingConstant;
+            console.log("caindo");
         }
 
         this.#player.getWorldPosition(this.#oldPos);

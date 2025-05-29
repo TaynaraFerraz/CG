@@ -14,6 +14,7 @@ import {
 } from "../libs/util/util.js";
 import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
 import { Box3 } from '../build/three.module.js';
+import { PLAYER_HEIGHT } from './constants.js';
 
 
 let scene, renderer, camera, cameraHolder, material, light; // Initial variables
@@ -24,12 +25,12 @@ light = initDefaultBasicLight(scene); // Create a basic light to illuminate the 
 
 //inicio da configuração da camera
 camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 17, 0);
+camera.position.set(0, PLAYER_HEIGHT, 0);
 camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 
 
 //criando o camera holder
-let cameraHolderGeometry = new THREE.CylinderGeometry(4, 4, 17);
+let cameraHolderGeometry = new THREE.CylinderGeometry(4, 4, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, material);
 cameraHolder.position.set(0, 20, 50);
 cameraHolder.visible = false; // Esconde o cameraHolder

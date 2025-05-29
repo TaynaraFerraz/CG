@@ -62,7 +62,7 @@ export class Area {
 
     //criação do cubo principal
     let cubeGeometry = new THREE.BoxGeometry(length, height, 96.0);
-    let cube = new THREE.Mesh(cubeGeometry, setDefaultMaterial('blue'));
+    let cube = new THREE.Mesh(cubeGeometry, material);
     cube.position.copy(position);
     //inverte a posição para a area maior ficar voltada para o centro
     if (i == 3)
@@ -104,11 +104,11 @@ export class Area {
     
     // colisão da escada
     
-    let stair = new THREE.Mesh(new THREE.PlaneGeometry(26, 27.5*Math.sqrt(2)), setDefaultMaterial('green'));
-    //stair.visible = false;
+    let stair = new THREE.Mesh(new THREE.PlaneGeometry(26, 38), setDefaultMaterial('green'));
+    stair.visible = false;
     stair.position.set(stairPositionX, 0, 60.0);
     stair.translateZ(1);
-    stair.rotateX(-1 * Math.PI / 4);
+    stair.rotateX(-1 * Math.PI / 3.8);
 
     cube.add(stair);
     let box = new THREE.Box3().setFromObject(stair, true);
