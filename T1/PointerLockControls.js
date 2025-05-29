@@ -124,6 +124,10 @@ function onMouseMove( event ) {
     const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
     const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
+    let range = 300;
+
+    if(movementX > range || movementX < -range) return;
+
     const camera = this.camera;
     const holder = this.holder;
 
