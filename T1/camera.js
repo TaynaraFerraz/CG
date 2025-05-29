@@ -9,9 +9,7 @@ import {
     onWindowResize,
 } from "../libs/util/util.js";
 import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
-import { Sphere } from './BulletsCollisionHandler.js';
-
-const spheres = [];
+import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 
 let scene, renderer, camera, cameraHolder, material, light, keyboard; // Initial variables
 scene = new THREE.Scene();    // Create main scene
@@ -131,7 +129,7 @@ let collidables = {
     floor: Area.collidableFloor
 }
 let playerCollisionHandler = new PlayerCollisionHandler(scene, cameraHolder, collidables);
-
+let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
 
 // Listen window size changes
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
@@ -141,18 +139,25 @@ const clock = new THREE.Clock();
 render();
 
 let shoot = false
-let intervalShoot 
+let intervalShoot
 
-function shootBall(){
+function shootBall() {
     const armaMundo = new THREE.Vector3();
-        arma.getWorldPosition(armaMundo); // pega as coordenadas globais da arma
+    arma.getWorldPosition(armaMundo); // pega as coordenadas globais da arma
 
-        console.log(armaMundo, 'arma')
+    console.log(armaMundo, 'arma')
 
-        const novaSphere = new Sphere(scene, armaMundo, camera);
-        spheres.push(novaSphere);
+    //const novaSphere = new Sphere(scene, armaMundo, camera);
+    const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 16);
+    const materialSphere = setDefaultMaterial('lightblue');
+    let sphere = new THREE.Mesh(sphereGeometry, materialSphere);
+    bulletsCollisionHandler.shootSphere(sphere); // instancia ou inves de armazenar a mesh
+    scene.add(this.sphere);
 
-        console.log(spheres.length)
+    // Define posição inicial
+    this.sphere.position.copy(position);
+
+    this.prevPosition = position.clone();
 }
 
 document.addEventListener('mousedown', (event) => {
@@ -175,45 +180,16 @@ document.addEventListener('mouseup', (event) => {
     clearInterval(intervalShoot);
 });
 
-//lista de todos os meshs de colidíveis
-const collidableMeshes = [
-    ...collidables.areas.map(obj => obj.mesh),
-    ...collidables.walls.map(obj => obj.mesh),
-    ...collidables.floor.map(obj => obj.mesh)
-];
-
-function checkCollisionSphere() {
-    for (let i = spheres.length - 1; i >=0 ; i--) {
-        const s = spheres[i];
-
-        // Salvar posição anterior e atualizar posição da esfera para utilizar no raycaster
-        const prevPositionBall = s.prevPosition.clone();
-        s.update(); 
-        const currPositionBall = s.sphere.position.clone();
-        const directionBall = new THREE.Vector3().subVectors(currPositionBall, prevPositionBall).normalize();
-        const distanceBall = prevPositionBall.distanceTo(currPositionBall);
-
-        const raycasterBall = new THREE.Raycaster(prevPositionBall, directionBall, 0, distanceBall);
-        const intersectsBall = raycasterBall.intersectObjects(collidableMeshes, true);
-
-        // Se colidiu com algum mesh, remover a esfera
-        if (intersectsBall.length > 0) {
-            console.log("Colidiu via raycaster");
-            s.remove(scene);
-            spheres.splice(i, 1);
-        }
-        console.log(spheres.length)
-    }
-}
-
-
 function render() {
     if (controls.isLocked) {
         moveAnimate(clock.getDelta());
     }
 
-    //keyboardUpdate()
-    checkCollisionSphere()
+    for (let i = spheres.length - 1; i >= 0; i--) {
+        spheres[i].checkCollisionSphere(collidables);
+    }
+
+    bulletsCollisionHandler.handleBulletsCollisions(collidables)
 
     //lidando com as colisões
     playerCollisionHandler.handleCollisions();

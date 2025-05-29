@@ -3,42 +3,86 @@ import {
     setDefaultMaterial,
 } from "../libs/util/util.js";
 
-export class Sphere {
-
-    sphere
+export const spheres = []
+export class BulletsCollisionHandler {
+    #spheres = []
+    #camera
     position
     direction
     move
     speed = 4;
     prevPosition
+    // #spheres = [];
 
-    constructor(scene, position, camera) {
+    constructor(scene, camera) {
         const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 16);
         const materialSphere = setDefaultMaterial('lightblue');
         this.sphere = new THREE.Mesh(sphereGeometry, materialSphere);
+        spheres.push(this) // instancia ou inves de armazenar a mesh
         scene.add(this.sphere);
+        console.log(spheres.length)
+        this.#camera = camera;
 
         // Define posição inicial
-        this.sphere.position.copy(position);
+        //this.sphere.position.copy(position);
 
         // Direção baseada na câmera
         const dir = new THREE.Vector3();
         this.direction = camera.getWorldDirection(dir);
 
-        this.prevPosition = position.clone();
+        //this.prevPosition = position.clone();
         this.move = true;
     }
 
     update() {
-        if (this.move) {
-            this.prevPosition.copy(this.sphere.position);
+        this.#spheres.forEach((sphere) => {
+            sphere.translateZ(-this.speed);
+        })
+            /* this.prevPosition.copy(this.sphere.position);
             const velocity = this.direction.clone().multiplyScalar(this.speed);
             this.sphere.position.add(velocity);    // this.sphere.translateZ(-2) fez com que a bolinha seja disparada para uma unica direção, bolinha não estava girando junto com a câmera
-            console.log(this.sphere.position)
-        }
+            console.log(this.sphere.position); */
     }
 
     remove(scene) {
         scene.remove(this.sphere);
+    }
+
+    shootSphere(sphere) {
+        this.#spheres.push(sphere);
+
+        // Direção baseada na câmera
+        this.#camera.getWorldDirection(this.direction);
+        
+    }
+
+    handleBulletsCollisions(scene, collidables) {
+        for (let i = spheres.length - 1; i >= 0; i--) {
+            const s = spheres[i];
+            const prevPositionBall = s.sphere.position.clone();
+
+            s.update();
+
+            const currPositionBall = s.sphere.position.clone();
+            const directionBall = new THREE.Vector3().subVectors(currPositionBall, prevPositionBall).normalize();
+            const distanceBall = prevPositionBall.distanceTo(currPositionBall);
+
+            const collidableMeshes = [
+                ...collidables.areas.map(obj => obj.mesh),
+                ...collidables.walls.map(obj => obj.mesh),
+                ...collidables.floor.map(obj => obj.mesh)
+            ];
+
+            const raycasterBall = new THREE.Raycaster(prevPositionBall, directionBall, 0, distanceBall);
+            const intersectsBall = raycasterBall.intersectObjects(collidableMeshes, true);
+
+            if (intersectsBall.length > 0) {
+                console.log("colidiu")
+                s.remove(scene);
+                spheres.splice(i, 1);
+            }
+            console.log(spheres.length)
+        }
+        this.prevPosition = this.#camera.position;
     }
 }
