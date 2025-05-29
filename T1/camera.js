@@ -32,11 +32,11 @@ cameraHolder.add(camera);
 scene.add(cameraHolder);
 
 // Arma (cilindro)
-const armaGeometry = new THREE.CylinderGeometry(0.1, 0.1, 1.5, 32);
+const armaGeometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 32);
 const arma = new THREE.Mesh(armaGeometry, material);
 arma.rotateX(Math.PI / 2);
 //arma.rotateY(THREE.MathUtils.degToRad(90))
-arma.position.set(0, -0.5, -0.5); // direita, baixo, frente
+arma.position.set(0, -0.3, -0.5); // direita, baixo, frente
 camera.add(arma);
 
 const controls = new PointerLockControls(cameraHolder, renderer.domElement);
@@ -126,7 +126,6 @@ Area.createMap(scene);
 let collidables = {
     areas: Area.collidableAreas,
     walls: Area.collidableWalls,
-    floor: Area.collidableFloor
 }
 let playerCollisionHandler = new PlayerCollisionHandler(scene, cameraHolder, collidables);
 let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
@@ -151,13 +150,16 @@ function shootBall() {
     const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 16);
     const materialSphere = setDefaultMaterial('lightblue');
     let sphere = new THREE.Mesh(sphereGeometry, materialSphere);
-    bulletsCollisionHandler.shootSphere(sphere); // instancia ou inves de armazenar a mesh
-    scene.add(this.sphere);
 
     // Define posição inicial
-    this.sphere.position.copy(position);
+    let cameraPosition = new THREE.Vector3();
+    arma.getWorldPosition(cameraPosition)
+    sphere.position.copy(cameraPosition);
 
-    this.prevPosition = position.clone();
+
+    scene.add(sphere);
+    bulletsCollisionHandler.shootSphere(sphere); // instancia ou inves de armazenar a mesh
+
 }
 
 document.addEventListener('mousedown', (event) => {
@@ -185,9 +187,6 @@ function render() {
         moveAnimate(clock.getDelta());
     }
 
-    for (let i = spheres.length - 1; i >= 0; i--) {
-        spheres[i].checkCollisionSphere(collidables);
-    }
 
     bulletsCollisionHandler.handleBulletsCollisions(collidables)
 

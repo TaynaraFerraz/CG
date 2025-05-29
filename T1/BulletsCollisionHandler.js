@@ -2,15 +2,17 @@ import * as THREE from 'three';
 import {
     setDefaultMaterial,
 } from "../libs/util/util.js";
+import { Vector3 } from '../build/three.module.js';
 
 export const spheres = []
 export class BulletsCollisionHandler {
     #spheres = []
-    #camera
+    #camera;
+    #scene;
     position
     direction
     move
-    speed = 4;
+    speed = 1.5;
     prevPosition
     // #spheres = [];
 
@@ -22,6 +24,7 @@ export class BulletsCollisionHandler {
         scene.add(this.sphere);
         console.log(spheres.length)
         this.#camera = camera;
+        this.#scene = scene;
 
         // Define posição inicial
         //this.sphere.position.copy(position);
@@ -34,10 +37,8 @@ export class BulletsCollisionHandler {
         this.move = true;
     }
 
-    update() {
-        this.#spheres.forEach((sphere) => {
+    #updateSpherePosition(sphere) {
             sphere.translateZ(-this.speed);
-        })
             /* this.prevPosition.copy(this.sphere.position);
             const velocity = this.direction.clone().multiplyScalar(this.speed);
             this.sphere.position.add(velocity);    // this.sphere.translateZ(-2) fez com que a bolinha seja disparada para uma unica direção, bolinha não estava girando junto com a câmera
@@ -52,25 +53,38 @@ export class BulletsCollisionHandler {
         this.#spheres.push(sphere);
 
         // Direção baseada na câmera
-        this.#camera.getWorldDirection(this.direction);
-        
+        let sphereLookAt = new THREE.Vector3();
+        sphere.getWorldPosition(sphereLookAt);
+
+        console.log("pos atual", sphereLookAt);
+        console.log("direcao", this.direction);
+        this.direction.multiplyScalar(-4);
+        sphereLookAt.add(this.direction);
+        this.direction.multiplyScalar(-1/4);
+
+        console.log("final", sphereLookAt);
+
+        sphere.lookAt(sphereLookAt);
     }
 
-    handleBulletsCollisions(scene, collidables) {
-        for (let i = spheres.length - 1; i >= 0; i--) {
-            const s = spheres[i];
-            const prevPositionBall = s.sphere.position.clone();
+    handleBulletsCollisions(collidables) {
+        this.#camera.getWorldDirection(this.direction);
+        //console.log(this.direction);
+        
+        this.#spheres.forEach((s) => {
+            //console.log(s);
+            
+            const prevPositionBall = s.position.clone();
 
-            s.update();
+            this.#updateSpherePosition(s);
 
-            const currPositionBall = s.sphere.position.clone();
+            const currPositionBall = s.position.clone();
             const directionBall = new THREE.Vector3().subVectors(currPositionBall, prevPositionBall).normalize();
             const distanceBall = prevPositionBall.distanceTo(currPositionBall);
 
             const collidableMeshes = [
                 ...collidables.areas.map(obj => obj.mesh),
                 ...collidables.walls.map(obj => obj.mesh),
-                ...collidables.floor.map(obj => obj.mesh)
             ];
 
             const raycasterBall = new THREE.Raycaster(prevPositionBall, directionBall, 0, distanceBall);
@@ -78,11 +92,10 @@ export class BulletsCollisionHandler {
 
             if (intersectsBall.length > 0) {
                 console.log("colidiu")
-                s.remove(scene);
-                spheres.splice(i, 1);
+                s.removeFromParent();
             }
-            console.log(spheres.length)
-        }
+            //console.log(spheres.length)
+        })
         this.prevPosition = this.#camera.position;
     }
 }

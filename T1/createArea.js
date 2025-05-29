@@ -8,7 +8,6 @@ export class Area {
   static collidableAreas = [];
   static collidableWalls = [];
   static collidableStairs = [];
-  static collidableFloor = [];
 
   constructor(scene) {
     this.scene = scene;
@@ -125,44 +124,28 @@ export class Area {
     let wallMaterial = new THREE.MeshBasicMaterial();
     let walls = [];
 
-    let outsideWallsGeometry = new THREE.BoxGeometry(500, 100, 2);
-    let material = setDefaultMaterial()
-    let outsideWalls = [];
 
     for (let i = 0; i < 4; ++i) {
       walls.push(new THREE.Mesh(wallGeometry, wallMaterial));
-      outsideWalls.push(new THREE.Mesh(outsideWallsGeometry, material))
     }
 
     walls[0].position.set(0, 36, -250);
-    outsideWalls[0].position.set(0, 121, -251);
 
     walls[1].position.set(-250, 36, 0);
     walls[1].rotation.y = Math.PI / 2;
-    outsideWalls[1].position.set(-250, 121, 0);
-    outsideWalls[1].rotation.y = Math.PI / 2;
 
     walls[2].position.set(250, 36, 0);
     walls[2].rotation.y = Math.PI / -2;
-    outsideWalls[2].position.set(250, 121, 0);
-    outsideWalls[2].rotation.y = Math.PI / -2;
 
     walls[3].position.set(0, 36, 250);
     walls[3].rotation.y = Math.PI
-    outsideWalls[3].position.set(0, 121, 250);
-    outsideWalls[3].rotation.y = Math.PI
 
     for (let i = 0; i < walls.length; i++) {
       scene.add(walls[i]);
-      scene.add(outsideWalls[i])
-      outsideWalls[i].visible = false
-
       let wallBox = new THREE.Box3().setFromObject(walls[i], true);
-      let outsideWallBox = new THREE.Box3().setFromObject(outsideWalls[i], true)
       console.log(wallBox.min, wallBox.max);
 
       this.collidableWalls.push({ box: wallBox, mesh: walls[i] });
-      this.collidableWalls.push({ box: outsideWallBox, mesh: outsideWalls[i] });
     }
 
     // create the ground plane
@@ -170,18 +153,6 @@ export class Area {
     let planeMaterial = setDefaultMaterial('lightgray')
     let plane = new THREE.Mesh(planeGeometry, planeMaterial)
 
-    let roofGeometry = new THREE.BoxGeometry(510, 2, 510)
-    let roof = new THREE.Mesh(roofGeometry, planeMaterial)
-    roof.translateY(171)
-    roof.visible = false
-
-    let planeBox = new THREE.Box3().setFromObject(plane)
-    let roofBox = new THREE.Box3().setFromObject(roof);
-
-    this.collidableFloor.push({ box: planeBox, mesh: plane })
-    this.collidableFloor.push({ box: roofBox, mesh: roof })
-
     scene.add(plane);
-    scene.add(roof)
   }
 }
