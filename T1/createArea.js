@@ -122,7 +122,7 @@ export class Area {
     //os numeros são correções para a escada ficar alinhada ao cubo principal
     for (let i = 0; i < 8; i++) {
       let stairStepGeometry = new THREE.BoxGeometry(25.0, stairHeight, stairHeight * (1 + 7 - i));
-      let stairStep = new THREE.Mesh(stairStepGeometry, material);
+      let stairStep = new THREE.Mesh(stairStepGeometry, new setDefaultMaterial('rgb(205, 150, 108)'));
       if (i == 0) {
         stairStep.position.set(stairPositionX, -10.5, 60);
       } else {
