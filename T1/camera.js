@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import Stats from '../build/jsm/libs/stats.module.js';
-import { PointerLockControls } from '../build/jsm/controls/PointerLockControls.js'
+import { PointerLockControls } from './PointerLockControls.js'
 import { Area } from './createArea.js';
 import {
     initRenderer,
@@ -32,19 +32,15 @@ camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(4, 4, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, material);
-cameraHolder.position.set(0, 20, 50);
+cameraHolder.position.set(0, 20, 0);
 cameraHolder.visible = false; // Esconde o cameraHolder
-
-
-scene.add(cameraHolder);
-
 
 cameraHolder.add(camera);
 
+const controls = new PointerLockControls(cameraHolder, camera, renderer.domElement);
 
 
 
-const controls = new PointerLockControls(cameraHolder, renderer.domElement);
 
 const blocker = document.getElementById('blocker');
 const instructions = document.getElementById('instructions');
@@ -70,7 +66,7 @@ controls.addEventListener('unlock', function () {
     crosshair.style.display = 'none'; // Esconde a mira
 });
 
-scene.add(controls.getObject());
+//scene.add(controls.getObject());
 
 //auxiliares para a movimentação
 const speed = 20;
