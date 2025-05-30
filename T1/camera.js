@@ -11,6 +11,7 @@ import {
 import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
 import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 import { PLAYER_HEIGHT } from './constants.js';
+import { Vector3 } from '../build/three.module.js';
 
 let scene, renderer, camera, cameraHolder, material, light, keyboard; // Initial variables
 scene = new THREE.Scene();    // Create main scene
@@ -21,30 +22,30 @@ keyboard = new KeyboardState();
 
 //inicio da configuração da camera
 camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, PLAYER_HEIGHT, 0);
+camera.position.set(0, PLAYER_HEIGHT / 2, 0);
 camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
+
+// Arma (cilindro)
+const armaGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 32);
+const arma = new THREE.Mesh(armaGeometry, material);
+arma.rotateX(Math.PI / 2);
+
+arma.position.set(0, -0.1, -0.1); // direita, baixo, frente
+
+camera.add(arma);
 
 
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(4, 4, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, material);
-cameraHolder.position.set(0, 20, 0);
-cameraHolder.visible = false; // Esconde o cameraHolder
+cameraHolder.position.set(0, PLAYER_HEIGHT, 0);
+//cameraHolder.visible = false; // Esconde o cameraHolder
 
 cameraHolder.add(camera);
 
-// Arma (cilindro)
-const armaGeometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 32);
-const arma = new THREE.Mesh(armaGeometry, material);
-arma.rotateX(Math.PI / 2);
-//arma.rotateY(THREE.MathUtils.degToRad(90))
-arma.position.set(0, -0.3, -0.5); // direita, baixo, frente
-camera.add(arma);
+
 
 const controls = new PointerLockControls(cameraHolder, camera, renderer.domElement);
-
-
-
 
 const blocker = document.getElementById('blocker');
 const instructions = document.getElementById('instructions');
@@ -52,9 +53,7 @@ const crosshair = document.getElementById('crosshair');
 
 //controlam se o mouse está travado ou não
 instructions.addEventListener('click', function () {
-
     controls.lock();
-
 }, false);
 
 //controlam a notificação de que o mouse está travado ou não
@@ -70,7 +69,7 @@ controls.addEventListener('unlock', function () {
     crosshair.style.display = 'none'; // Esconde a mira
 });
 
-//scene.add(controls.getObject());
+scene.add(controls.getObject());
 
 //auxiliares para a movimentação
 const speed = 20;
@@ -88,8 +87,8 @@ window.addEventListener('keyup', (event) => movementControls(event.keyCode, fals
 function movementControls(key, value) {
     switch (key) {
         case 16: // SHIFT
-        shift = value;
-        break;
+            shift = value;
+            break;
         case 87: // W
             moveForward = value;
             break;
@@ -107,7 +106,7 @@ function movementControls(key, value) {
 
 //realiza a movimentação utilizando metodos do PointerLockControls
 function moveAnimate(delta) {
-    let moveSpeed = shift? 3 * speed * delta : speed * delta;
+    let moveSpeed = shift ? 3 * speed * delta : speed * delta;
 
     if (moveForward) {
         controls.moveForward(moveSpeed);
@@ -133,7 +132,7 @@ Area.createMap(scene);
     let boundingBox = new THREE.Box3();
     boundingBox.setFromObject(child);
     return boundingBox;
-}) */
+    }) */
 let collidables = {
     areas: Area.collidableAreas,
     walls: Area.collidableWalls,
@@ -153,25 +152,23 @@ let shoot = false
 let intervalShoot
 
 function shootBall() {
-    const armaMundo = new THREE.Vector3();
+    let armaMundo = new THREE.Vector3();
     arma.getWorldPosition(armaMundo); // pega as coordenadas globais da arma
 
     console.log(armaMundo, 'arma')
+        let worldPosition = new Vector3();
+    camera.getWorldPosition(worldPosition)
+    console.log(worldPosition, "camera");
 
     //const novaSphere = new Sphere(scene, armaMundo, camera);
-    const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 16);
+    const sphereGeometry = new THREE.SphereGeometry(0.1, 32, 16);
     const materialSphere = setDefaultMaterial('lightblue');
     let sphere = new THREE.Mesh(sphereGeometry, materialSphere);
 
-    // Define posição inicial
-    let cameraPosition = new THREE.Vector3();
-    arma.getWorldPosition(cameraPosition)
-    sphere.position.copy(cameraPosition);
-
+    sphere.position.copy(armaMundo);
 
     scene.add(sphere);
-    bulletsCollisionHandler.shootSphere(sphere); // instancia ou inves de armazenar a mesh
-
+    bulletsCollisionHandler.addSphere(sphere); // instancia ou inves de armazenar a mesh
 }
 
 document.addEventListener('mousedown', (event) => {
@@ -198,6 +195,10 @@ function render() {
     if (controls.isLocked) {
         moveAnimate(clock.getDelta());
     }
+
+    /* arma.getWorldPosition(worldPosition)
+    console.log(worldPosition); */
+
 
 
     bulletsCollisionHandler.handleBulletsCollisions(collidables)

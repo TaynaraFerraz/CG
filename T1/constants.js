@@ -1,3 +1,3 @@
-const PLAYER_HEIGHT = 16;
+const PLAYER_HEIGHT = 23;
 
 export { PLAYER_HEIGHT };

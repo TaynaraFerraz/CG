@@ -12,7 +12,7 @@ export class BulletsCollisionHandler {
     position
     direction
     move
-    speed = 1.5;
+    speed = 0.5;
     prevPosition
     // #spheres = [];
 
@@ -49,7 +49,7 @@ export class BulletsCollisionHandler {
         scene.remove(this.sphere);
     }
 
-    shootSphere(sphere) {
+    addSphere(sphere) {
         this.#spheres.push(sphere);
 
         // Direção baseada na câmera
