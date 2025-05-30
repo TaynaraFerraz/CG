@@ -71,7 +71,7 @@ export class BulletsCollisionHandler {
         this.#camera.getWorldDirection(this.direction);
         //console.log(this.direction);
         
-        this.#spheres.forEach((s) => {
+        this.#spheres = this.#spheres.filter((s) => {
             //console.log(s);
             
             const prevPositionBall = s.position.clone();
@@ -90,12 +90,20 @@ export class BulletsCollisionHandler {
             const raycasterBall = new THREE.Raycaster(prevPositionBall, directionBall, 0, distanceBall);
             const intersectsBall = raycasterBall.intersectObjects(collidableMeshes, true);
 
-            if (intersectsBall.length > 0) {
+            if (intersectsBall.length > 0 || s.position.y >= 72 || s.position.y <= 0) {
                 console.log("colidiu")
-                s.removeFromParent();
+                console.log('position', s.position)
+                this.#scene.remove(s);
+                s.geometry.dispose();
+                s.material.dispose();
+                s = undefined;
+                return false;
             }
-            //console.log(spheres.length)
+            console.log(this.#spheres.length)
+            
+            return true;
         })
+        //console.log(this.#spheres.length)
         this.prevPosition = this.#camera.position;
     }
 }
