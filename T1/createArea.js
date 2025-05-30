@@ -1,8 +1,11 @@
 import * as THREE from 'three';
 import {
   setDefaultMaterial,
-  createGroundPlaneXZ,
+  createGroundPlaneXZ
 } from "../libs/util/util.js";
+
+
+
 import { BoxGeometry } from '../build/three.module.js';
 export class Area {
   static collidableAreas = [];
@@ -21,48 +24,57 @@ export class Area {
     positions.push(new THREE.Vector3(160.0, 12.0, -172.0));
     positions.push(new THREE.Vector3(0.0, 12.0, 172.0));
 
+    //criação da base chão/parede
     this.createTerrain(scene);
 
+    //criação das areas
     for (let i = 0; i < positions.length; i++) {
       this.createArea(scene, positions[i], i);
     }
   }
 
   static createArea(scene, position, i) {
-    let material = setDefaultMaterial();
+    let material;
     //criação da base da plataforma
     //inicialização com valores padrão (plataforma pequena com escada ao centro)
     const height = 24.0;
     let length = 120.0;
-    let leftLength = 48.0;
-    let rightLength = 48.0;
+    let leftLength = 47.5;
+    let rightLength = 47.5;
 
     if (i == 0) {
-      leftLength = 16.0;
+      material = setDefaultMaterial('lightblue');
+      leftLength = 15.0;
       rightLength = 80.0;
     }
     if (i == 1) {
+      material = setDefaultMaterial('red');
       leftLength = 80.0;
-      rightLength = 16.0;
+      rightLength = 15.0;
     }
     if (i == 2) {
-      leftLength = 48.0;
-      rightLength = 48.0;
+      material = setDefaultMaterial('blue');
+      leftLength = 47.5;
+      rightLength = 47.5;
     }
     if (i == 3) {
+      material = setDefaultMaterial('green');
       length = 360.0;
       leftLength = 167.5;
       rightLength = 167.5;
     }
 
 
+    //criação do cubo principal
     let cubeGeometry = new THREE.BoxGeometry(length, height, 96.0);
     let cube = new THREE.Mesh(cubeGeometry, material);
     cube.position.copy(position);
+    //inverte a posição para a area maior ficar voltada para o centro
     if (i == 3)
       cube.rotation.y = Math.PI;
     scene.add(cube);
 
+    //colisão
     let boxCube = new THREE.Box3().setFromObject(cube, true);
     this.collidableAreas.push({ box: boxCube, mesh: cube });
 
@@ -75,6 +87,7 @@ export class Area {
 
     let cubeGeometry3 = new THREE.BoxGeometry(rightLength, height, height);
     let cubeRight = new THREE.Mesh(cubeGeometry3, material);
+    //calculo da posição do cubo direito em relação ao cubo principal
     cubeRight.position.set((length - rightLength) / 2, 0.0, 60.0);
     cube.add(cubeRight);
 
@@ -95,9 +108,13 @@ export class Area {
     }
 
     // colisão da escada
-    let stair = new THREE.Mesh(new THREE.BoxGeometry(25, 24 * Math.sqrt(2), 24 * Math.sqrt(2)), setDefaultMaterial());
-    stair.position.set(stairPositionX, -12.0, 48.0);
-    stair.rotateX(Math.PI / 4);
+    
+    let stair = new THREE.Mesh(new THREE.PlaneGeometry(26, 38), setDefaultMaterial('green'));
+    stair.visible = false;
+    stair.position.set(stairPositionX, 0, 60.0);
+    stair.translateZ(1);
+    stair.rotateX(-1 * Math.PI / 3.8);
+
     cube.add(stair);
     let box = new THREE.Box3().setFromObject(stair, true);
     this.collidableStairs.push({ box: box, mesh: stair });
@@ -106,7 +123,7 @@ export class Area {
     //os numeros são correções para a escada ficar alinhada ao cubo principal
     for (let i = 0; i < 8; i++) {
       let stairStepGeometry = new THREE.BoxGeometry(25.0, stairHeight, stairHeight * (1 + 7 - i));
-      let stairStep = new THREE.Mesh(stairStepGeometry, material);
+      let stairStep = new THREE.Mesh(stairStepGeometry, new setDefaultMaterial('rgb(205, 150, 108)'));
       if (i == 0) {
         stairStep.position.set(stairPositionX, -10.5, 60);
       } else {
@@ -114,8 +131,6 @@ export class Area {
       }
       cube.add(stairStep);
     }
-
-
   }
 
   static createTerrain(scene) {
@@ -129,6 +144,7 @@ export class Area {
       walls.push(new THREE.Mesh(wallGeometry, wallMaterial));
     }
 
+    //posicionamento e rotação das paredes
     walls[0].position.set(0, 36, -250);
 
     walls[1].position.set(-250, 36, 0);
@@ -140,6 +156,7 @@ export class Area {
     walls[3].position.set(0, 36, 250);
     walls[3].rotation.y = Math.PI
 
+    //colisão das paredes
     for (let i = 0; i < walls.length; i++) {
       scene.add(walls[i]);
       let wallBox = new THREE.Box3().setFromObject(walls[i], true);

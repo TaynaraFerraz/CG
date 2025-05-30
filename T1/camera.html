@@ -8,12 +8,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
       #blocker {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -43,11 +46,8 @@
     <script type="importmap">
       { "imports": { "three": "../build/three.module.js" } }
     </script>
-    <div id="blocker" class="w3-display-container">
-      <div
-        id="instructions"
-        class="w3-display-middle w3-center w3-white w3-opacity"
-      >
+    <div id="blocker">
+      <div id="instructions">
         <p>(Click to continue)</p>
       </div>
     </div>
