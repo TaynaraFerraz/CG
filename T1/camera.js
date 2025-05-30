@@ -72,7 +72,7 @@ controls.addEventListener('unlock', function () {
 scene.add(controls.getObject());
 
 //auxiliares para a movimentação
-const speed = 20;
+const speed = 60;
 let shift = false;
 let moveForward = false;
 let moveBackward = false;
@@ -90,15 +90,19 @@ function movementControls(key, value) {
             shift = value;
             break;
         case 87: // W
+        case 38: // Seta pra cima
             moveForward = value;
             break;
         case 83: // S
+        case 40: // Seta pra baixo
             moveBackward = value;
             break;
         case 65: // A
+        case 37: // Seta pra esquerda
             moveLeft = value;
             break;
         case 68: // D
+        case 39: // Seta pra direita
             moveRight = value;
             break;
     }
@@ -106,7 +110,7 @@ function movementControls(key, value) {
 
 //realiza a movimentação utilizando metodos do PointerLockControls
 function moveAnimate(delta) {
-    let moveSpeed = shift ? 3 * speed * delta : speed * delta;
+    let moveSpeed = shift ? 1.5 * speed * delta : speed * delta;
 
     if (moveForward) {
         controls.moveForward(moveSpeed);
