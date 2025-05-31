@@ -12,7 +12,7 @@ export class BulletsCollisionHandler {
     position
     direction
     move
-    speed = 0.5;
+    speed = 5;
     prevPosition
     // #spheres = [];
 

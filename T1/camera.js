@@ -10,7 +10,7 @@ import {
 } from "../libs/util/util.js";
 import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
 import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
-import { PLAYER_HEIGHT } from './constants.js';
+import { PLAYER_HEIGHT, SHIFT_MULTIPLIER, SPEED } from './constants.js';
 import { Vector3 } from '../build/three.module.js';
 
 let scene, renderer, camera, cameraHolder, material, light, keyboard; // Initial variables
@@ -72,7 +72,6 @@ controls.addEventListener('unlock', function () {
 scene.add(controls.getObject());
 
 //auxiliares para a movimentação
-const speed = 60;
 let shift = false;
 let moveForward = false;
 let moveBackward = false;
@@ -110,7 +109,7 @@ function movementControls(key, value) {
 
 //realiza a movimentação utilizando metodos do PointerLockControls
 function moveAnimate(delta) {
-    let moveSpeed = shift ? 1.5 * speed * delta : speed * delta;
+    let moveSpeed = shift ? SHIFT_MULTIPLIER * SPEED * delta : SPEED * delta;
 
     if (moveForward) {
         controls.moveForward(moveSpeed);
@@ -142,7 +141,7 @@ let collidables = {
     walls: Area.collidableWalls,
     stairs: Area.collidableStairs
 }
-let playerCollisionHandler = new PlayerCollisionHandler(scene, cameraHolder, collidables);
+let playerCollisionHandler = new PlayerCollisionHandler(cameraHolder, collidables);
 let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
 
 // Listen window size changes
@@ -159,10 +158,8 @@ function shootBall() {
     let armaMundo = new THREE.Vector3();
     arma.getWorldPosition(armaMundo); // pega as coordenadas globais da arma
 
-    console.log(armaMundo, 'arma')
-        let worldPosition = new Vector3();
+    let worldPosition = new Vector3();
     camera.getWorldPosition(worldPosition)
-    console.log(worldPosition, "camera");
 
     //const novaSphere = new Sphere(scene, armaMundo, camera);
     const sphereGeometry = new THREE.SphereGeometry(0.1, 32, 16);
@@ -199,11 +196,6 @@ function render() {
     if (controls.isLocked) {
         moveAnimate(clock.getDelta());
     }
-
-    /* arma.getWorldPosition(worldPosition)
-    console.log(worldPosition); */
-
-
 
     bulletsCollisionHandler.handleBulletsCollisions(collidables)
 

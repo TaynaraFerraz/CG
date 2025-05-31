@@ -1,45 +1,68 @@
 import * as THREE from 'three';
 import { Vector3 } from '../build/three.module.js';
-import { PLAYER_HEIGHT } from './constants.js';
+import { PLAYER_HEIGHT, SHIFT_MULTIPLIER, SPEED } from './constants.js';
 
 export class PlayerCollisionHandler {
     #fallingConstant = 0.5;
-    #scene;
     #player;
-    #collidables = {};
+    #originalCollidables = {};
+    #currentCollidables = {};
     #oldPos;
     #raycaster;
-    #raycasterOrigin;
     #boundingBox;
-    iteracoes = 0;
+    #usefulCollisionAreaBox;
+    #usefulBoxCheckingDelaySeconds = 2;
 
-    constructor(scene, player, collidables) {
+    constructor(player, collidables) {
         this.#player = player;
-        this.#collidables = collidables;
-        this.#scene = scene;
+        this.#originalCollidables = collidables;
+        this.#currentCollidables = { ...collidables };
+
         this.#oldPos = new THREE.Vector3();
         this.#player.getWorldPosition(this.#oldPos);
         this.#raycaster = new THREE.Raycaster();
         this.#raycaster.far = 20;
-        this.#raycasterOrigin = new Vector3();
 
         this.#boundingBox = new THREE.Box3();
         this.#boundingBox.setFromObject(this.#player);
+
+        this.#usefulCollisionAreaBox = new THREE.Box3();
+        const min = new THREE.Vector3(this.#player.position.x - SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds, 0, this.#player.position.z - SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds);
+        const max = new THREE.Vector3(this.#player.position.x + SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds, 40, this.#player.position.z + SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds);
+
+        this.#usefulCollisionAreaBox.set(min, max);
+
+        setInterval(() => this.#filterCollidables.call(this), this.#usefulBoxCheckingDelaySeconds * 1000);
     }
 
-    #handleGroupCollisions(collidables, isStairs, log) {
+    #filterCollidables() {
+        const min = new THREE.Vector3(this.#player.position.x - SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds, 0, this.#player.position.z - SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds);
+        const max = new THREE.Vector3(this.#player.position.x + SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds, 40, this.#player.position.z + SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds);
+        
+
+        this.#usefulCollisionAreaBox.set(min, max);
+
+        for (const key in this.#originalCollidables) {
+            const filteredCollidables = this.#originalCollidables[key].filter((collidable) => {
+                if (this.#usefulCollisionAreaBox.intersectsBox(collidable.box)) return true;
+            });
+            this.#currentCollidables[key] = filteredCollidables;
+        }
+    }
+
+    #handleGroupCollisions(collidables, isStairs) {
         let isAbove = false;
         let currentPos = new THREE.Vector3();
         this.#boundingBox.setFromObject(this.#player);
         this.#player.getWorldPosition(currentPos);
 
         let deltaMovement = new THREE.Vector3(0, 0, 0);
-        
-        
+
+
         collidables.forEach((object) => {
             if (this.#boundingBox.intersectsBox(object.box)) {
-                
-                
+
+
                 if ((this.#oldPos.x != currentPos.x ||
                     this.#oldPos.y != currentPos.y ||
                     this.#oldPos.z != currentPos.z) //se tiver variação de posição
@@ -48,27 +71,26 @@ export class PlayerCollisionHandler {
                     deltaMovement.addVectors(currentPos, this.#oldPos.multiplyScalar(-1)); //pegando o vetor da direção do movimento subtraindo posição antiga da nova
                     this.#oldPos.multiplyScalar(-1) //voltando com a posição antiga pro valor original
 
-                    
+
                     let normalizedMovementDirection = new THREE.Vector3(0, 0, 0);
                     normalizedMovementDirection.copy(deltaMovement);
                     normalizedMovementDirection.normalize(); //direção normalizada
 
                     this.#raycaster.set(this.#player.position, normalizedMovementDirection); //apontando o raio para a direção do movimento
-                    
-                    if(isStairs){
+
+                    if (isStairs) {
                         this.#raycaster.set(this.#player.position, new Vector3(0, -1, 0));
                     }
-                    
-                    
+
+
                     let normalToIntersection = new THREE.Vector3();
                     let intersectionResult = this.#raycaster.intersectObject(object.mesh, false)[0] // pega a interseção com o objeto mais próxima no raio
-                    
-                    
+
+
                     if (intersectionResult) { //se houver interseção
                         normalToIntersection = intersectionResult.normal.transformDirection(object.mesh.matrixWorld); //pega o vetor normal com a transformação para a normal do mundo
-                        //console.log(log, normalToIntersection);
-                        
-                        
+
+
                         let posAfterCollision = new THREE.Vector3();
 
                         posAfterCollision = currentPos; //pega posição atual
@@ -83,8 +105,8 @@ export class PlayerCollisionHandler {
                         this.#player.position.x = posAfterCollision.x;
                         this.#player.position.y = posAfterCollision.y;
                         this.#player.position.z = posAfterCollision.z;
-                    } else if(isStairs) {
-                        this.#player.position.y+=(this.#fallingConstant); //caso caia embaixo da escada, espero que nunca mais rode
+                    } else if (isStairs) {
+                        this.#player.position.y += (this.#fallingConstant); //caso caia embaixo da escada, espero que nunca mais rode
                     }
                 }
             }
@@ -93,7 +115,7 @@ export class PlayerCollisionHandler {
             isAboveTestPosition.copy(this.#player.position);
             deltaMovement.normalize();
 
-            if(isStairs){
+            if (isStairs) {
                 //isAboveTestPosition.add(deltaMovement.multiplyScalar(3));
             }
 
@@ -101,10 +123,7 @@ export class PlayerCollisionHandler {
 
             let isAboveCheckingRay = this.#raycaster.intersectObject(object.mesh, false);
             if (isAboveCheckingRay.length > 0) {
-                console.log(isAboveCheckingRay[0].distance);
-                
-                if(isAboveCheckingRay[0].distance<PLAYER_HEIGHT/2+1) {
-                    console.log(isAbove);
+                if (isAboveCheckingRay[0].distance < PLAYER_HEIGHT / 2 + 1) {
                     isAbove = true;
                 }
             }
@@ -114,18 +133,18 @@ export class PlayerCollisionHandler {
 
     handleCollisions() {
         if (Math.abs(this.#player.position.x) > 240 || Math.abs(this.#player.position.z) > 240) {
-            this.#handleGroupCollisions(this.#collidables.walls);
+            this.#handleGroupCollisions(this.#currentCollidables.walls);
         }
 
-        let isAboveArea = this.#handleGroupCollisions(this.#collidables.areas, false, "colidiu");
-        let isAboveStair = this.#handleGroupCollisions(this.#collidables.stairs, true);
+        let isAboveArea = this.#handleGroupCollisions(this.#currentCollidables.areas, false, "colidiu");
+        let isAboveStair = this.#handleGroupCollisions(this.#currentCollidables.stairs, true);
 
 
         //queda
-        if (this.#player.position.y > PLAYER_HEIGHT/2 && !isAboveArea && !isAboveStair) {
+        if (this.#player.position.y > PLAYER_HEIGHT / 2 && !isAboveArea && !isAboveStair) {
             this.#player.position.y -= this.#fallingConstant;
-            console.log("caindo");
         }
+
 
         this.#player.getWorldPosition(this.#oldPos);
     }

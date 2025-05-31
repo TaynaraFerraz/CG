@@ -1,3 +1,5 @@
 const PLAYER_HEIGHT = 23;
+const SPEED = 60;
+const SHIFT_MULTIPLIER = 1.5;
 
-export { PLAYER_HEIGHT };
+export { PLAYER_HEIGHT, SPEED, SHIFT_MULTIPLIER };
