@@ -43,9 +43,10 @@ cameraHolder.position.set(0, PLAYER_HEIGHT, 0);
 cameraHolder.add(camera);
 
 
-
+//inicializando o PointerLockControls customizado
 const controls = new PointerLockControls(cameraHolder, camera, renderer.domElement);
 
+//elementos de interface
 const blocker = document.getElementById('blocker');
 const instructions = document.getElementById('instructions');
 const crosshair = document.getElementById('crosshair');
@@ -87,20 +88,20 @@ function movementControls(key, value) {
         case 16: // SHIFT
             shift = value;
             break;
-            case 87: // W
-            case 38: // Seta pra cima
+        case 87: // W
+        case 38: // Seta pra cima
             moveForward = value;
             break;
         case 83: // S
         case 40: // Seta pra baixo
             moveBackward = value;
             break;
-            case 65: // A
-            case 37: // Seta pra esquerda
+        case 65: // A
+        case 37: // Seta pra esquerda
             moveLeft = value;
             break;
-            case 68: // D
-            case 39: // Seta pra direita
+        case 68: // D
+        case 39: // Seta pra direita
             moveRight = value;
             break;
         }

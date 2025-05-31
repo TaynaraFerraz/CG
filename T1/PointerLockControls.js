@@ -120,33 +120,36 @@ class PointerLockControls extends EventDispatcher {
 function onMouseMove( event ) {
 
     if ( this.isLocked === false ) return;
-
+    
+    //para garantir compatibilidade entre navegadores
+    // respectivamente: padrão atual, Firefox antigo, chrome antigo
     const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
     const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
     let range = 300;
-
     if(movementX > range || movementX < -range) return;
 
     const camera = this.camera;
     const holder = this.holder;
 
-
-    //separa os euleres para a câmera e o holder
+    // Separa os euleres para a câmera e o holder
     _euler.setFromQuaternion( camera.quaternion );
     _eulerHolder.setFromQuaternion( holder.quaternion );
 
+    // Atualiza o yaw (rotação Y) do holder com o movimento horizontal do mouse
     _eulerHolder.y -= movementX * 0.002 * this.pointerSpeed;
+
+    // Atualiza o pitch (rotação X) da câmera com o movimento vertical do mouse
     _euler.x -= movementY * 0.002 * this.pointerSpeed;
 
+    // Limita o pitch para não virar de cabeça para baixo
     _euler.x = Math.max( _PI_2 - this.maxPolarAngle, Math.min( _PI_2 - this.minPolarAngle, _euler.x ) );
 
+    // Aplica as rotações calculadas
     camera.quaternion.setFromEuler( _euler );
     holder.quaternion.setFromEuler( _eulerHolder );
 
-
     this.dispatchEvent( _changeEvent );
-
 }
 
 function onPointerlockChange() {

@@ -16,6 +16,7 @@ export class Area {
   static createMap(scene) {
     let positions = [];
 
+    //posições para o bloco principal de cada área
     positions.push(new THREE.Vector3(-160.0, 12.0, -172.0));
     positions.push(new THREE.Vector3(0.0, 12.0, -172.0));
     positions.push(new THREE.Vector3(160.0, 12.0, -172.0));
@@ -39,6 +40,7 @@ export class Area {
     let leftLength = 47.5;
     let rightLength = 47.5;
 
+    //definição do material e tamanho da plataforma de acordo com o índice
     if (i == 0) {
       material = setDefaultMaterial('lightblue');
       leftLength = 15.0;
@@ -117,7 +119,7 @@ export class Area {
     this.collidableStairs.push({ box: box, mesh: stair });
 
     //reescrever/deixar mais legivel se possivel
-    //os numeros são correções para a escada ficar alinhada ao cubo principal
+    //as constantes são correções para a escada ficar alinhada ao cubo principal
     for (let i = 0; i < 8; i++) {
       let stairStepGeometry = new THREE.BoxGeometry(25.0, stairHeight, stairHeight * (1 + 7 - i));
       let stairStep = new THREE.Mesh(stairStepGeometry, setDefaultMaterial('#ffe6d2'));
