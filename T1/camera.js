@@ -10,9 +10,9 @@ import {
 } from "../libs/util/util.js";
 import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
 import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
-import { PLAYER_HEIGHT, SHIFT_MULTIPLIER, SPEED } from './constants.js';
-import { Vector3 } from '../build/three.module.js';
+import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
 
+const clock = new THREE.Clock();
 let scene, renderer, camera, cameraHolder, material, light, keyboard; // Initial variables
 scene = new THREE.Scene();    // Create main scene
 renderer = initRenderer();    // Init a basic renderer
@@ -27,7 +27,7 @@ camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 
 // Arma (cilindro)
 const armaGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 32);
-const arma = new THREE.Mesh(armaGeometry, material);
+const arma = new THREE.Mesh(armaGeometry, setDefaultMaterial('#3b3b3b'));
 arma.rotateX(Math.PI / 2);
 
 arma.position.set(0, -0.1, -0.1); // direita, baixo, frente
@@ -36,10 +36,9 @@ camera.add(arma);
 
 
 //criando o camera holder
-let cameraHolderGeometry = new THREE.CylinderGeometry(4, 4, PLAYER_HEIGHT);
+let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, material);
 cameraHolder.position.set(0, PLAYER_HEIGHT, 0);
-//cameraHolder.visible = false; // Esconde o cameraHolder
 
 cameraHolder.add(camera);
 
@@ -88,29 +87,29 @@ function movementControls(key, value) {
         case 16: // SHIFT
             shift = value;
             break;
-        case 87: // W
-        case 38: // Seta pra cima
+            case 87: // W
+            case 38: // Seta pra cima
             moveForward = value;
             break;
         case 83: // S
         case 40: // Seta pra baixo
             moveBackward = value;
             break;
-        case 65: // A
-        case 37: // Seta pra esquerda
+            case 65: // A
+            case 37: // Seta pra esquerda
             moveLeft = value;
             break;
-        case 68: // D
-        case 39: // Seta pra direita
+            case 68: // D
+            case 39: // Seta pra direita
             moveRight = value;
             break;
-    }
+        }
 }
 
 //realiza a movimentação utilizando metodos do PointerLockControls
 function moveAnimate(delta) {
     let moveSpeed = shift ? SHIFT_MULTIPLIER * SPEED * delta : SPEED * delta;
-
+    
     if (moveForward) {
         controls.moveForward(moveSpeed);
     }
@@ -129,41 +128,20 @@ function moveAnimate(delta) {
 //testeMashs()
 Area.createMap(scene);
 
-//colisores
-
-/* let collidables = scene.children.map((child) => {
-    let boundingBox = new THREE.Box3();
-    boundingBox.setFromObject(child);
-    return boundingBox;
-    }) */
-let collidables = {
-    areas: Area.collidableAreas,
-    walls: Area.collidableWalls,
-    stairs: Area.collidableStairs
-}
-let playerCollisionHandler = new PlayerCollisionHandler(cameraHolder, collidables);
-let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
-
-// Listen window size changes
-window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
-
-const clock = new THREE.Clock();
-
-render();
-
+//funções e intervalo para o sistema de disparo
 let shoot = false
-let intervalShoot
+let intervalShoot;
 
 function shootBall() {
     let armaMundo = new THREE.Vector3();
     arma.getWorldPosition(armaMundo); // pega as coordenadas globais da arma
 
-    let worldPosition = new Vector3();
+    let worldPosition = new THREE.Vector3();
     camera.getWorldPosition(worldPosition)
 
     //const novaSphere = new Sphere(scene, armaMundo, camera);
-    const sphereGeometry = new THREE.SphereGeometry(0.1, 32, 16);
-    const materialSphere = setDefaultMaterial('lightblue');
+    const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 16);
+    const materialSphere = setDefaultMaterial('#7a7a7a');
     let sphere = new THREE.Mesh(sphereGeometry, materialSphere);
 
     sphere.position.copy(armaMundo);
@@ -178,9 +156,9 @@ document.addEventListener('mousedown', (event) => {
     if (event.button !== 0 && event.button !== 2) return;
 
     if (!shoot) {
-        shoot = true
-        shootBall()
-        intervalShoot = setInterval(shootBall, 500)
+        shoot = true;
+        shootBall();
+        intervalShoot = setInterval(shootBall, 500);
     }
 });
 
@@ -191,6 +169,22 @@ document.addEventListener('mouseup', (event) => {
     shoot = false;
     clearInterval(intervalShoot);
 });
+
+//colisores
+let collidables = {
+    areas: Area.collidableAreas,
+    walls: Area.collidableWalls,
+    stairs: Area.collidableStairs
+}
+let playerCollisionHandler = new PlayerCollisionHandler(cameraHolder, collidables);
+let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
+
+// Listen window size changes
+window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
+
+
+render();
+
 
 function render() {
     if (controls.isLocked) {

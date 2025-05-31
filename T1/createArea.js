@@ -1,12 +1,9 @@
 import * as THREE from 'three';
 import {
-  setDefaultMaterial,
-  createGroundPlaneXZ
-} from "../libs/util/util.js";
+  setDefaultMaterial} from "../libs/util/util.js";
 
 
 
-import { BoxGeometry } from '../build/three.module.js';
 export class Area {
   static collidableAreas = [];
   static collidableWalls = [];
@@ -48,17 +45,17 @@ export class Area {
       rightLength = 80.0;
     }
     if (i == 1) {
-      material = setDefaultMaterial('red');
+      material = setDefaultMaterial('#ff3535');
       leftLength = 80.0;
       rightLength = 15.0;
     }
     if (i == 2) {
-      material = setDefaultMaterial('blue');
+      material = setDefaultMaterial('#2c41ff');
       leftLength = 47.5;
       rightLength = 47.5;
     }
     if (i == 3) {
-      material = setDefaultMaterial('green');
+      material = setDefaultMaterial('#00b109');
       length = 360.0;
       leftLength = 167.5;
       rightLength = 167.5;
@@ -123,7 +120,7 @@ export class Area {
     //os numeros são correções para a escada ficar alinhada ao cubo principal
     for (let i = 0; i < 8; i++) {
       let stairStepGeometry = new THREE.BoxGeometry(25.0, stairHeight, stairHeight * (1 + 7 - i));
-      let stairStep = new THREE.Mesh(stairStepGeometry, new setDefaultMaterial('rgb(205, 150, 108)'));
+      let stairStep = new THREE.Mesh(stairStepGeometry, setDefaultMaterial('#ffe6d2'));
       if (i == 0) {
         stairStep.position.set(stairPositionX, -10.5, 60);
       } else {
@@ -136,7 +133,7 @@ export class Area {
   static createTerrain(scene) {
     //create walls
     let wallGeometry = new THREE.BoxGeometry(500, 72, 2); // mudança de planeGeometry por BoxGeometry porque sendo um plano a esfera não estava identificando colisão, quando coloquei uma leve espessura, ela colide com a esfera  
-    let wallMaterial = new THREE.MeshBasicMaterial();
+    let wallMaterial = setDefaultMaterial('#a7a7a7');
     let walls = [];
 
 
@@ -160,14 +157,13 @@ export class Area {
     for (let i = 0; i < walls.length; i++) {
       scene.add(walls[i]);
       let wallBox = new THREE.Box3().setFromObject(walls[i], true);
-      console.log(wallBox.min, wallBox.max);
 
       this.collidableWalls.push({ box: wallBox, mesh: walls[i] });
     }
 
     // create the ground plane
     let planeGeometry = new THREE.BoxGeometry(510, 2, 510);
-    let planeMaterial = setDefaultMaterial('lightgray')
+    let planeMaterial = setDefaultMaterial('#c5c5c5')
     let plane = new THREE.Mesh(planeGeometry, planeMaterial)
 
     scene.add(plane);
