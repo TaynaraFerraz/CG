@@ -55,6 +55,11 @@ export class PlayerCollisionHandler {
 
         collidables.forEach((object) => {
             if (this.#boundingBox.intersectsBox(object.box)) {
+                if(Math.abs(this.#player.position.x) > 249 || Math.abs(this.#player.position.z) > 249){
+                    this.#player.position.copy(this.#oldPos);
+                    return;
+                }
+
                 if ((this.#oldPos.x != currentPos.x ||
                     this.#oldPos.y != currentPos.y ||
                     this.#oldPos.z != currentPos.z) //se tiver variação de posição do player
@@ -81,7 +86,6 @@ export class PlayerCollisionHandler {
 
                     if (intersectionResult) { //se houver interseção
                         normalToIntersection = intersectionResult.normal.transformDirection(object.mesh.matrixWorld); //pega o vetor normal com a transformação para a normal do mundo
-
 
                         let posAfterCollision = new THREE.Vector3();
 
