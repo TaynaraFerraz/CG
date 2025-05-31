@@ -29,10 +29,7 @@ export class BulletsCollisionHandler {
             sphere.translateZ(-this.speed);
     }
 
-    remove(scene) {
-        scene.remove(this.sphere);
-    }
-
+    // adiciona a esfera ao vetor de esferas
     addSphere(sphere) {
         this.#spheres.push(sphere);
 
@@ -40,34 +37,40 @@ export class BulletsCollisionHandler {
         let sphereLookAt = new THREE.Vector3();
         sphere.getWorldPosition(sphereLookAt);
 
-        this.direction.multiplyScalar(-4);
+        this.direction.multiplyScalar(-4); //calcular um ponto a frente a esfera, nesse caso de magnitude 4
         sphereLookAt.add(this.direction);
-        this.direction.multiplyScalar(-1/4);
+        this.direction.multiplyScalar(-1/4);// reverte para não alterar em outras partes
 
         sphere.lookAt(sphereLookAt);
         sphere.translateZ(-0.3); //para sair da boca do cilindro e não do meio
     }
 
+    // função de lidar com as colisões
     handleBulletsCollisions(collidables) {
         this.#camera.getWorldDirection(this.direction);
         
+        // filtra o vetor de esferas, retirando ela da estrutura caso colidir
         this.#spheres = this.#spheres.filter((sphere) => {  
             const prevPositionBall = sphere.position.clone();
 
+            // realiza a movimentação/translação da esfera
             this.#updateSpherePosition(sphere);
 
             const currPositionBall = sphere.position.clone();
-            const directionBall = new THREE.Vector3().subVectors(currPositionBall, prevPositionBall).normalize();
+            const directionBall = new THREE.Vector3().subVectors(currPositionBall, prevPositionBall).normalize(); //vetor normalizado apenas para ter a direção
             const distanceBall = prevPositionBall.distanceTo(currPositionBall);
 
+            // colidíveis que serão analisados
             const collidableMeshes = [
                 ...collidables.areas.map(obj => obj.mesh),
                 ...collidables.walls.map(obj => obj.mesh),
             ];
 
+            //raio para identificar objetos nessa direção
             const raycasterBall = new THREE.Raycaster(prevPositionBall, directionBall, 0, distanceBall);
             const intersectsBall = raycasterBall.intersectObjects(collidableMeshes, true);
 
+            //verificação da altura para remover caso ultrapassar o chão e o máximo da altura
             if (intersectsBall.length > 0 || sphere.position.y >= 72 || sphere.position.y <= 0) {
                 this.#scene.remove(sphere);
                 sphere.geometry.dispose();

@@ -133,6 +133,7 @@ Area.createMap(scene);
 let shoot = false
 let intervalShoot;
 
+//cria a bolinha a aser disparada e chama  a classe para lidar com suas posíveis colisões
 function shootBall() {
     let armaMundo = new THREE.Vector3();
     arma.getWorldPosition(armaMundo); // pega as coordenadas globais da arma
@@ -140,7 +141,6 @@ function shootBall() {
     let worldPosition = new THREE.Vector3();
     camera.getWorldPosition(worldPosition)
 
-    //const novaSphere = new Sphere(scene, armaMundo, camera);
     const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 16);
     const materialSphere = setDefaultMaterial('#7a7a7a');
     let sphere = new THREE.Mesh(sphereGeometry, materialSphere);
@@ -148,9 +148,10 @@ function shootBall() {
     sphere.position.copy(armaMundo);
 
     scene.add(sphere);
-    bulletsCollisionHandler.addSphere(sphere); // instancia ou inves de armazenar a mesh
+    bulletsCollisionHandler.addSphere(sphere); 
 }
 
+//captura evento de clique no mouse, para chamar a função de disparar as bolinhas
 document.addEventListener('mousedown', (event) => {
     if (!controls.isLocked) return; // jogador não está no jogo ainda
     // event.button === 0 -> botão esquerdo, event.button === 2 -> botão direito
