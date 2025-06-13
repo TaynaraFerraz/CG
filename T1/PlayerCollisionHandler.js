@@ -10,7 +10,8 @@ export class PlayerCollisionHandler {
     #raycaster;
     #boundingBox;
     #usefulCollisionAreaBox;
-    #usefulBoxCheckingDelaySeconds = 2;
+    #usefulBoxCheckingDelaySeconds = 1;
+    #isFiltering;
 
     constructor(player, collidables) {
         this.#player = player;
@@ -26,36 +27,53 @@ export class PlayerCollisionHandler {
         this.#boundingBox.setFromObject(this.#player);
 
         this.#usefulCollisionAreaBox = new THREE.Box3();
+        this.#isFiltering = false;
 
-        this.#filterCollidables();
-        setInterval(() => this.#filterCollidables.call(this), this.#usefulBoxCheckingDelaySeconds * 1000); //filtra nessa cadência
+        setInterval(() => this.#isFiltering = true, this.#usefulBoxCheckingDelaySeconds * 1000); //filtra nessa cadência
     }
 
-    #filterCollidables() { //função para filtrar os colidíveis próximos ao jogador
-        //cria uma box com a maior distância que o jogador consegue percorrer no intervalo estipulado
-        const min = new THREE.Vector3(this.#player.position.x - SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds, 0, this.#player.position.z - SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds);
-        const max = new THREE.Vector3(this.#player.position.x + SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds, 40, this.#player.position.z + SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds);
+    #isAbove(object) {
+        let isAbove = false;
+        let isAboveTestPosition = new THREE.Vector3();
+        isAboveTestPosition.copy(this.#player.position);
+        let yAxis = new THREE.Vector3(0, 1, 0);
+        let testDelta = new THREE.Vector3(0, 0, PLAYER_WIDTH / 2); //vetor para somar na posição e testar as quatro bordas
 
-        this.#usefulCollisionAreaBox.set(min, max); 
+        for (let i = 0; i < 4; i++) {
+            isAboveTestPosition.add(testDelta.applyAxisAngle(yAxis, Math.PI / 2)); //adicionando o vetor com 90 graus de rotação em y na posição do teste
+            this.#raycaster.set(isAboveTestPosition, new THREE.Vector3(0, -1, 0)); //setando raio para baixo
 
-        for (const key in this.#originalCollidables) {// percorre todos os colidíveis
-            const filteredCollidables = this.#originalCollidables[key].filter((collidable) => {
-                if (this.#usefulCollisionAreaBox.intersectsBox(collidable.box)) return true;  //filtra os que estão na box útil
-            });
-            this.#currentCollidables[key] = filteredCollidables; //seta a chave correspondente no vetor atual
+            let isAboveCheck = this.#raycaster.intersectObject(object.mesh, false); //se intercepta, está em cima
+            if (isAboveCheck.length > 0) {
+                if (isAboveCheck[0].distance < PLAYER_HEIGHT / 2 + 1) {
+                    isAbove = true;
+                    console.log(isAbove);
+                    break;
+                }
+            }
+            isAboveTestPosition.add(testDelta.multiplyScalar(-1)); //tirando o delta da posição para os novos testes
+            testDelta.multiplyScalar(-1); //voltando delta ao anterior
         }
+        return isAbove;
     }
 
-    #handleGroupCollisions(collidables, isStair = false) { //lidando com a colisão de um grupo de colidíveis, isStair serve para mudar certas coisas caso seja um conjunto de escadas
+    #handleGroupCollisions(collidables, key = "", isStair = false) { //lidando com a colisão de um grupo de colidíveis, isStair serve para mudar certas coisas caso seja um conjunto de escadas
         let isAbove = false; //para retornar se está em cima de alguém do grupo de colidíveis, útil para a gravidade
         let deltaMovement = new THREE.Vector3(0, 0, 0);
         let currentPos = new THREE.Vector3();
+        let filteredCollidables = this.#isFiltering ? this.#originalCollidables[key] : collidables; //se tiver que filtrar pega o original
         this.#boundingBox.setFromObject(this.#player);
         this.#player.getWorldPosition(currentPos);
 
-        collidables.forEach((object) => {
+        //apenas para quando for filtrar
+        //cria uma box com a maior distância que o jogador consegue percorrer no intervalo estipulado
+        const min = new THREE.Vector3(this.#player.position.x - SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds, 0, this.#player.position.z - SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds);
+        const max = new THREE.Vector3(this.#player.position.x + SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds, 40, this.#player.position.z + SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds);
+        this.#usefulCollisionAreaBox.set(min, max);
+
+        filteredCollidables = filteredCollidables.filter((object) => {
             if (this.#boundingBox.intersectsBox(object.box)) {
-                if(Math.abs(this.#player.position.x) > 249 || Math.abs(this.#player.position.z) > 249){
+                if (Math.abs(this.#player.position.x) > 249 || Math.abs(this.#player.position.z) > 249) {
                     this.#player.position.copy(this.#oldPos);
                     return;
                 }
@@ -98,54 +116,46 @@ export class PlayerCollisionHandler {
                         posAfterCollision.add(deltaMovement); //adiciona o movimento apenas na direção correta
 
                         //seta as coordenadas para o resultado
-                        this.#player.position.x = posAfterCollision.x;
-                        this.#player.position.y = posAfterCollision.y;
-                        this.#player.position.z = posAfterCollision.z;
+                        this.#player.position.copy(posAfterCollision);
                     } else if (isStair) {
                         this.#player.position.y += (this.#fallingSpeed); //caso caia embaixo da escada, espero que nunca mais rode
                     }
                 }
             }
-
+            
             //conferindo as quatro bordas do player para ver se pode cair ou não
-            let isAboveTestPosition = new THREE.Vector3();
-            isAboveTestPosition.copy(this.#player.position);
-            let yAxis = new THREE.Vector3(0, 1, 0);
-            let testDelta = new THREE.Vector3(0, 0, PLAYER_WIDTH/2); //vetor para somar na posição e testar as quatro bordas
+            isAbove = this.#isAbove(object) || isAbove;
 
-            for (let i = 0; i < 4; i++) {
-                isAboveTestPosition.add(testDelta.applyAxisAngle(yAxis, Math.PI/2)); //adicionando o vetor com 90 graus de rotação em y na posição do teste
-                this.#raycaster.set(isAboveTestPosition, new THREE.Vector3(0, -1, 0)); //setando raio para baixo
-                
-                let isAboveCheck = this.#raycaster.intersectObject(object.mesh, false); //se intercepta, está em cima
-                if (isAboveCheck.length > 0) {
-                    if (isAboveCheck[0].distance < PLAYER_HEIGHT / 2 + 1) {
-                        isAbove = true;
-                        break;
-                    }
-                }
-                isAboveTestPosition.add(testDelta.multiplyScalar(-1)); //tirando o delta da posição para os novos testes
-                testDelta.multiplyScalar(-1); //voltando delta ao anterior
+            if (this.#isFiltering) {//apenas se estiver filtrando faz esse teste 
+                if (this.#usefulCollisionAreaBox.intersectsBox(object.box)) return true; //se está na caixa útil passa pelo filtro
             }
         })
+
+        if (this.#isFiltering) {//se filtrou nessa iteração
+            this.#currentCollidables[key] = filteredCollidables; //seta os atuais na chave correta para os colidíveis novos
+        }
         return isAbove;
     }
-
+    
     handleCollisions() {
-        if (Math.abs(this.#player.position.x) > 240 || Math.abs(this.#player.position.z) > 240) { //só testa paredes se estiver próximo a elas
-            this.#handleGroupCollisions(this.#currentCollidables.walls);
-        }
-
+        //testando paredes
+        this.#handleGroupCollisions(this.#currentCollidables.walls, "walls");
+        
         //vendo se está em cima de áreas ou escadas
-        let isAboveArea = this.#handleGroupCollisions(this.#currentCollidables.areas);
-        let isAboveStair = this.#handleGroupCollisions(this.#currentCollidables.stairs, true);
+        let isAboveArea = this.#handleGroupCollisions(this.#currentCollidables.areas, "areas");
+        let isAboveStair = this.#handleGroupCollisions(this.#currentCollidables.stairs, "stairs", true);
 
+        this.#isFiltering = false; //para de filtrar
+        
+        console.log(this.#currentCollidables.areas.length);
+        
+        
 
         //vendo se pode cair
         if (this.#player.position.y > PLAYER_HEIGHT / 2 && !isAboveArea && !isAboveStair) {
             this.#player.position.y -= this.#fallingSpeed;
         }
-
+        
         this.#player.getWorldPosition(this.#oldPos);
     }
 }
