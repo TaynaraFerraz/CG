@@ -10,7 +10,7 @@ export function loadLightPostScene(scene)
       let obj = gltf.scene;
       obj.traverse( function ( child ) {
       if ( child ) {
-            child.castShadow = true;
+            child.castShadow = false;
       }});
 
       obj.traverse( function( node ){
