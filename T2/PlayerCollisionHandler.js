@@ -47,7 +47,6 @@ export class PlayerCollisionHandler {
             if (isAboveCheck.length > 0) {
                 if (isAboveCheck[0].distance < PLAYER_HEIGHT / 2 + 1) {
                     isAbove = true;
-                    console.log(isAbove);
                     break;
                 }
             }
@@ -108,8 +107,7 @@ export class PlayerCollisionHandler {
                         let posAfterCollision = new THREE.Vector3();
 
                         posAfterCollision = currentPos; //pega posição atual
-                        posAfterCollision.add(deltaMovement.multiplyScalar(-1)); //tira o delta pra voltar na posição anterior à colisão
-                        deltaMovement.multiplyScalar(-1); //voltando o delta pro original
+                        posAfterCollision.addScaledVector(deltaMovement, -1); //tira o delta pra voltar na posição anterior à colisão
 
                         deltaMovement.projectOnPlane(normalToIntersection); //projeta a variação no plano com a normal da malha
 
@@ -146,10 +144,6 @@ export class PlayerCollisionHandler {
         let isAboveStair = this.#handleGroupCollisions(this.#currentCollidables.stairs, "stairs", true);
 
         this.#isFiltering = false; //para de filtrar
-        
-        console.log(this.#currentCollidables.areas.length);
-        
-        
 
         //vendo se pode cair
         if (this.#player.position.y > PLAYER_HEIGHT / 2 && !isAboveArea && !isAboveStair) {

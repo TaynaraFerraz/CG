@@ -7,10 +7,14 @@ import {
     initDefaultBasicLight,
     setDefaultMaterial,
     onWindowResize,
+    getMaxSize,
 } from "../libs/util/util.js";
+import { GLTFLoader } from '../build/jsm/loaders/GLTFLoader.js';
 import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
 import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
+import { Cacodemon } from './Cacodemon.js';
+import { EnemiesHandler } from './EnemiesHandler.js';
 
 const clock = new THREE.Clock();
 let scene, renderer, camera, cameraHolder, material, light, keyboard; // Initial variables
@@ -22,8 +26,45 @@ keyboard = new KeyboardState();
 
 //inicio da configuração da camera
 camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, PLAYER_HEIGHT / 2, 0);
+camera.position.set(0, PLAYER_HEIGHT);
 camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
+
+//carregador de assets
+let loader = new GLTFLoader();
+
+// Normalize scale and multiple by the newScale
+function normalizeAndRescale(obj, newScale) {
+    var scale = getMaxSize(obj);
+    obj.scale.set(newScale * (1.0 / scale),
+    newScale * (1.0 / scale),
+    newScale * (1.0 / scale));
+    return obj;
+}
+
+function fixPosition(obj) {
+    // Fix position of the object over the ground plane
+    var box = new THREE.Box3().setFromObject(obj);
+    if (box.min.y > 0)
+        obj.translateY(-box.min.y);
+    else
+    obj.translateY(-1 * box.min.y);
+return obj;
+}
+
+loader.load('./assets/cacodemon.glb', (gltf) => {
+    let obj = gltf.scene;
+    
+    obj.traverse(function (child) {
+        if (child.isMesh) child.castShadow = true;
+        //if (child.material) child.material.side = THREE.DoubleSide;
+    });
+    
+    obj = normalizeAndRescale(obj, 10);
+    obj = fixPosition(obj);
+    scene.add(obj);
+    let cacodemon = new Cacodemon(obj, cameraHolder);
+    enemiesHandler.addEnemy(cacodemon);
+})
 
 // Arma (cilindro)
 const armaGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 32);
@@ -86,25 +127,25 @@ window.addEventListener('keyup', (event) => movementControls(event.keyCode, fals
 function movementControls(key, value) {
     switch (key) {
         case 16: // SHIFT
-            shift = value;
-            break;
+        shift = value;
+        break;
         case 87: // W
         case 38: // Seta pra cima
-            moveForward = value;
-            break;
+        moveForward = value;
+        break;
         case 83: // S
         case 40: // Seta pra baixo
-            moveBackward = value;
-            break;
+        moveBackward = value;
+        break;
         case 65: // A
         case 37: // Seta pra esquerda
-            moveLeft = value;
-            break;
+        moveLeft = value;
+        break;
         case 68: // D
         case 39: // Seta pra direita
-            moveRight = value;
-            break;
-        }
+        moveRight = value;
+        break;
+    }
 }
 
 //realiza a movimentação utilizando metodos do PointerLockControls
@@ -117,7 +158,7 @@ function moveAnimate(delta) {
     else if (moveBackward) {
         controls.moveForward(-moveSpeed);
     }
-
+    
     if (moveRight) {
         controls.moveRight(moveSpeed);
     }
@@ -137,18 +178,18 @@ let intervalShoot;
 function shootBall() {
     let armaMundo = new THREE.Vector3();
     arma.getWorldPosition(armaMundo); // pega as coordenadas globais da arma
-
+    
     let worldPosition = new THREE.Vector3();
     camera.getWorldPosition(worldPosition)
-
+    
     const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 16);
     const materialSphere = setDefaultMaterial('#7a7a7a');
     let sphere = new THREE.Mesh(sphereGeometry, materialSphere);
-
+    
     sphere.position.copy(armaMundo);
-
+    
     scene.add(sphere);
-    bulletsCollisionHandler.addSphere(sphere); 
+    bulletsCollisionHandler.addSphere(sphere);
 }
 
 //captura evento de clique no mouse, para chamar a função de disparar as bolinhas
@@ -156,7 +197,7 @@ document.addEventListener('mousedown', (event) => {
     if (!controls.isLocked) return; // jogador não está no jogo ainda
     // event.button === 0 -> botão esquerdo, event.button === 2 -> botão direito
     if (event.button !== 0 && event.button !== 2) return;
-
+    
     if (!shoot) {
         shoot = true;
         shootBall();
@@ -166,7 +207,7 @@ document.addEventListener('mousedown', (event) => {
 
 document.addEventListener('mouseup', (event) => {
     if (event.button !== 0 && event.button !== 2) return;
-
+    
     // Para o disparo contínuo
     shoot = false;
     clearInterval(intervalShoot);
@@ -180,10 +221,10 @@ let collidables = {
 }
 let playerCollisionHandler = new PlayerCollisionHandler(cameraHolder, collidables);
 let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
+let enemiesHandler = new EnemiesHandler();
 
 // Listen window size changes
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
-
 
 render();
 
@@ -197,6 +238,9 @@ function render() {
 
     //lidando com as colisões
     playerCollisionHandler.handleCollisions();
+
+    //lidando com inimigos
+    enemiesHandler.handleEnemyMovements();
 
     requestAnimationFrame(render);
     renderer.render(scene, camera) // Render scene
