@@ -29,9 +29,88 @@ export class Area {
     for (let i = 0; i < positions.length; i++) {
       this.createArea(scene, positions[i], i);
     }
+    this.createAreaPilars(scene);
+  }
+
+  static createAreaPilars(scene) {
+    let position = new THREE.Vector3(-160.0, 3.0, -162.0);
+    let height = 4.0;
+    let length = 120.0;
+    let leftLength = 15.0;
+    let rightLength = 80.0;
+
+    //cubo principal
+    let material = setDefaultMaterial('lightblue'); // remover depois 
+    let cubeGeometry = new THREE.BoxGeometry(length, height, 116.0);
+    let cube = new THREE.Mesh(cubeGeometry, material);
+    cube.position.copy(position);
+    
+    /* let ajuda = new THREE.Mesh(new THREE.BoxGeometry(120, 1, 120), setDefaultMaterial('red'));
+    ajuda.position.set(-160, 3.0, -160.0);
+    scene.add(ajuda); */
+
+    let boxCube = new THREE.Box3().setFromObject(cube, true);
+    this.collidableAreas.push({ box: boxCube, mesh: cube });
+    scene.add(cube);
+    cube.matrixAutoUpdate = false;
+
+    let cubeGeometry2 = new THREE.BoxGeometry(leftLength, height, 4.0);
+    let cubeLeft = new THREE.Mesh(cubeGeometry2, material);
+    //calculo da posição do cubo esquerdo em relação ao cubo principal
+    cubeLeft.position.set(-(length - leftLength) / 2, 0.0, 60.0);
+    cube.add(cubeLeft);
+
+    let cubeGeometry3 = new THREE.BoxGeometry(rightLength, height, 4.0);
+    let cubeRight = new THREE.Mesh(cubeGeometry3, material);
+    //calculo da posição do cubo direito em relação ao cubo principal
+    cubeRight.position.set((length - rightLength) / 2, 0.0, 60.0);
+    cube.add(cubeRight);
+
+    //colisão
+    let leftBoxCube = new THREE.Box3().setFromObject(cubeLeft, true);
+    let rightBoxCube = new THREE.Box3().setFromObject(cubeRight, true);
+    this.collidableAreas.push({ box: leftBoxCube, mesh: cubeLeft });
+    this.collidableAreas.push({ box: rightBoxCube, mesh: cubeRight });
+
+    //escadas
+    let stairHeight = height / 8;
+    //calculo da posição da escada em relação ao cubo principal
+    let stairPositionX = 0.0;
+    if (leftLength < length / 2) {
+      stairPositionX = -(length - leftLength) / 2 + leftLength / 2 + 12.5;
+    } else {
+      stairPositionX = (length - rightLength) / 2 - rightLength / 2 - 12.5;
+    }
+
+    // colisão da escada
+    
+    let stair = new THREE.Mesh(new THREE.PlaneGeometry(26, 6), setDefaultMaterial('green'));
+    //stair.visible = false;
+    stair.position.set(stairPositionX, 0, 59.3);
+    stair.translateZ(1);
+    stair.rotateX(-1 * Math.PI / 3.9);
+
+    cube.add(stair);
+    let box = new THREE.Box3().setFromObject(stair, true);
+    this.collidableStairs.push({ box: box, mesh: stair });
+
+    //reescrever/deixar mais legivel se possivel
+    //as constantes são correções para a escada ficar alinhada ao cubo principal
+    for (let i = 0; i < 8; i++) {
+      let stairStepGeometry = new THREE.BoxGeometry(25.0, stairHeight, stairHeight * (1 + 7 - i));
+      let stairStep = new THREE.Mesh(stairStepGeometry, setDefaultMaterial('#ffe6d2'));
+      if (i == 0) {
+        stairStep.position.set(stairPositionX, -1.75, 60.0);
+      } else {
+        stairStep.position.set(stairPositionX, -1.75 + stairHeight * i, 60.0 - (stairHeight * i) / 2);
+      }
+      cube.add(stairStep);
+    }
   }
 
   static createArea(scene, position, i) {
+    if(i == 0)
+      return;
     let material;
     //criação da base da plataforma
     //inicialização com valores padrão (plataforma pequena com escada ao centro)
@@ -109,7 +188,7 @@ export class Area {
     // colisão da escada
     
     let stair = new THREE.Mesh(new THREE.PlaneGeometry(26, 38), setDefaultMaterial('green'));
-    stair.visible = false;
+    stair.visible = true;
     stair.position.set(stairPositionX, 0, 60.0);
     stair.translateZ(1);
     stair.rotateX(-1 * Math.PI / 3.8);
