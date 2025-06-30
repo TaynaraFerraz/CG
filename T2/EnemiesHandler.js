@@ -13,7 +13,6 @@ export class EnemiesHandler {
     constructor(scene, player) {
         this.#scene = scene;
         this.#player = player;
-        console.log(player);
     }
 
     // Normalize scale and multiple by the newScale
@@ -67,6 +66,7 @@ export class EnemiesHandler {
         this.#enemies.forEach((enemy) => {
             enemy.handleMovement();
             enemy.handleCollisions();
+            enemy.handleHealthBar();
         });
     }
 };

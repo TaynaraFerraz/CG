@@ -209,3 +209,5 @@ function render() {
     requestAnimationFrame(render);
     renderer.render(scene, camera) // Render scene
 }
+
+export { scene };

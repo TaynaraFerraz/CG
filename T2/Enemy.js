@@ -1,20 +1,25 @@
 import * as THREE from 'three';
 import { Collidables } from './Collidables.js';
+import { scene } from './camera.js';
+import { HealthBar } from './HealthBar.js';
 
 export class Enemy {
     object;
     player;
     #health;
+    #maxHealth;
     angry = true;
     dead = false;
     #oldPos;
     #boundingBox;
     #raycaster;
     lookAtQuaternion;
+    #healthBar
 
-    constructor(object, player, health) {
+    constructor(object, player, maxHealth) {
         this.object = object;
-        this.#health = health;
+        this.#maxHealth = maxHealth;
+        this.#health = maxHealth;
         this.player = player;
 
         this.#oldPos = new THREE.Vector3();
@@ -26,6 +31,8 @@ export class Enemy {
         this.#raycaster.far = 5;
 
         this.lookAtQuaternion = new THREE.Quaternion();
+
+        this.#healthBar = new HealthBar(this, 3, 0.7);
     }
 
     #kill() {
@@ -108,5 +115,9 @@ export class Enemy {
         }
 
         this.object.getWorldPosition(this.#oldPos);
+    };
+
+    handleHealthBar(){
+        this.#healthBar.update(this.#health, this.#maxHealth);
     };
 }

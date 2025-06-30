@@ -2,6 +2,8 @@ import { Enemy } from "./Enemy.js";
 import * as THREE from 'three';
 
 export class Cacodemon extends Enemy {
+    #randomized = false;
+
     constructor(object, player, collidables) {
         super(object, player, 20, collidables);
         object.name = "cacodemon";
@@ -9,7 +11,6 @@ export class Cacodemon extends Enemy {
         this.randomizerCallback();
     }
 
-    #randomized = false;
 
     randomizerCallback() {
         if (!this.dead) {
