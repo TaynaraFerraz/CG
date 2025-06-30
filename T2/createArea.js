@@ -185,15 +185,37 @@ export class Area {
     this.collidableAreas.push({ box: leftBoxCube, mesh: cubeLeft });
     this.collidableAreas.push({ box: rightBoxCube, mesh: cubeRight });
 
+    //porta
+    let doorGeometry = new THREE.BoxGeometry(6.0, 7.0, 2.0);
+    let doorMaterial = setDefaultMaterial('yellow');
+    let door = new THREE.Mesh(doorGeometry, doorMaterial);
+    door.position.set(37.5, 0.0, 62.0);
+    cube.add(door);
+
+    let boxDoor = new THREE.Box3().setFromObject(door, true);
+    this.collidableAreas.push({ box: boxDoor, mesh: door });
+
+    //elevador
+    let elevadorGeometry = new THREE.BoxGeometry(5.0, 6.0, 4.0);
+    let elevadorMaterial = setDefaultMaterial('brown');
+    let elevador = new THREE.Mesh(elevadorGeometry, elevadorMaterial);
+    elevador.position.set(37.5, 0.0, 60.0);
+    cube.add(elevador);
+
+    let boxElevador = new THREE.Box3().setFromObject(elevador, true);
+    this.collidableAreas.push({ box: boxElevador, mesh: elevador });
+
     for(let i = 0; i < 6; i++) {
       for(let j = 0; j < 6; j++) {
+        if((i == 2 || i == 3) && (j == 2 || j == 3))
+          continue;
         let cubeGeometry = new THREE.BoxGeometry(3.0, 20.0, 3.0);
         let cubeMaterial = setDefaultMaterial('blue');
         let pilar = new THREE.Mesh(cubeGeometry, cubeMaterial);
         if(i % 2 == 0 && j % 2 == 0)
-          pilar.position.set(-50.0 + 20 * i, 18.0, -50.0 + 20 * j);
+          pilar.position.set(-50.0 + 20 * i, 21.0, -50.0 + 20 * j);
         else if(i == j)
-          pilar.position.set(-50.0 + 20 * i, 15.0, -50.0 + 20 * j);
+          pilar.position.set(-50.0 + 20 * i, 17.0, -50.0 + 20 * j);
         else if(i % 3 == 0 || j % 3 == 0)
           pilar.position.set(-50.0 + 20 * i, 8.0, -50.0 + 20 * j);
         else
@@ -208,6 +230,13 @@ export class Area {
     let altar =  new THREE.Mesh(new THREE.BoxGeometry(4.0, 6.0, 4.0), setDefaultMaterial('#a7a7a7'));
     altar.position.set(0.0, 2.0, 0.0);
     cube.add(altar);
+
+    let pilarGeometry = new THREE.BoxGeometry(4.0, 20.0, 4.0);
+    let pilarMaterial = setDefaultMaterial('blue');
+    let pilar = new THREE.Mesh(pilarGeometry, pilarMaterial);
+    pilar.position.set(0.0, 16.0, 0.0);
+    altar.add(pilar);
+
 
     let boxAltar = new THREE.Box3().setFromObject(altar, true);
     this.collidableAreas.push({ box: boxAltar, mesh: altar });
