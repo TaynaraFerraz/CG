@@ -9,12 +9,11 @@ import {
     onWindowResize,
     getMaxSize,
 } from "../libs/util/util.js";
-import { GLTFLoader } from '../build/jsm/loaders/GLTFLoader.js';
 import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
 import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
-import { Cacodemon } from './Cacodemon.js';
 import { EnemiesHandler } from './EnemiesHandler.js';
+import { Collidables } from './Collidables.js'
 
 const clock = new THREE.Clock();
 let scene, renderer, camera, cameraHolder, material, light, keyboard; // Initial variables
@@ -29,42 +28,6 @@ camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight,
 camera.position.set(0, PLAYER_HEIGHT);
 camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 
-//carregador de assets
-let loader = new GLTFLoader();
-
-// Normalize scale and multiple by the newScale
-function normalizeAndRescale(obj, newScale) {
-    var scale = getMaxSize(obj);
-    obj.scale.set(newScale * (1.0 / scale),
-    newScale * (1.0 / scale),
-    newScale * (1.0 / scale));
-    return obj;
-}
-
-function fixPosition(obj) {
-    // Fix position of the object over the ground plane
-    var box = new THREE.Box3().setFromObject(obj);
-    if (box.min.y > 0)
-        obj.translateY(-box.min.y);
-    else
-    obj.translateY(-1 * box.min.y);
-return obj;
-}
-
-loader.load('./assets/cacodemon.glb', (gltf) => {
-    let obj = gltf.scene;
-    
-    obj.traverse(function (child) {
-        if (child.isMesh) child.castShadow = true;
-        //if (child.material) child.material.side = THREE.DoubleSide;
-    });
-    
-    obj = normalizeAndRescale(obj, 10);
-    obj = fixPosition(obj);
-    scene.add(obj);
-    let cacodemon = new Cacodemon(obj, cameraHolder);
-    enemiesHandler.addEnemy(cacodemon);
-})
 
 // Arma (cilindro)
 const armaGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 32);
@@ -214,14 +177,15 @@ document.addEventListener('mouseup', (event) => {
 });
 
 //colisores
-let collidables = {
+Collidables.collidables = {
     areas: Area.collidableAreas,
     walls: Area.collidableWalls,
     stairs: Area.collidableStairs
 }
-let playerCollisionHandler = new PlayerCollisionHandler(cameraHolder, collidables);
+let playerCollisionHandler = new PlayerCollisionHandler(cameraHolder);
 let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
-let enemiesHandler = new EnemiesHandler();
+let enemiesHandler = new EnemiesHandler(scene, cameraHolder);
+enemiesHandler.addEnemy('cacodemon');
 
 // Listen window size changes
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
@@ -234,13 +198,13 @@ function render() {
         moveAnimate(clock.getDelta());
     }
 
-    bulletsCollisionHandler.handleBulletsCollisions(collidables)
+    bulletsCollisionHandler.handleBulletsCollisions(Collidables.collidables)
 
     //lidando com as colisões
     playerCollisionHandler.handleCollisions();
 
     //lidando com inimigos
-    enemiesHandler.handleEnemyMovements();
+    enemiesHandler.handleEnemies();
 
     requestAnimationFrame(render);
     renderer.render(scene, camera) // Render scene

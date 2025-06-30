@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
+import { Collidables } from './Collidables.js';
 
 export class PlayerCollisionHandler {
     #fallingSpeed = 0.7;
@@ -13,10 +14,10 @@ export class PlayerCollisionHandler {
     #usefulBoxCheckingDelaySeconds = 1;
     #isFiltering;
 
-    constructor(player, collidables) {
+    constructor(player) {
         this.#player = player;
-        this.#originalCollidables = collidables;
-        this.#currentCollidables = { ...collidables };
+        this.#originalCollidables = Collidables.collidables;
+        this.#currentCollidables = { ...Collidables.collidables };
 
         this.#oldPos = new THREE.Vector3();
         this.#player.getWorldPosition(this.#oldPos);
@@ -82,8 +83,8 @@ export class PlayerCollisionHandler {
                     this.#oldPos.z != currentPos.z) //se tiver variação de posição do player
                 ) {
 
-                    deltaMovement.addVectors(currentPos, this.#oldPos.multiplyScalar(-1)); //pegando o vetor da direção do movimento subtraindo posição antiga da nova
-                    this.#oldPos.multiplyScalar(-1) //voltando com a posição antiga pro valor original
+                    deltaMovement.copy(currentPos);
+                    deltaMovement.addScaledVector(this.#oldPos, -1); //pegando o vetor da direção do movimento subtraindo posição antiga da nova
 
 
                     let normalizedMovementDirection = new THREE.Vector3(0, 0, 0);
