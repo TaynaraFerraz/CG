@@ -30,24 +30,21 @@ export class Area {
       this.createArea(scene, positions[i], i);
     }
     this.createAreaPilars(scene);
+    this.createAreaCubes(scene);
   }
 
   static createAreaPilars(scene) {
     let position = new THREE.Vector3(-160.0, 2.5, -162.0);
     let height = 5.0;
     let length = 120.0;
-    let leftLength = 15.0;
-    let rightLength = 80.0;
+    let leftLength = 20.0;
+    let rightLength = 75.0;
 
     //cubo principal
     let material = setDefaultMaterial('lightblue'); // remover depois 
     let cubeGeometry = new THREE.BoxGeometry(length, height, 116.0);
     let cube = new THREE.Mesh(cubeGeometry, material);
     cube.position.copy(position);
-    
-    /* let ajuda = new THREE.Mesh(new THREE.BoxGeometry(120, 1, 120), setDefaultMaterial('red'));
-    ajuda.position.set(-160, 3.0, -160.0);
-    scene.add(ajuda); */
 
     let boxCube = new THREE.Box3().setFromObject(cube, true);
     this.collidableAreas.push({ box: boxCube, mesh: cube });
@@ -82,9 +79,8 @@ export class Area {
     }
 
     // colisão da escada
-    
     let stair = new THREE.Mesh(new THREE.PlaneGeometry(26, 6), setDefaultMaterial('green'));
-    //stair.visible = false;
+    stair.visible = false;
     stair.position.set(stairPositionX, 0.5, 59.3);
     stair.translateZ(1);
     stair.rotateX(-1 * Math.PI / 3.9);
@@ -106,17 +102,90 @@ export class Area {
       cube.add(stairStep);
     }
 
-    for(let i = 0; i < 4; i++) {
+    for(let i = 0; i < 6; i++) {
       let pilarGeometry = new THREE.CylinderGeometry(5.0, 5.0, 20.0);
       let pilarMaterial = setDefaultMaterial('#a7a7a7');
       let pilar = new THREE.Mesh(pilarGeometry, pilarMaterial);
-      //pilar.position.set(-160.0, 10.0, -160.0);
+      pilar.position.set(-50.0+20*i, 12.5, -50.0);
+      
       cube.add(pilar);
+      let boxPilar = new THREE.Box3().setFromObject(pilar, true);
+      this.collidableAreas.push({ box: boxPilar, mesh: pilar });
+      
+      let pilarLeft = new THREE.Mesh(pilarGeometry, pilarMaterial);
+      let pilarRight = new THREE.Mesh(pilarGeometry, pilarMaterial);
+      pilarRight.position.set(50.0, 12.5, 50.0-20*i);
+      pilarLeft.position.set(-50.0, 12.5, 50.0-20*i);
+      cube.add(pilarRight);
+      cube.add(pilarLeft);
+
+      let boxPilarLeft = new THREE.Box3().setFromObject(pilarLeft, true);
+      let boxPilarRight = new THREE.Box3().setFromObject(pilarRight, true);
+      this.collidableAreas.push({ box: boxPilarLeft, mesh: pilarLeft });
+      this.collidableAreas.push({ box: boxPilarRight, mesh: pilarRight });
     }
+
+    let r1 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 10.0, 15.0), setDefaultMaterial('rgb(180, 72, 0)'));
+    r1.position.set(0.0, 27.5, -50.5);
+    cube.add(r1);
+
+    let r2 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 10.0, 15.0), setDefaultMaterial('rgb(180, 72, 0)'));
+    r2.rotateY(Math.PI/2);
+    r2.position.set(50.5, 27.5, 2.0);
+    cube.add(r2);
+
+    let r3 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 10.0, 15.0), setDefaultMaterial('rgb(180, 72, 0)'));
+    r3.rotateY(Math.PI/-2);
+    r3.position.set(-50.5, 27.5, 2.0);
+    cube.add(r3);
+
+    let altar =  new THREE.Mesh(new THREE.BoxGeometry(4.0, 6.0, 4.0), setDefaultMaterial('#a7a7a7'));
+    altar.position.set(0.0, 1.0, 0.0);
+    cube.add(altar);
+
+    let boxAltar = new THREE.Box3().setFromObject(altar, true);
+    this.collidableAreas.push({ box: boxAltar, mesh: altar });
   }
 
+  static createAreaCubes(scene) {
+    let position = new THREE.Vector3(0.0, 3.5, -162.0);
+    let height = 7.0;
+    let length = 120.0;
+    let leftLength = 80;
+    let rightLength = 20.0;
+
+    //cubo principal
+    let material = setDefaultMaterial('red'); // remover depois 
+    let cubeGeometry = new THREE.BoxGeometry(length, height, 116.0);
+    let cube = new THREE.Mesh(cubeGeometry, material);
+    cube.position.copy(position);
+
+    let boxCube = new THREE.Box3().setFromObject(cube, true);
+    this.collidableAreas.push({ box: boxCube, mesh: cube });
+    scene.add(cube);
+
+    let cubeGeometry2 = new THREE.BoxGeometry(leftLength, height, 4.0);
+    let cubeLeft = new THREE.Mesh(cubeGeometry2, material);
+    //calculo da posição do cubo esquerdo em relação ao cubo principal
+    cubeLeft.position.set(-(length - leftLength) / 2, 0.0, 60.0);
+    cube.add(cubeLeft);
+
+    let cubeGeometry3 = new THREE.BoxGeometry(rightLength, height, 4.0);
+    let cubeRight = new THREE.Mesh(cubeGeometry3, material);
+    //calculo da posição do cubo direito em relação ao cubo principal
+    cubeRight.position.set((length - rightLength) / 2, 0.0, 60.0);
+    cube.add(cubeRight);
+
+    //colisão
+    let leftBoxCube = new THREE.Box3().setFromObject(cubeLeft, true);
+    let rightBoxCube = new THREE.Box3().setFromObject(cubeRight, true);
+    this.collidableAreas.push({ box: leftBoxCube, mesh: cubeLeft });
+    this.collidableAreas.push({ box: rightBoxCube, mesh: cubeRight });
+
+    
+  }
   static createArea(scene, position, i) {
-    if(i == 0)
+    if(i == 0 || i == 1)
       return;
     let material;
     //criação da base da plataforma
