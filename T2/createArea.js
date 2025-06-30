@@ -33,8 +33,8 @@ export class Area {
   }
 
   static createAreaPilars(scene) {
-    let position = new THREE.Vector3(-160.0, 3.0, -162.0);
-    let height = 4.0;
+    let position = new THREE.Vector3(-160.0, 2.5, -162.0);
+    let height = 5.0;
     let length = 120.0;
     let leftLength = 15.0;
     let rightLength = 80.0;
@@ -52,7 +52,6 @@ export class Area {
     let boxCube = new THREE.Box3().setFromObject(cube, true);
     this.collidableAreas.push({ box: boxCube, mesh: cube });
     scene.add(cube);
-    cube.matrixAutoUpdate = false;
 
     let cubeGeometry2 = new THREE.BoxGeometry(leftLength, height, 4.0);
     let cubeLeft = new THREE.Mesh(cubeGeometry2, material);
@@ -73,7 +72,7 @@ export class Area {
     this.collidableAreas.push({ box: rightBoxCube, mesh: cubeRight });
 
     //escadas
-    let stairHeight = height / 8;
+    let stairHeight = 4 / 8;
     //calculo da posição da escada em relação ao cubo principal
     let stairPositionX = 0.0;
     if (leftLength < length / 2) {
@@ -86,7 +85,7 @@ export class Area {
     
     let stair = new THREE.Mesh(new THREE.PlaneGeometry(26, 6), setDefaultMaterial('green'));
     //stair.visible = false;
-    stair.position.set(stairPositionX, 0, 59.3);
+    stair.position.set(stairPositionX, 0.5, 59.3);
     stair.translateZ(1);
     stair.rotateX(-1 * Math.PI / 3.9);
 
@@ -100,11 +99,19 @@ export class Area {
       let stairStepGeometry = new THREE.BoxGeometry(25.0, stairHeight, stairHeight * (1 + 7 - i));
       let stairStep = new THREE.Mesh(stairStepGeometry, setDefaultMaterial('#ffe6d2'));
       if (i == 0) {
-        stairStep.position.set(stairPositionX, -1.75, 60.0);
+        stairStep.position.set(stairPositionX, -1.25, 60.0);
       } else {
-        stairStep.position.set(stairPositionX, -1.75 + stairHeight * i, 60.0 - (stairHeight * i) / 2);
+        stairStep.position.set(stairPositionX, -1.25 + stairHeight * i, 60.0 - (stairHeight * i) / 2);
       }
       cube.add(stairStep);
+    }
+
+    for(let i = 0; i < 4; i++) {
+      let pilarGeometry = new THREE.CylinderGeometry(5.0, 5.0, 20.0);
+      let pilarMaterial = setDefaultMaterial('#a7a7a7');
+      let pilar = new THREE.Mesh(pilarGeometry, pilarMaterial);
+      //pilar.position.set(-160.0, 10.0, -160.0);
+      cube.add(pilar);
     }
   }
 
@@ -188,7 +195,7 @@ export class Area {
     // colisão da escada
     
     let stair = new THREE.Mesh(new THREE.PlaneGeometry(26, 38), setDefaultMaterial('green'));
-    stair.visible = true;
+    stair.visible = false;
     stair.position.set(stairPositionX, 0, 60.0);
     stair.translateZ(1);
     stair.rotateX(-1 * Math.PI / 3.8);

@@ -73,7 +73,7 @@ export class PlayerCollisionHandler {
                     normalizedMovementDirection.copy(deltaMovement);
                     normalizedMovementDirection.normalize(); //direção normalizada
 
-                    this.#raycaster.set(this.#player.position, normalizedMovementDirection); //apontando o raio para a direção do movimento
+                    this.#raycaster.set(this.#oldPos, normalizedMovementDirection); //apontando o raio para a direção do movimento
 
                     if (isStair) {
                         this.#raycaster.set(this.#player.position, new THREE.Vector3(0, -1, 0)); //se for uma escada, solta o raio pra baixo ao invés da direção de movimento
