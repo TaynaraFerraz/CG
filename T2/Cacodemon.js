@@ -45,15 +45,15 @@ export class Cacodemon extends Enemy {
                 this.lookAtPlayer();
 
                 if (this.player.position.distanceTo(this.object.position) > 7) {
-                    this.object.translateZ(0.15);
+                    this.object.translateZ(0.08);
                 }
             } else {
                 this.rotateTowardsQuaternion();
-                this.object.translateZ(0.15);
+                this.object.translateZ(0.08);
             }
         } else {
             this.rotateTowardsQuaternion();
-            this.object.translateZ(0.07);
+            this.object.translateZ(0.04);
         }
     }
 };

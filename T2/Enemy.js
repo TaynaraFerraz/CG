@@ -119,5 +119,6 @@ export class Enemy {
 
     handleHealthBar(){
         this.#healthBar.update(this.#health, this.#maxHealth);
+        this.#health -= 0.005;
     };
 }
