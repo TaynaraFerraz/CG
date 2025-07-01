@@ -87,13 +87,19 @@ function createKey() {
     let cubeGeometry = new THREE.BoxGeometry(2, 2, 2);
     let cube = new THREE.Mesh(cubeGeometry);
 
-    let cylinderGeometry = new THREE.CylinderGeometry(0.6, 0.6, 2.5);
+    let cylinderGeometry = new THREE.CylinderGeometry(0.5, 0.5, 10);
     let cylinder1 = new THREE.Mesh(cylinderGeometry);
     let cylinder2 = new THREE.Mesh(cylinderGeometry);
     let cylinder3 = new THREE.Mesh(cylinderGeometry);
 
+    cylinder1.rotateX(Math.PI/3.75);
     cylinder2.rotateX(Math.PI / 2);
-    cylinder3.rotateZ(-Math.PI / 2);
+    cylinder2.rotateZ(Math.PI/4);
+    cylinder3.rotateZ(Math.PI/3.5);
+
+    cylinder1.position.set(0, 0.9, 0);
+    cylinder2.position.set(0, 0, 1);
+    cylinder3.position.set(0, -0.8, 0);
 
     cylinder1.matrixAutoUpdate = false;
     cylinder2.matrixAutoUpdate = false;
