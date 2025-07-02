@@ -108,7 +108,7 @@ export class Enemy {
                 let intersectionResult = this.#raycaster.intersectObject(collidable.mesh, false)[0] // pega a interseção com o objeto mais próxima no raio
 
                 if ((intersectionResult && intersectionResult.distance < 4) || this.object.position.y < 4) {
-                    this.object.position.y += 0.05;
+                    this.object.position.y += 0.02;
                 }
             });
 

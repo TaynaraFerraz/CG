@@ -13,13 +13,13 @@ export class HealthBar {
         this.#barWidth = barWidth;
         this.#barHeight = barHeight;
         let greenPlaneGeometry = new THREE.PlaneGeometry(barWidth, barHeight);
-        let greenPlaneMaterial = new THREE.MeshBasicMaterial({ color: 'green', side: THREE.DoubleSide });
+        let greenPlaneMaterial = new THREE.MeshBasicMaterial({ color: '#00910c', side: THREE.DoubleSide });
         this.#greenBar = new THREE.Mesh(greenPlaneGeometry, greenPlaneMaterial);
         this.#greenBar.translateY(2.3);
 
 
         let redPlaneGeometry = new THREE.PlaneGeometry(0, barHeight);
-        let redPlaneMaterial = new THREE.MeshBasicMaterial({ color: 'red', side: THREE.DoubleSide });
+        let redPlaneMaterial = new THREE.MeshBasicMaterial({ color: '#8d0000', side: THREE.DoubleSide });
         this.#redBar = new THREE.Mesh(redPlaneGeometry, redPlaneMaterial);
         this.#redBar.translateY(2.3);
 
