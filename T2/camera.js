@@ -11,7 +11,8 @@ import {
 import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
 import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
-import { CSG } from '../libs/other/CSGMesh.js';
+import { KeysHandler } from './KeysHandler.js';
+import { Gun } from './Gun.js';
 
 const clock = new THREE.Clock();
 let scene, renderer, camera, cameraHolder, material, light, keyboard; // Initial variables
@@ -25,16 +26,6 @@ keyboard = new KeyboardState();
 camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, PLAYER_HEIGHT / 2, 0);
 camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
-
-// Arma (cilindro)
-const armaGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 32);
-const arma = new THREE.Mesh(armaGeometry, setDefaultMaterial('#3b3b3b'));
-arma.rotateX(Math.PI / 2);
-
-arma.position.set(0, -0.1, -0.1); // direita, baixo, frente
-
-camera.add(arma);
-
 
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
@@ -83,52 +74,6 @@ let moveRight = false;
 window.addEventListener('keydown', (event) => movementControls(event.keyCode, true));
 window.addEventListener('keyup', (event) => movementControls(event.keyCode, false));
 
-function createKey() {
-    let cubeGeometry = new THREE.BoxGeometry(2, 2, 2);
-    let cube = new THREE.Mesh(cubeGeometry);
-
-    let cylinderGeometry = new THREE.CylinderGeometry(0.5, 0.5, 10);
-    let cylinder1 = new THREE.Mesh(cylinderGeometry);
-    let cylinder2 = new THREE.Mesh(cylinderGeometry);
-    let cylinder3 = new THREE.Mesh(cylinderGeometry);
-
-    cylinder1.rotateX(Math.PI/3.75);
-    cylinder2.rotateX(Math.PI / 2);
-    cylinder2.rotateZ(Math.PI/4);
-    cylinder3.rotateZ(Math.PI/3.5);
-
-    cylinder1.position.set(0, 0.9, 0);
-    cylinder2.position.set(0, 0, 1);
-    cylinder3.position.set(0, -0.8, 0);
-
-    cylinder1.matrixAutoUpdate = false;
-    cylinder2.matrixAutoUpdate = false;
-    cylinder3.matrixAutoUpdate = false;
-
-    cylinder1.updateMatrix();
-    cylinder2.updateMatrix();
-    cylinder3.updateMatrix();
-
-    let cubeCSG = CSG.fromMesh(cube);
-    let cylinder1CSG = CSG.fromMesh(cylinder1)
-    let cylinder2CSG = CSG.fromMesh(cylinder2)
-    let cylinder3CSG = CSG.fromMesh(cylinder3)
-
-    let csgObject = cubeCSG.subtract(cylinder1CSG);
-    let csgObject1 = csgObject.subtract(cylinder2CSG);
-    let csgObject2 = csgObject1.subtract(cylinder3CSG);
-    let csgFinal = CSG.toMesh(csgObject2, new THREE.Matrix4())
-    csgFinal.material = new THREE.MeshPhongMaterial({
-        "color": "rgb(223, 47, 47)",
-        "shininess": "200",
-        "specular": "rgb(255,255,255)"
-    })
-
-    csgFinal.scale.set(0.3, 0.3, 0.3);
-    csgFinal.position.set(-160.0, 6.9, -162.0);
-    scene.add(csgFinal);
-}
-
 //mapeia as teclas para os movimentos
 function movementControls(key, value) {
     switch (key) {
@@ -172,51 +117,7 @@ function moveAnimate(delta) {
         controls.moveRight(-moveSpeed);
     }
 }
-
-//testeMashs()
 Area.createMap(scene);
-
-//funções e intervalo para o sistema de disparo
-let shoot = false
-let intervalShoot;
-
-function shootBall() {
-    let armaMundo = new THREE.Vector3();
-    arma.getWorldPosition(armaMundo); // pega as coordenadas globais da arma
-
-    let worldPosition = new THREE.Vector3();
-    camera.getWorldPosition(worldPosition)
-
-    //const novaSphere = new Sphere(scene, armaMundo, camera);
-    const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 16);
-    const materialSphere = setDefaultMaterial('#7a7a7a');
-    let sphere = new THREE.Mesh(sphereGeometry, materialSphere);
-
-    sphere.position.copy(armaMundo);
-
-    scene.add(sphere);
-    bulletsCollisionHandler.addSphere(sphere); // instancia ou inves de armazenar a mesh
-}
-
-document.addEventListener('mousedown', (event) => {
-    if (!controls.isLocked) return; // jogador não está no jogo ainda
-    // event.button === 0 -> botão esquerdo, event.button === 2 -> botão direito
-    if (event.button !== 0 && event.button !== 2) return;
-
-    if (!shoot) {
-        shoot = true;
-        shootBall();
-        intervalShoot = setInterval(shootBall, 500);
-    }
-});
-
-document.addEventListener('mouseup', (event) => {
-    if (event.button !== 0 && event.button !== 2) return;
-
-    // Para o disparo contínuo
-    shoot = false;
-    clearInterval(intervalShoot);
-});
 
 //colisores
 let collidables = {
@@ -224,15 +125,51 @@ let collidables = {
     walls: Area.collidableWalls,
     stairs: Area.collidableStairs
 }
+
 let playerCollisionHandler = new PlayerCollisionHandler(cameraHolder, collidables);
 let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
+let keysHandler = new KeysHandler(scene);
+
+//testeMashs()
+let gun = new Gun(camera, scene, bulletsCollisionHandler);
+gun.createGun();
+
+//funções e intervalo para o sistema de disparo
+let shoot = false;
+let intervalShoot;
+let lastShotTime = 0;
+const shootMax = 500; 
+
+document.addEventListener('mousedown', (event) => {
+    if (!controls.isLocked) return;
+    if (event.button !== 0 && event.button !== 2) return;
+
+    const now = Date.now();
+    if (!shoot && now - lastShotTime >= shootMax) {
+        shoot = true;
+        gun.shootBall();
+        lastShotTime = now;
+        intervalShoot = setInterval(() => { // controla o disparo contínuo, verificando a cada 50ms
+            const now = Date.now();
+            if (now - lastShotTime >= shootMax) {
+                gun.shootBall();
+                lastShotTime = now;
+            }
+        }, 50); 
+    }
+});
+
+document.addEventListener('mouseup', (event) => {
+    if (event.button !== 0 && event.button !== 2) return;
+    shoot = false;
+    clearInterval(intervalShoot);
+});
+
 
 // Listen window size changes
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
 
-
 render();
-
 
 function render() {
     if (controls.isLocked) {
@@ -244,7 +181,7 @@ function render() {
     //lidando com as colisões
     playerCollisionHandler.handleCollisions();
 
-    createKey();
+    keysHandler.addKey("rgb(223, 47, 47)");
 
     requestAnimationFrame(render);
     renderer.render(scene, camera) // Render scene

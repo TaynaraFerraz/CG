@@ -26,11 +26,7 @@ export class BulletsCollisionHandler {
     }
 
     #updateSpherePosition(sphere) {
-            sphere.translateZ(-this.speed);
-    }
-
-    remove(scene) {
-        scene.remove(this.sphere);
+        sphere.translateZ(-this.speed);
     }
 
     addSphere(sphere) {
@@ -42,7 +38,7 @@ export class BulletsCollisionHandler {
 
         this.direction.multiplyScalar(-4);
         sphereLookAt.add(this.direction);
-        this.direction.multiplyScalar(-1/4);
+        this.direction.multiplyScalar(-1 / 4);
 
         sphere.lookAt(sphereLookAt);
         sphere.translateZ(-0.3); //para sair da boca do cilindro e não do meio
@@ -50,8 +46,8 @@ export class BulletsCollisionHandler {
 
     handleBulletsCollisions(collidables) {
         this.#camera.getWorldDirection(this.direction);
-        
-        this.#spheres = this.#spheres.filter((sphere) => {  
+
+        this.#spheres = this.#spheres.filter((sphere) => {
             const prevPositionBall = sphere.position.clone();
 
             this.#updateSpherePosition(sphere);
@@ -75,7 +71,7 @@ export class BulletsCollisionHandler {
                 sphere = undefined;
                 return false;
             }
-            
+
             return true;
         })
         this.prevPosition = this.#camera.position;
