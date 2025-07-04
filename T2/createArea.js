@@ -1,6 +1,4 @@
 import * as THREE from 'three';
-import {
-  setDefaultMaterial} from "../libs/util/util.js";
 
 
 
@@ -9,6 +7,9 @@ export class Area {
   static collidableWalls = [];
   static collidableStairs = [];
   static altares = [];
+  static elevador = [];
+  static door = [];
+  static elevatorChek;
 
   constructor(scene) {
     this.scene = scene;
@@ -43,7 +44,7 @@ export class Area {
     let rightLength = 75.0;
     
     //cubo principal
-    let material = setDefaultMaterial('lightblue'); // remover depois 
+    let material = this.lambertMaterial('lightblue'); // remover depois 
     let cubeGeometry = new THREE.BoxGeometry(length, height, 116.0);
     let cube = new THREE.Mesh(cubeGeometry, material);
     cube.position.copy(position);
@@ -81,7 +82,7 @@ export class Area {
     }
 
     // colisão da escada
-    let stair = new THREE.Mesh(new THREE.PlaneGeometry(26, 6), setDefaultMaterial('green'));
+    let stair = new THREE.Mesh(new THREE.PlaneGeometry(26, 6), this.lambertMaterial('green'));
     stair.visible = false;
     stair.position.set(stairPositionX, 0.5, 59.3);
     stair.translateZ(1);
@@ -95,7 +96,7 @@ export class Area {
     //as constantes são correções para a escada ficar alinhada ao cubo principal
     for (let i = 0; i < 8; i++) {
       let stairStepGeometry = new THREE.BoxGeometry(25.0, stairHeight, stairHeight * (1 + 7 - i));
-      let stairStep = new THREE.Mesh(stairStepGeometry, setDefaultMaterial('#ffe6d2'));
+      let stairStep = new THREE.Mesh(stairStepGeometry, this.lambertMaterial('#ffe6d2'));
       if (i == 0) {
         stairStep.position.set(stairPositionX, -1.75, 60.0);
       } else {
@@ -106,7 +107,7 @@ export class Area {
 
     for(let i = 0; i < 12; i++) {
       let pilarGeometry = new THREE.CylinderGeometry(2.5, 2.5, 20.0);
-      let pilarMaterial = setDefaultMaterial('#a7a7a7');
+      let pilarMaterial = this.lambertMaterial('#a7a7a7');
       let pilar = new THREE.Mesh(pilarGeometry, pilarMaterial);
       pilar.position.set(-50.0+(100/11)*i, 12.0, -48.0);
       
@@ -127,22 +128,22 @@ export class Area {
       this.collidableAreas.push({ box: boxPilarRight, mesh: pilarRight });
     }
 
-    let r1 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), setDefaultMaterial('rgb(180, 72, 0)'));
+    let r1 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), this.lambertMaterial('rgb(180, 72, 0)'));
     r1.position.set(0.0, 24.5, -48.0);
     cube.add(r1);
 
-    let r2 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), setDefaultMaterial('rgb(180, 72, 0)'));
+    let r2 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), this.lambertMaterial('rgb(180, 72, 0)'));
     r2.rotateY(Math.PI/2);
     r2.position.set(50.0, 24.5, 2.0);
     cube.add(r2);
 
-    let r3 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), setDefaultMaterial('rgb(180, 72, 0)'));
+    let r3 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), this.lambertMaterial('rgb(180, 72, 0)'));
     r3.rotateY(Math.PI/-2);
     r3.position.set(-50.0, 24.5, 2.0);
     cube.add(r3);
 
-    let altar =  new THREE.Mesh(new THREE.BoxGeometry(4.0, 6.0, 4.0), setDefaultMaterial('#a7a7a7'));
-    altar.position.set(0.0, 1.0, 0.0);
+    let altar =  new THREE.Mesh(new THREE.BoxGeometry(4.0, 6.0, 4.0), this.lambertMaterial('#a7a7a7'));
+    altar.position.set(0.0, -2.0, 0.0);
     cube.add(altar);
 
     let boxAltar = new THREE.Box3().setFromObject(altar, true);
@@ -158,7 +159,7 @@ export class Area {
     let rightLength = 20.0;
 
     //cubo principal
-    let material = setDefaultMaterial('red'); // remover depois 
+    let material = this.lambertMaterial('red'); // remover depois 
     let cubeGeometry = new THREE.BoxGeometry(length, height, 116.0);
     let cube = new THREE.Mesh(cubeGeometry, material);
     cube.position.copy(position);
@@ -186,31 +187,54 @@ export class Area {
     this.collidableAreas.push({ box: rightBoxCube, mesh: cubeRight });
 
     //porta
+    let fechadura = new THREE.BoxGeometry(3.0, 3.0, 3.0);
+    let fechaduraMaterial = this.lambertMaterial('rgb(180, 72, 0)');
+    let fechaduraMesh = new THREE.Mesh(fechadura, fechaduraMaterial);
+    fechaduraMesh.position.set(37.5, -3.0, 70.0);
+    cube.add(fechaduraMesh);
+
+    let boxFechadura = new THREE.Box3().setFromObject(fechaduraMesh, true);
+    this.collidableAreas.push({ box: boxFechadura, mesh: fechaduraMesh });
+
     let doorGeometry = new THREE.BoxGeometry(6.0, 7.0, 2.0);
-    let doorMaterial = setDefaultMaterial('yellow');
+    let doorMaterial = this.lambertMaterial('yellow');
     let door = new THREE.Mesh(doorGeometry, doorMaterial);
     door.position.set(37.5, 0.0, 62.0);
     cube.add(door);
 
     let boxDoor = new THREE.Box3().setFromObject(door, true);
     this.collidableAreas.push({ box: boxDoor, mesh: door });
+    this.door.push(door);
 
     //elevador
     let elevadorGeometry = new THREE.BoxGeometry(5.0, 6.0, 4.0);
-    let elevadorMaterial = setDefaultMaterial('brown');
+    let elevadorMaterial = this.lambertMaterial('brown');
     let elevador = new THREE.Mesh(elevadorGeometry, elevadorMaterial);
     elevador.position.set(37.5, 0.0, 60.0);
     cube.add(elevador);
 
     let boxElevador = new THREE.Box3().setFromObject(elevador, true);
+    this.elevador.push({ box: boxElevador, mesh: elevador });
     this.collidableAreas.push({ box: boxElevador, mesh: elevador });
+
+    let elevadorAreaGeo = new THREE.BoxGeometry(11.0, 8.0, 11.0);
+    let elevadorAreaMaterial = this.lambertMaterial('white');
+    let elevadorArea = new THREE.Mesh(elevadorAreaGeo, elevadorAreaMaterial);
+    elevadorArea.position.set(37.5, 0.0, 60.0);
+    elevadorArea.visible = false;
+    
+    cube.add(elevadorArea);
+
+    let boxElevadorArea = new THREE.Box3().setFromObject(elevadorArea, true);
+    let helper = new THREE.BoxHelper(elevadorArea, 0x00ff00);
+    //scene.add(helper);
 
     for(let i = 0; i < 6; i++) {
       for(let j = 0; j < 6; j++) {
         if((i == 2 || i == 3) && (j == 2 || j == 3))
           continue;
         let cubeGeometry = new THREE.BoxGeometry(3.0, 20.0, 3.0);
-        let cubeMaterial = setDefaultMaterial('blue');
+        let cubeMaterial = this.lambertMaterial('blue');
         let pilar = new THREE.Mesh(cubeGeometry, cubeMaterial);
         if(i % 2 == 0 && j % 2 == 0)
           pilar.position.set(-50.0 + 20 * i, 21.0, -50.0 + 20 * j);
@@ -227,20 +251,23 @@ export class Area {
       }
     }
 
-    let altar =  new THREE.Mesh(new THREE.BoxGeometry(4.0, 6.0, 4.0), setDefaultMaterial('#a7a7a7'));
-    altar.position.set(0.0, 2.0, 0.0);
+    let altar =  new THREE.Mesh(new THREE.BoxGeometry(4.0, 6.0, 4.0), this.lambertMaterial('#a7a7a7'));
+    altar.position.set(0.0, -3.0, 0.0);
     cube.add(altar);
-
-    let pilarGeometry = new THREE.BoxGeometry(4.0, 20.0, 4.0);
-    let pilarMaterial = setDefaultMaterial('blue');
-    let pilar = new THREE.Mesh(pilarGeometry, pilarMaterial);
-    pilar.position.set(0.0, 16.0, 0.0);
-    altar.add(pilar);
-
 
     let boxAltar = new THREE.Box3().setFromObject(altar, true);
     this.collidableAreas.push({ box: boxAltar, mesh: altar });
     this.altares.push(altar);
+
+    let pilarGeometry = new THREE.BoxGeometry(4.0, 20.0, 4.0);
+    let pilarMaterial = this.lambertMaterial('blue');
+    let pilar = new THREE.Mesh(pilarGeometry, pilarMaterial);
+    pilar.position.set(0.0, 16.0, 0.0);
+    
+    altar.add(pilar);
+    
+    let pilarBox = new THREE.Box3().setFromObject(pilar, true);
+    this.collidableAreas.push({ box: pilarBox, mesh: pilar });
   }
 
   static createArea(scene, position, i) {
@@ -256,22 +283,22 @@ export class Area {
 
     //definição do material e tamanho da plataforma de acordo com o índice
     if (i == 0) {
-      material = setDefaultMaterial('lightblue');
+      material = this.lambertMaterial('lightblue');
       leftLength = 15.0;
       rightLength = 80.0;
     }
     if (i == 1) {
-      material = setDefaultMaterial('#ff3535');
+      material = this.lambertMaterial('#ff3535');
       leftLength = 80.0;
       rightLength = 15.0;
     }
     if (i == 2) {
-      material = setDefaultMaterial('#2c41ff');
+      material = this.lambertMaterial('#2c41ff');
       leftLength = 47.5;
       rightLength = 47.5;
     }
     if (i == 3) {
-      material = setDefaultMaterial('#00b109');
+      material = this.lambertMaterial('#00b109');
       length = 360.0;
       leftLength = 167.5;
       rightLength = 167.5;
@@ -322,7 +349,7 @@ export class Area {
 
     // colisão da escada
     
-    let stair = new THREE.Mesh(new THREE.PlaneGeometry(26, 38), setDefaultMaterial('green'));
+    let stair = new THREE.Mesh(new THREE.PlaneGeometry(26, 38), this.lambertMaterial('green'));
     stair.visible = false;
     stair.position.set(stairPositionX, 0, 60.0);
     stair.translateZ(1);
@@ -336,7 +363,7 @@ export class Area {
     //as constantes são correções para a escada ficar alinhada ao cubo principal
     for (let i = 0; i < 8; i++) {
       let stairStepGeometry = new THREE.BoxGeometry(25.0, stairHeight, stairHeight * (1 + 7 - i));
-      let stairStep = new THREE.Mesh(stairStepGeometry, setDefaultMaterial('#ffe6d2'));
+      let stairStep = new THREE.Mesh(stairStepGeometry, this.lambertMaterial('#ffe6d2'));
       if (i == 0) {
         stairStep.position.set(stairPositionX, -10.5, 60);
       } else {
@@ -349,7 +376,7 @@ export class Area {
   static createTerrain(scene) {
     //create walls
     let wallGeometry = new THREE.BoxGeometry(500, 72, 2); // mudança de planeGeometry por BoxGeometry porque sendo um plano a esfera não estava identificando colisão, quando coloquei uma leve espessura, ela colide com a esfera  
-    let wallMaterial = setDefaultMaterial('#a7a7a7');
+    let wallMaterial = this.lambertMaterial('#a7a7a7');
     let walls = [];
 
 
@@ -379,10 +406,45 @@ export class Area {
 
     // create the ground plane
     let planeGeometry = new THREE.PlaneGeometry(510, 510);
-    let planeMaterial = setDefaultMaterial('#a7a7a7');
+    let planeMaterial = this.lambertMaterial('#a7a7a7');
     let plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.rotateX(-Math.PI/2);
 
     scene.add(plane);
+  }
+
+  static lambertMaterial(color){
+    return new THREE.MeshLambertMaterial({ color: color });
+  }
+
+  static doorDown() {
+    let door = this.door[0];
+    //posição final da porta 37.5, 0.0, 62.0
+    door.position.lerp(new THREE.Vector3(37.5, -8.0, 62.0), 0.01);
+  }
+  
+  static primeiroAltar() {
+    let altar = this.altares[0];
+    altar.position.lerp(new THREE.Vector3(0.0, 1.0, 0.0), 0.01);
+  }
+  
+  static segundoAltar() {
+    let altar = this.altares[1];
+    //posição final do pilar 0.0, 2.0, 0.0
+    altar.position.lerp(new THREE.Vector3(0.0, 2.0, 0.0), 0.01);
+  }
+
+  static elevadorUp(player) {
+    let elevador = this.elevador[0];
+    elevador.position.lerp(new THREE.Vector3(37.5, 0.0, 60.0), 0.01);
+  }
+
+  static elevadorDown(player) {
+    let elevador = this.elevador[0];
+    elevador.position.lerp(new THREE.Vector3(37.5, -6.0, 60.0), 0.01);
+  }
+
+  static elevadorNear(player) {
+    //se entrar na area retorna true;
   }
 }
