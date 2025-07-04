@@ -13,6 +13,7 @@ import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
 import { KeysHandler } from './KeysHandler.js';
 import { Gun } from './Gun.js';
+import { ChainGun } from './ChainGun.js';
 
 const clock = new THREE.Clock();
 let scene, renderer, camera, cameraHolder, material, light, keyboard; // Initial variables
@@ -129,16 +130,17 @@ let collidables = {
 let playerCollisionHandler = new PlayerCollisionHandler(cameraHolder, collidables);
 let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
 let keysHandler = new KeysHandler(scene);
-
+let chainGun = new ChainGun(camera);
+chainGun.addChainGun()
 //testeMashs()
 let gun = new Gun(camera, scene, bulletsCollisionHandler);
-gun.createGun();
+//gun.createGun();
 
 //funções e intervalo para o sistema de disparo
 let shoot = false;
 let intervalShoot;
 let lastShotTime = 0;
-const shootMax = 500; 
+const shootMax = 500;
 
 document.addEventListener('mousedown', (event) => {
     if (!controls.isLocked) return;
@@ -155,7 +157,7 @@ document.addEventListener('mousedown', (event) => {
                 gun.shootBall();
                 lastShotTime = now;
             }
-        }, 50); 
+        }, 50);
     }
 });
 
