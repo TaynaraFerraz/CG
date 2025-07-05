@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-
+import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
 
 
 export class Area {
@@ -9,7 +9,8 @@ export class Area {
   static altares = [];
   static elevador = [];
   static door = [];
-  static elevatorChek;
+  static elevadorCheck;
+  static isDown = false;
 
   constructor(scene) {
     this.scene = scene;
@@ -225,6 +226,8 @@ export class Area {
     
     cube.add(elevadorArea);
 
+    this.elevadorCheck = new THREE.Box3().setFromObject(elevadorArea, true);
+    
     let boxElevadorArea = new THREE.Box3().setFromObject(elevadorArea, true);
     let helper = new THREE.BoxHelper(elevadorArea, 0x00ff00);
     //scene.add(helper);
@@ -421,30 +424,33 @@ export class Area {
     let door = this.door[0];
     //posição final da porta 37.5, 0.0, 62.0
     door.position.lerp(new THREE.Vector3(37.5, -8.0, 62.0), 0.01);
+
+    // Atualiza a Box3 da porta no vetor de colisão
+    let doorCollidable = this.collidableAreas.find(obj => obj.mesh === door);
+    if (doorCollidable) {
+        doorCollidable.box.setFromObject(door, true);
+    }
   }
   
   static primeiroAltar() {
     let altar = this.altares[0];
     altar.position.lerp(new THREE.Vector3(0.0, 1.0, 0.0), 0.01);
-  }
-  
-  static segundoAltar() {
+
+    // Atualiza a Box3 do altar no vetor de colisão
+    let altarCollidable = this.collidableAreas.find(obj => obj.mesh === altar);
+    if (altarCollidable) {
+        altarCollidable.box.setFromObject(altar, true);
+    }
+}
+
+static segundoAltar() {
     let altar = this.altares[1];
-    //posição final do pilar 0.0, 2.0, 0.0
     altar.position.lerp(new THREE.Vector3(0.0, 2.0, 0.0), 0.01);
-  }
 
-  static elevadorUp(player) {
-    let elevador = this.elevador[0];
-    elevador.position.lerp(new THREE.Vector3(37.5, 0.0, 60.0), 0.01);
-  }
-
-  static elevadorDown(player) {
-    let elevador = this.elevador[0];
-    elevador.position.lerp(new THREE.Vector3(37.5, -6.0, 60.0), 0.01);
-  }
-
-  static elevadorNear(player) {
-    //se entrar na area retorna true;
-  }
+    // Atualiza a Box3 do altar no vetor de colisão
+    let altarCollidable = this.collidableAreas.find(obj => obj.mesh === altar);
+    if (altarCollidable) {
+        altarCollidable.box.setFromObject(altar, true);
+    }
+}
 }

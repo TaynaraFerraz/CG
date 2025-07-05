@@ -186,12 +186,15 @@ window.addEventListener('resize', function () { onWindowResize(camera, renderer)
 
 render();
 
+var movimentoCompleto = true;
 
 function render() {
     if (controls.isLocked) {
         moveAnimate(clock.getDelta());
     }
-
+    Area.doorDown();
+    Area.primeiroAltar();
+    Area.segundoAltar();
     bulletsCollisionHandler.handleBulletsCollisions(collidables)
 
     //lidando com as colisões
