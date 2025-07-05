@@ -5,7 +5,7 @@ export class KeysHandler {
 
     #scene
 
-    constructor(scene){
+    constructor(scene) {
         this.#scene = scene;
     }
 
@@ -18,14 +18,8 @@ export class KeysHandler {
         let cylinder2 = new THREE.Mesh(cylinderGeometry);
         let cylinder3 = new THREE.Mesh(cylinderGeometry);
 
-        cylinder1.rotateX(Math.PI / 3.75);
         cylinder2.rotateX(Math.PI / 2);
-        cylinder2.rotateZ(Math.PI / 4);
-        cylinder3.rotateZ(Math.PI / 3.5);
-
-        cylinder1.position.set(0, 0.9, 0);
-        cylinder2.position.set(0, 0, 1);
-        cylinder3.position.set(0, -0.8, 0);
+        cylinder3.rotateZ(-Math.PI / 2);
 
         cylinder1.matrixAutoUpdate = false;
         cylinder2.matrixAutoUpdate = false;

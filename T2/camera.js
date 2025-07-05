@@ -12,8 +12,8 @@ import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
 import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
 import { KeysHandler } from './KeysHandler.js';
-import { Gun } from './Gun.js';
 import { ChainGun } from './ChainGun.js';
+import { Gun } from './Gun.js';
 
 const clock = new THREE.Clock();
 let scene, renderer, camera, cameraHolder, material, light, keyboard; // Initial variables
@@ -32,9 +32,7 @@ camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, material);
 cameraHolder.position.set(-120, PLAYER_HEIGHT + 5, -120);
-
 cameraHolder.add(camera);
-
 
 //inicializando o PointerLockControls customizado
 const controls = new PointerLockControls(cameraHolder, camera, renderer.domElement);
@@ -130,11 +128,10 @@ let collidables = {
 let playerCollisionHandler = new PlayerCollisionHandler(cameraHolder, collidables);
 let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
 let keysHandler = new KeysHandler(scene);
-let chainGun = new ChainGun(camera);
-chainGun.addChainGun()
-//testeMashs()
+let chainGun = new ChainGun(camera, scene);
 let gun = new Gun(camera, scene, bulletsCollisionHandler);
-//gun.createGun();
+gun.createGun()
+let activeGun = gun;
 
 //funções e intervalo para o sistema de disparo
 let shoot = false;
@@ -149,12 +146,12 @@ document.addEventListener('mousedown', (event) => {
     const now = Date.now();
     if (!shoot && now - lastShotTime >= shootMax) {
         shoot = true;
-        gun.shootBall();
+        activeGun.shootBall()
         lastShotTime = now;
         intervalShoot = setInterval(() => { // controla o disparo contínuo, verificando a cada 50ms
             const now = Date.now();
             if (now - lastShotTime >= shootMax) {
-                gun.shootBall();
+                activeGun.shootBall()
                 lastShotTime = now;
             }
         }, 50);
@@ -167,6 +164,30 @@ document.addEventListener('mouseup', (event) => {
     clearInterval(intervalShoot);
 });
 
+function switchGun(newGun) {
+    if (activeGun === newGun) return; 
+
+    if (activeGun === gun)
+        gun.remove();
+    else if (activeGun === chainGun)
+        chainGun.remove();
+
+    if (newGun === gun)
+        gun.createGun();
+    else if (newGun === chainGun)
+        chainGun.addChainGun();
+    
+    activeGun = newGun;
+}
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === '1') {
+        switchGun(chainGun)
+    }
+    else if (event.key === '2') {
+        switchGun(gun)
+    }
+});
 
 // Listen window size changes
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
@@ -182,6 +203,8 @@ function render() {
 
     //lidando com as colisões
     playerCollisionHandler.handleCollisions();
+    if (activeGun == chainGun)
+        chainGun.spriteUpdate()
 
     keysHandler.addKey("rgb(223, 47, 47)");
 

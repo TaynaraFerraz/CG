@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 import { setDefaultMaterial } from '../libs/util/util.js';
 
 export class Gun {
@@ -40,5 +39,12 @@ export class Gun {
 
         this.#scene.add(sphere);
         this.#bulletsCollisionHandler.addSphere(sphere);
+    }
+
+    remove(){
+        this.#camera.remove(this.#arma)
+        this.#arma.material.dispose()
+        this.#arma.geometry.dispose()
+        this.#arma = null
     }
 }
