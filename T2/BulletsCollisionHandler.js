@@ -1,7 +1,4 @@
 import * as THREE from 'three';
-import {
-    setDefaultMaterial,
-} from "../libs/util/util.js";
 
 export class BulletsCollisionHandler {
     #spheres = []

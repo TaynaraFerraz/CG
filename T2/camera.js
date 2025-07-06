@@ -128,6 +128,7 @@ let collidables = {
 let playerCollisionHandler = new PlayerCollisionHandler(cameraHolder, collidables);
 let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
 let keysHandler = new KeysHandler(scene);
+
 let chainGun = new ChainGun(camera, scene);
 let gun = new Gun(camera, scene, bulletsCollisionHandler);
 gun.createGun()
@@ -137,21 +138,25 @@ let activeGun = gun;
 let shoot = false;
 let intervalShoot;
 let lastShotTime = 0;
-const shootMax = 500;
 
 document.addEventListener('mousedown', (event) => {
     if (!controls.isLocked) return;
     if (event.button !== 0 && event.button !== 2) return;
+    shoot = true;
 
-    const now = Date.now();
-    if (!shoot && now - lastShotTime >= shootMax) {
-        shoot = true;
-        activeGun.shootBall()
-        lastShotTime = now;
-        intervalShoot = setInterval(() => { // controla o disparo contínuo, verificando a cada 50ms
+    if (activeGun === chainGun) {
+        activeGun.shootBall(); // dispara imediatamente
+        intervalShoot = setInterval(() => {
+            if (shoot) {
+                activeGun.shootBall(); // disparo contínuo
+            }
+        }, 50); // verifica a cada 50ms para caso não estiver mais disparando
+
+    } else {
+        intervalShoot = setInterval(() => {
             const now = Date.now();
-            if (now - lastShotTime >= shootMax) {
-                activeGun.shootBall()
+            if (shoot && now - lastShotTime >= 500) {
+                activeGun.shootBall();
                 lastShotTime = now;
             }
         }, 50);
@@ -160,12 +165,16 @@ document.addEventListener('mousedown', (event) => {
 
 document.addEventListener('mouseup', (event) => {
     if (event.button !== 0 && event.button !== 2) return;
+
+    if (activeGun == chainGun)
+        activeGun.stopAction()
+
     shoot = false;
     clearInterval(intervalShoot);
 });
 
 function switchGun(newGun) {
-    if (activeGun === newGun) return; 
+    if (activeGun === newGun) return;
 
     if (activeGun === gun)
         gun.remove();
@@ -176,7 +185,7 @@ function switchGun(newGun) {
         gun.createGun();
     else if (newGun === chainGun)
         chainGun.addChainGun();
-    
+
     activeGun = newGun;
 }
 
@@ -187,6 +196,13 @@ document.addEventListener('keydown', (event) => {
     else if (event.key === '2') {
         switchGun(gun)
     }
+});
+
+document.addEventListener('wheel', (event) => {
+    if (activeGun == chainGun)
+        switchGun(gun);
+    else
+        switchGun(chainGun);
 });
 
 // Listen window size changes

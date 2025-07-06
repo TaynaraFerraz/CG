@@ -33,7 +33,7 @@ export class ChainGun {
 
     shootBall() {
         this.#action = this.#spriteMixer.Action(this.#actionSprite, 0, 4, 20)
-        this.#action.playOnce(); // trocar para playLoop e ver um método de parar ao soltar o clique
+        this.#action.playLoop(); // trocar para playLoop e ver um método de parar ao soltar o clique
 
         const initialPosition = this.#actionSprite.getWorldPosition(new Vector3())
         console.log(initialPosition)
@@ -44,7 +44,21 @@ export class ChainGun {
 
         const raycaster = new THREE.Raycaster(initialPosition, direction.normalize());
 
-        //considerar apenas os inimigos para efeitos de danos
+        // ---------------------- apenas para ver a direção atraves da linha ---------------------
+        // const length = 10; // tamanho da linha
+        // const endPoint = new THREE.Vector3().copy(initialPosition).add(direction.clone().multiplyScalar(length));
+
+        // const geometry = new THREE.BufferGeometry().setFromPoints([
+        //     initialPosition,
+        //     endPoint
+        // ]);
+
+        // const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+
+        // const line = new THREE.Line(geometry, material);
+        // this.#scene.add(line);
+
+        //-----------------------------considerar apenas os inimigos para efeitos de danos
         // const collidableMeshes = [
         //     ...collidables.areas.map(obj => obj.mesh),
         //     ...collidables.walls.map(obj => obj.mesh),
@@ -62,6 +76,10 @@ export class ChainGun {
         let delta = this.#clock.getDelta()
         //console.log(delta)
         this.#spriteMixer.update(delta)
+    }
+
+    stopAction() {
+        this.#action.stop();
     }
 
     remove() {

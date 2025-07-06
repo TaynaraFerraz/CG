@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { setDefaultMaterial } from '../libs/util/util.js';
 
 export class Gun {
 
@@ -16,7 +15,10 @@ export class Gun {
 
     createGun() {
         const armaGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 32);
-        const arma = new THREE.Mesh(armaGeometry, setDefaultMaterial('#3b3b3b'));
+        const armaMaterial = new THREE.MeshLambertMaterial({
+            color: '#3b3b3b'
+        })
+        const arma = new THREE.Mesh(armaGeometry, armaMaterial);
         arma.rotateX(Math.PI / 2);
 
         arma.position.set(0, -0.1, -0.1); // direita, baixo, frente
@@ -32,7 +34,9 @@ export class Gun {
         this.#camera.getWorldPosition(worldPosition)
 
         const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 16);
-        const materialSphere = setDefaultMaterial('#7a7a7a');
+        const materialSphere = new THREE.MeshLambertMaterial({
+            color: '#7a7a7a'
+        });
         let sphere = new THREE.Mesh(sphereGeometry, materialSphere);
 
         sphere.position.copy(armaMundo);
