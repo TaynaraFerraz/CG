@@ -48,6 +48,8 @@ export class Area {
     let material = this.lambertMaterial('lightblue'); // remover depois 
     let cubeGeometry = new THREE.BoxGeometry(length, height, 116.0);
     let cube = new THREE.Mesh(cubeGeometry, material);
+    cube.castShadow = true;
+    cube.receiveShadow = true;
     cube.position.copy(position);
 
     let boxCube = new THREE.Box3().setFromObject(cube, true);
@@ -58,12 +60,16 @@ export class Area {
     let cubeLeft = new THREE.Mesh(cubeGeometry2, material);
     //calculo da posição do cubo esquerdo em relação ao cubo principal
     cubeLeft.position.set(-(length - leftLength) / 2, 0.0, 60.0);
+    cubeLeft.castShadow = true;
+    cubeLeft.receiveShadow = true;
     cube.add(cubeLeft);
 
     let cubeGeometry3 = new THREE.BoxGeometry(rightLength, height, 4.0);
     let cubeRight = new THREE.Mesh(cubeGeometry3, material);
     //calculo da posição do cubo direito em relação ao cubo principal
     cubeRight.position.set((length - rightLength) / 2, 0.0, 60.0);
+    cubeRight.castShadow = true;
+    cubeRight.receiveShadow = true;
     cube.add(cubeRight);
 
     //colisão
@@ -89,7 +95,11 @@ export class Area {
     stair.translateZ(1);
     stair.rotateX(-1 * Math.PI / 3.9);
 
+    stair.castShadow = true;
+    stair.receiveShadow = true;
+
     cube.add(stair);
+
     let box = new THREE.Box3().setFromObject(stair, true);
     this.collidableStairs.push({ box: box, mesh: stair });
 
@@ -104,6 +114,9 @@ export class Area {
       } else {
         stairStep.position.set(stairPositionX, -1.75 + stairHeight * i, 60.0 - (stairHeight * i) / 2);
       }
+      stairStep.castShadow = true;
+      stairStep.receiveShadow = true;
+
       cube.add(stairStep);
     }
 
@@ -112,6 +125,9 @@ export class Area {
       let pilarMaterial = this.lambertMaterial('#a7a7a7');
       let pilar = new THREE.Mesh(pilarGeometry, pilarMaterial);
       pilar.position.set(-50.0+(100/11)*i, 12.0, -48.0);
+
+      pilar.castShadow = true;
+      pilar.receiveShadow = true;
       
       cube.add(pilar);
       let boxPilar = new THREE.Box3().setFromObject(pilar, true);
@@ -121,6 +137,10 @@ export class Area {
       let pilarRight = new THREE.Mesh(pilarGeometry, pilarMaterial);
       pilarRight.position.set(50.0, 12.0, -48.0+(100/11)*i);
       pilarLeft.position.set(-50.0, 12.0, -48.0+(100/11)*i);
+      pilarRight.castShadow = true;
+      pilarRight.receiveShadow = true;
+      pilarLeft.castShadow = true;
+      pilarLeft.receiveShadow = true;
       cube.add(pilarRight);
       cube.add(pilarLeft);
 
@@ -133,20 +153,29 @@ export class Area {
     let blocoMaterial = this.lambertMaterial('rgb(180, 72, 0)');
     let r1 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), blocoMaterial);
     r1.position.set(0.0, 24.5, -48.0);
+    r1.castShadow = true;
+    r1.receiveShadow = true;
     cube.add(r1);
 
     let r2 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), blocoMaterial);
     r2.rotateY(Math.PI/2);
     r2.position.set(50.0, 24.5, 2.0);
+    r2.castShadow = true;
+    r2.receiveShadow = true;
     cube.add(r2);
 
     let r3 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), blocoMaterial);
     r3.rotateY(Math.PI/-2);
     r3.position.set(-50.0, 24.5, 2.0);
+    r3.castShadow = true;
+    r3.receiveShadow = true;
     cube.add(r3);
 
     let altar =  new THREE.Mesh(new THREE.BoxGeometry(4.0, 6.0, 4.0), this.lambertMaterial('#a7a7a7'));
+    altar.castShadow = true;
+    altar.receiveShadow = true;
     altar.position.set(0.0, -2.0, 0.0);
+    
     cube.add(altar);
 
     let boxAltar = new THREE.Box3().setFromObject(altar, true);
@@ -402,6 +431,8 @@ export class Area {
 
     //colisão das paredes
     for (let i = 0; i < walls.length; i++) {
+      walls[i].castShadow = true;
+      walls[i].receiveShadow = true;
       scene.add(walls[i]);
       let wallBox = new THREE.Box3().setFromObject(walls[i], true);
 
@@ -412,6 +443,7 @@ export class Area {
     let planeGeometry = new THREE.PlaneGeometry(510, 510);
     let planeMaterial = this.lambertMaterial('#a7a7a7');
     let plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.receiveShadow = true;
     plane.rotateX(-Math.PI/2);
 
     scene.add(plane);

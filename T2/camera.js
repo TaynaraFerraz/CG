@@ -15,9 +15,60 @@ import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constant
 const clock = new THREE.Clock();
 let scene, renderer, camera, cameraHolder, light, keyboard; // Initial variables
 scene = new THREE.Scene();    // Create main scene
-renderer = initRenderer();    // Init a basic renderer
-light = initDefaultBasicLight(scene); // Create a basic light to illuminate the scene
+renderer = new THREE.WebGLRenderer();
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.VSMShadowMap;
+
+renderer.setClearColor(new THREE.Color('black'));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+document.getElementById("webgl-output").appendChild(renderer.domElement);
+
+//light = initDefaultBasicLight(scene); // Create a basic light to illuminate the scene
 keyboard = new KeyboardState();
+
+light = new THREE.DirectionalLight('rgb(255,255,255)', 3);
+light.position.set(140.0, 200.0, 120.0);
+light.castShadow = true;
+light.shadow.mapSize.width = 1024;
+light.shadow.mapSize.height = 1024;
+light.shadow.camera.near = 0.1;
+light.shadow.camera.far = 600;
+light.shadow.camera.left = -500;
+light.shadow.camera.right = 500;
+light.shadow.camera.bottom = -500;
+light.shadow.camera.top = 500;
+light.shadow.bias = -0.0005;
+light.shadow.radius = 4;
+
+scene.add(light);
+
+let secondLight;
+
+secondLight = new THREE.DirectionalLight('rgb(255,255,255)', 0.5);
+secondLight.position.set(-140.0, 100.0, -120.0);
+secondLight.castShadow = true;
+secondLight.shadow.mapSize.width = 1024;
+secondLight.shadow.mapSize.height = 1024;
+secondLight.shadow.camera.near = 0.1;
+secondLight.shadow.camera.far = 600;
+secondLight.shadow.camera.left = -500;
+secondLight.shadow.camera.right = 500;
+secondLight.shadow.camera.bottom = -500;
+secondLight.shadow.camera.top = 500;
+secondLight.shadow.bias = -0.0005;
+secondLight.shadow.radius = 4;
+
+scene.add(secondLight);
+
+const shadowCameraHelper = new THREE.CameraHelper(light.shadow.camera);
+scene.add(shadowCameraHelper);
+
+window.addEventListener('keydown', (event) => {
+    if (event.key === 'h') { // pressione 'h' para alternar
+        shadowCameraHelper.visible = !shadowCameraHelper.visible;
+    }
+});
 
 //inicio da configuração da camera
 camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -37,7 +88,7 @@ camera.add(arma);
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, Area.lambertMaterial('red'));
-cameraHolder.position.set(-0, PLAYER_HEIGHT+8, -120);
+cameraHolder.position.set(-0, PLAYER_HEIGHT+8, -0);
 
 cameraHolder.add(camera);
 
