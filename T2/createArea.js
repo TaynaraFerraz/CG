@@ -95,9 +95,10 @@ export class Area {
 
     //reescrever/deixar mais legivel se possivel
     //as constantes são correções para a escada ficar alinhada ao cubo principal
+    let stairMaterial = this.lambertMaterial('#ffe6d2');
     for (let i = 0; i < 8; i++) {
       let stairStepGeometry = new THREE.BoxGeometry(25.0, stairHeight, stairHeight * (1 + 7 - i));
-      let stairStep = new THREE.Mesh(stairStepGeometry, this.lambertMaterial('#ffe6d2'));
+      let stairStep = new THREE.Mesh(stairStepGeometry, stairMaterial);
       if (i == 0) {
         stairStep.position.set(stairPositionX, -1.75, 60.0);
       } else {
@@ -129,16 +130,17 @@ export class Area {
       this.collidableAreas.push({ box: boxPilarRight, mesh: pilarRight });
     }
 
-    let r1 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), this.lambertMaterial('rgb(180, 72, 0)'));
+    let blocoMaterial = this.lambertMaterial('rgb(180, 72, 0)');
+    let r1 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), blocoMaterial);
     r1.position.set(0.0, 24.5, -48.0);
     cube.add(r1);
 
-    let r2 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), this.lambertMaterial('rgb(180, 72, 0)'));
+    let r2 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), blocoMaterial);
     r2.rotateY(Math.PI/2);
     r2.position.set(50.0, 24.5, 2.0);
     cube.add(r2);
 
-    let r3 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), this.lambertMaterial('rgb(180, 72, 0)'));
+    let r3 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), blocoMaterial);
     r3.rotateY(Math.PI/-2);
     r3.position.set(-50.0, 24.5, 2.0);
     cube.add(r3);
@@ -231,13 +233,13 @@ export class Area {
     let boxElevadorArea = new THREE.Box3().setFromObject(elevadorArea, true);
     let helper = new THREE.BoxHelper(elevadorArea, 0x00ff00);
     //scene.add(helper);
-
+    
+    let cubeMaterial = this.lambertMaterial('blue');
     for(let i = 0; i < 6; i++) {
       for(let j = 0; j < 6; j++) {
         if((i == 2 || i == 3) && (j == 2 || j == 3))
           continue;
         let cubeGeometry = new THREE.BoxGeometry(3.0, 20.0, 3.0);
-        let cubeMaterial = this.lambertMaterial('blue');
         let pilar = new THREE.Mesh(cubeGeometry, cubeMaterial);
         if(i % 2 == 0 && j % 2 == 0)
           pilar.position.set(-50.0 + 20 * i, 21.0, -50.0 + 20 * j);
@@ -263,8 +265,7 @@ export class Area {
     this.altares.push(altar);
 
     let pilarGeometry = new THREE.BoxGeometry(4.0, 20.0, 4.0);
-    let pilarMaterial = this.lambertMaterial('blue');
-    let pilar = new THREE.Mesh(pilarGeometry, pilarMaterial);
+    let pilar = new THREE.Mesh(pilarGeometry, this.lambertMaterial('blue'));
     pilar.position.set(0.0, 16.0, 0.0);
     
     altar.add(pilar);

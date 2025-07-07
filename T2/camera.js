@@ -13,10 +13,9 @@ import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
 
 const clock = new THREE.Clock();
-let scene, renderer, camera, cameraHolder, material, light, keyboard; // Initial variables
+let scene, renderer, camera, cameraHolder, light, keyboard; // Initial variables
 scene = new THREE.Scene();    // Create main scene
 renderer = initRenderer();    // Init a basic renderer
-material = setDefaultMaterial(); // create a basic material
 light = initDefaultBasicLight(scene); // Create a basic light to illuminate the scene
 keyboard = new KeyboardState();
 
@@ -27,7 +26,7 @@ camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 
 // Arma (cilindro)
 const armaGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 32);
-const arma = new THREE.Mesh(armaGeometry, setDefaultMaterial('#3b3b3b'));
+const arma = new THREE.Mesh(armaGeometry, Area.lambertMaterial('#3b3b3b'));
 arma.rotateX(Math.PI / 2);
 
 arma.position.set(0, -0.1, -0.1); // direita, baixo, frente
@@ -142,7 +141,7 @@ function shootBall() {
 
     //const novaSphere = new Sphere(scene, armaMundo, camera);
     const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 16);
-    const materialSphere = setDefaultMaterial('#7a7a7a');
+    const materialSphere = Area.lambertMaterial('#7a7a7a');
     let sphere = new THREE.Mesh(sphereGeometry, materialSphere);
 
     sphere.position.copy(armaMundo);
@@ -192,8 +191,10 @@ function render() {
     if (controls.isLocked) {
         moveAnimate(clock.getDelta());
     }
-    Area.doorDown();
+
+    //TODO: colocar algo para verificar se a função pode ou não ser executada
     Area.primeiroAltar();
+    Area.doorDown();
     Area.segundoAltar();
     bulletsCollisionHandler.handleBulletsCollisions(collidables)
 
