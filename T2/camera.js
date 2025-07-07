@@ -44,10 +44,9 @@ light.shadow.radius = 4;
 scene.add(light);
 
 let secondLight;
-
-secondLight = new THREE.DirectionalLight('rgb(255,255,255)', 0.5);
+secondLight = new THREE.HemisphereLight('white','darkslategray',0.1);
+/* secondLight = new THREE.DirectionalLight('rgb(255,255,255)', 0.5);
 secondLight.position.set(-140.0, 100.0, -120.0);
-secondLight.castShadow = true;
 secondLight.shadow.mapSize.width = 1024;
 secondLight.shadow.mapSize.height = 1024;
 secondLight.shadow.camera.near = 0.1;
@@ -57,7 +56,7 @@ secondLight.shadow.camera.right = 500;
 secondLight.shadow.camera.bottom = -500;
 secondLight.shadow.camera.top = 500;
 secondLight.shadow.bias = -0.0005;
-secondLight.shadow.radius = 4;
+secondLight.shadow.radius = 4; */
 
 scene.add(secondLight);
 
