@@ -14,6 +14,8 @@ import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constant
 import { KeysHandler } from './KeysHandler.js';
 import { ChainGun } from './ChainGun.js';
 import { Gun } from './Gun.js';
+import { Player } from './Player.js';
+import { Collidables } from './Collidables.js';
 
 const clock = new THREE.Clock();
 let scene, renderer, camera, cameraHolder, material, light, keyboard; // Initial variables
@@ -119,95 +121,20 @@ function moveAnimate(delta) {
 Area.createMap(scene);
 
 //colisores
-let collidables = {
+Collidables.collidables = {
     areas: Area.collidableAreas,
     walls: Area.collidableWalls,
     stairs: Area.collidableStairs
 }
 
-let playerCollisionHandler = new PlayerCollisionHandler(cameraHolder, collidables);
-let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
+let player = new Player(scene, cameraHolder, camera);
+let playerCollisionHandler = new PlayerCollisionHandler(player.object, Collidables.collidables);
 let keysHandler = new KeysHandler(scene);
 
-let chainGun = new ChainGun(camera, scene);
-let gun = new Gun(camera, scene, bulletsCollisionHandler);
-gun.createGun()
-let activeGun = gun;
-
-//funções e intervalo para o sistema de disparo
-let shoot = false;
-let intervalShoot;
-let lastShotTime = 0;
-
-document.addEventListener('mousedown', (event) => {
-    if (!controls.isLocked) return;
-    if (event.button !== 0 && event.button !== 2) return;
-    shoot = true;
-
-    if (activeGun === chainGun) {
-        activeGun.shootBall(); // dispara imediatamente
-        intervalShoot = setInterval(() => {
-            if (shoot) {
-                activeGun.shootBall(); // disparo contínuo
-            }
-        }, 50); // verifica a cada 50ms para caso não estiver mais disparando
-
-    } else {
-        intervalShoot = setInterval(() => {
-            const now = Date.now();
-            if (shoot && now - lastShotTime >= 500) {
-                activeGun.shootBall();
-                lastShotTime = now;
-            }
-        }, 50);
-    }
-});
-
-document.addEventListener('mouseup', (event) => {
-    if (event.button !== 0 && event.button !== 2) return;
-
-    if (activeGun == chainGun)
-        activeGun.stopAction()
-
-    shoot = false;
-    clearInterval(intervalShoot);
-});
-
-function switchGun(newGun) {
-    if (activeGun === newGun) return;
-
-    if (activeGun === gun)
-        gun.remove();
-    else if (activeGun === chainGun)
-        chainGun.remove();
-
-    if (newGun === gun)
-        gun.createGun();
-    else if (newGun === chainGun)
-        chainGun.addChainGun();
-
-    activeGun = newGun;
-}
-
-document.addEventListener('keydown', (event) => {
-    if (event.key === '1') {
-        switchGun(chainGun)
-    }
-    else if (event.key === '2') {
-        switchGun(gun)
-    }
-});
-
-document.addEventListener('wheel', (event) => {
-    if (activeGun == chainGun)
-        switchGun(gun);
-    else
-        switchGun(chainGun);
-});
+player.actions(controls)
 
 // Listen window size changes
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
-
 render();
 
 function render() {
@@ -215,12 +142,14 @@ function render() {
         moveAnimate(clock.getDelta());
     }
 
-    bulletsCollisionHandler.handleBulletsCollisions(collidables)
+    player.handlePlayer();
 
     //lidando com as colisões
     playerCollisionHandler.handleCollisions();
-    if (activeGun == chainGun)
-        chainGun.spriteUpdate()
+
+    if (player.activeGun instanceof ChainGun) {
+        player.activeGun.spriteUpdate(); // animação do sprite tem que ser no render
+    }
 
     keysHandler.addKey("rgb(223, 47, 47)");
 

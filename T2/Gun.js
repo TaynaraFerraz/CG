@@ -1,30 +1,33 @@
 import * as THREE from 'three';
+import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
+import { Collidables } from './Collidables.js';
+import { PLAYER_HEIGHT } from './constants.js';
 
 export class Gun {
-
     #arma
     #camera
     #scene
     #bulletsCollisionHandler
 
-    constructor(camera, scene, bulletsCollisionHandler) {
+    constructor(camera, scene) {
         this.#camera = camera;
         this.#scene = scene;
-        this.#bulletsCollisionHandler = bulletsCollisionHandler;
-    }
+        this.#bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
 
-    createGun() {
         const armaGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 32);
         const armaMaterial = new THREE.MeshLambertMaterial({
             color: '#3b3b3b'
         })
         const arma = new THREE.Mesh(armaGeometry, armaMaterial);
         arma.rotateX(Math.PI / 2);
-
-        arma.position.set(0, -0.1, -0.1); // direita, baixo, frente
+    
+        
         this.#arma = arma;
-        this.#camera.add(arma);
+        this.#scene.add(this.#arma);
+        this.#camera.add(this.#arma);
+        arma.position.set(0, -0.1, -0.1); // direita, baixo, frente
     }
+
 
     shootBall() {
         let armaMundo = new THREE.Vector3();
@@ -50,5 +53,10 @@ export class Gun {
         this.#arma.material.dispose()
         this.#arma.geometry.dispose()
         this.#arma = null
+    }
+
+    handleGun() {
+        this.#bulletsCollisionHandler.handleBulletsCollisions(Collidables.collidables);
+        //console.log(this.#arma.position);
     }
 }

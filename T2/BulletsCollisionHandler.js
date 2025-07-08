@@ -14,6 +14,7 @@ export class BulletsCollisionHandler {
         this.#camera = camera;
         this.#scene = scene;
 
+        
         // Direção baseada na câmera
         const dir = new THREE.Vector3();
         this.direction = camera.getWorldDirection(dir);
