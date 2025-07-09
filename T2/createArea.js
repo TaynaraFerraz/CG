@@ -197,6 +197,8 @@ export class Area {
     cube.position.copy(position);
 
     let boxCube = new THREE.Box3().setFromObject(cube, true);
+    cube.castShadow = true;
+    cube.receiveShadow = true;
     this.collidableAreas.push({ box: boxCube, mesh: cube });
     scene.add(cube);
 
@@ -204,12 +206,16 @@ export class Area {
     let cubeLeft = new THREE.Mesh(cubeGeometry2, material);
     //calculo da posição do cubo esquerdo em relação ao cubo principal
     cubeLeft.position.set(-(length - leftLength) / 2, 0.0, 60.0);
+    cubeLeft.castShadow = true;
+    cubeLeft.receiveShadow = true;
     cube.add(cubeLeft);
 
     let cubeGeometry3 = new THREE.BoxGeometry(rightLength, height, 4.0);
     let cubeRight = new THREE.Mesh(cubeGeometry3, material);
     //calculo da posição do cubo direito em relação ao cubo principal
     cubeRight.position.set((length - rightLength) / 2, 0.0, 60.0);
+    cubeRight.castShadow = true;
+    cubeRight.receiveShadow = true;
     cube.add(cubeRight);
 
     //colisão
@@ -223,6 +229,8 @@ export class Area {
     let fechaduraMaterial = this.lambertMaterial('rgb(180, 72, 0)');
     let fechaduraMesh = new THREE.Mesh(fechadura, fechaduraMaterial);
     fechaduraMesh.position.set(37.5, -3.0, 70.0);
+    fechaduraMesh.castShadow = true;
+    fechaduraMesh.receiveShadow = true;
     cube.add(fechaduraMesh);
 
     let boxFechadura = new THREE.Box3().setFromObject(fechaduraMesh, true);
@@ -232,6 +240,8 @@ export class Area {
     let doorMaterial = this.lambertMaterial('yellow');
     let door = new THREE.Mesh(doorGeometry, doorMaterial);
     door.position.set(37.5, 0.0, 62.0);
+    door.castShadow = true;
+    door.receiveShadow = true;
     cube.add(door);
 
     let boxDoor = new THREE.Box3().setFromObject(door, true);
@@ -243,6 +253,8 @@ export class Area {
     let elevadorMaterial = this.lambertMaterial('brown');
     let elevador = new THREE.Mesh(elevadorGeometry, elevadorMaterial);
     elevador.position.set(37.5, 0.0, 60.0);
+    elevador.castShadow = true;
+    elevador.receiveShadow = true;
     cube.add(elevador);
 
     let boxElevador = new THREE.Box3().setFromObject(elevador, true);
@@ -278,6 +290,8 @@ export class Area {
           pilar.position.set(-50.0 + 20 * i, 8.0, -50.0 + 20 * j);
         else
           pilar.position.set(-50.0 + 20 * i, 13.0, -50.0 + 20 * j);
+        pilar.castShadow = true;
+        pilar.receiveShadow = true;
         cube.add(pilar);
 
         let pilarBox = new THREE.Box3().setFromObject(pilar, true);
@@ -287,6 +301,8 @@ export class Area {
 
     let altar =  new THREE.Mesh(new THREE.BoxGeometry(4.0, 6.0, 4.0), this.lambertMaterial('#a7a7a7'));
     altar.position.set(0.0, -3.0, 0.0);
+    altar.castShadow = true;
+    altar.receiveShadow = true;
     cube.add(altar);
 
     let boxAltar = new THREE.Box3().setFromObject(altar, true);
@@ -295,6 +311,8 @@ export class Area {
 
     let pilarGeometry = new THREE.BoxGeometry(4.0, 20.0, 4.0);
     let pilar = new THREE.Mesh(pilarGeometry, this.lambertMaterial('blue'));
+    pilar.castShadow = true;
+    pilar.receiveShadow = true;
     pilar.position.set(0.0, 16.0, 0.0);
     
     altar.add(pilar);

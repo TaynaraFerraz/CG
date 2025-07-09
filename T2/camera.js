@@ -62,7 +62,7 @@ secondLight.shadow.radius = 4; */
 scene.add(secondLight);
 
 const shadowCameraHelper = new THREE.CameraHelper(light.shadow.camera);
-scene.add(shadowCameraHelper);
+//scene.add(shadowCameraHelper);
 
 window.addEventListener('keydown', (event) => {
     if (event.key === 'h') { // pressione 'h' para alternar
