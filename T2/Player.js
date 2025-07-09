@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { ChainGun } from "./ChainGun.js";
 import { Gun } from "./Gun.js";
 
@@ -9,23 +10,24 @@ export class Player {
     #gun
     #chainGun
     activeGun
-    #keys
+    keys = []
     #shoot = false
     #intervalShoot
     #lastShotTime = 0
+    #catch = true
 
     constructor(scene, object, camera) {
         this.#scene = scene;
         this.#camera = camera;
         this.object = object;
         this.#gun = new Gun(camera, scene);
-        this.#keys = [];
+        this.keys = [];
         this.activeGun = this.#gun
 
     }
 
     handlePlayer() {
-        if(this.activeGun == this.#gun)
+        if (this.activeGun == this.#gun)
             this.#gun.handleGun();
     }
 
@@ -34,14 +36,14 @@ export class Player {
 
         if (this.activeGun === this.#gun)
             this.#gun.remove();
-        else 
+        else
             this.#chainGun.remove();
 
-        if (newGun === this.#gun){
+        if (newGun === this.#gun) {
             this.#gun = new Gun(this.#camera, this.#scene)
             this.activeGun = this.#gun
         }
-        else if (newGun === this.#chainGun){
+        else if (newGun === this.#chainGun) {
             this.#chainGun = new ChainGun(this.#camera, this.#scene)
             this.activeGun = this.#chainGun
         }
@@ -100,5 +102,18 @@ export class Player {
                 this.#switchGun(this.#chainGun)
         });
     }
-    
+
+    addKey(key) {
+        console.log(this.#camera.getWorldPosition(new THREE.Vector3()))
+
+        let position = this.#camera.getWorldPosition(new THREE.Vector3())
+        let distance = key.position.distanceTo(position)
+        if (distance < 3.5 && this.#catch) {
+            this.keys.push(key)
+            key.removeKey()
+            this.#catch = false;
+        }
+        console.log(this.keys)
+    }
+
 }

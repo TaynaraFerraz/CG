@@ -9,11 +9,9 @@ import {
     onWindowResize,
 } from "../libs/util/util.js";
 import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
-import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
-import { KeysHandler } from './KeysHandler.js';
+import { Key} from './Key.js';
 import { ChainGun } from './ChainGun.js';
-import { Gun } from './Gun.js';
 import { Player } from './Player.js';
 import { Collidables } from './Collidables.js';
 
@@ -129,7 +127,7 @@ Collidables.collidables = {
 
 let player = new Player(scene, cameraHolder, camera);
 let playerCollisionHandler = new PlayerCollisionHandler(player.object, Collidables.collidables);
-let keysHandler = new KeysHandler(scene);
+let initialKey = new Key(scene, "rgb(223, 47, 47)"); // fazer um controle para aparecer apenas quando matar os inimigos
 
 player.actions(controls)
 
@@ -143,6 +141,7 @@ function render() {
     }
 
     player.handlePlayer();
+    player.addKey(initialKey)
 
     //lidando com as colisões
     playerCollisionHandler.handleCollisions();
@@ -150,8 +149,6 @@ function render() {
     if (player.activeGun instanceof ChainGun) {
         player.activeGun.spriteUpdate(); // animação do sprite tem que ser no render
     }
-
-    keysHandler.addKey("rgb(223, 47, 47)");
 
     requestAnimationFrame(render);
     renderer.render(scene, camera) // Render scene
