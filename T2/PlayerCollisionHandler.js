@@ -13,6 +13,7 @@ export class PlayerCollisionHandler {
     #usefulCollisionAreaBox;
     #usefulBoxCheckingDelaySeconds = 2;
     #movimentoCompleto = true;
+    #isUp = true;
 
     constructor(player, collidables) {
         this.#player = player;
@@ -57,10 +58,10 @@ export class PlayerCollisionHandler {
 
         collidables.forEach((object) => {
             if (this.#boundingBox.intersectsBox(object.box)) {
-                if(Math.abs(this.#player.position.x) > 249 || Math.abs(this.#player.position.z) > 249){
+                /* if(Math.abs(this.#player.position.x) > 249 || Math.abs(this.#player.position.z) > 249){
                     this.#player.position.copy(this.#oldPos);
                     return;
-                }
+                } */
 
                 if ((this.#oldPos.x != currentPos.x ||
                     this.#oldPos.y != currentPos.y ||
@@ -149,11 +150,14 @@ export class PlayerCollisionHandler {
         }
 
         if (!this.#movimentoCompleto || this.elevadorNear(this.#player) || Area.isDown) {
-            if (Area.isDown) {
-            this.#movimentoCompleto = this.elevadorUp(this.#player);
-            } else {
-            this.#movimentoCompleto = this.elevadorDown(this.#player);
+            if (Area.isDown && this.isElevador()) {
+                this.#movimentoCompleto = this.elevadorUp(this.#player);
+            }else if (!Area.isDown && this.#isUp) {
+                this.#movimentoCompleto = this.elevadorDown(this.#player);
             }
+        }
+        if(!this.elevadorNear() && !this.#isUp && !Area.isDown && this.#movimentoCompleto){
+            this.#isUp = true;
         }
         this.#player.getWorldPosition(this.#oldPos);
     }
@@ -197,6 +201,7 @@ export class PlayerCollisionHandler {
     if (elevador.position.y >= targetY) {
         elevador.position.y = targetY;
         Area.isDown = false;
+        this.#isUp = false;
         return true;
     }
     return false;
@@ -206,7 +211,7 @@ export class PlayerCollisionHandler {
     let elevadorObj = Area.elevador[0];
     let elevador = elevadorObj.mesh;
     const velocidade = 0.08; // ajuste conforme desejado
-    const targetY = -8.0;
+    const targetY = -6.1;
 
     if (this.isElevador(this.#player) && this.#player.position.y > PLAYER_HEIGHT / 2) {
         // Move elevador e player juntos para baixo

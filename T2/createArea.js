@@ -408,7 +408,7 @@ export class Area {
 
   static createTerrain(scene) {
     //create walls
-    let wallGeometry = new THREE.BoxGeometry(500, 72, 2); // mudança de planeGeometry por BoxGeometry porque sendo um plano a esfera não estava identificando colisão, quando coloquei uma leve espessura, ela colide com a esfera  
+    let wallGeometry = new THREE.BoxGeometry(504, 72, 8); // mudança de planeGeometry por BoxGeometry porque sendo um plano a esfera não estava identificando colisão, quando coloquei uma leve espessura, ela colide com a esfera  
     let wallMaterial = this.lambertMaterial('#a7a7a7');
     let walls = [];
 
@@ -418,15 +418,15 @@ export class Area {
     }
 
     //posicionamento e rotação das paredes
-    walls[0].position.set(0, 36, -250);
+    walls[0].position.set(0, 36, -254);
 
-    walls[1].position.set(-250, 36, 0);
+    walls[1].position.set(-254, 36, 0);
     walls[1].rotation.y = Math.PI / 2;
 
-    walls[2].position.set(250, 36, 0);
+    walls[2].position.set(254, 36, 0);
     walls[2].rotation.y = Math.PI / -2;
 
-    walls[3].position.set(0, 36, 250);
+    walls[3].position.set(0, 36, 254);
     walls[3].rotation.y = Math.PI
 
     //colisão das paredes
@@ -437,6 +437,7 @@ export class Area {
       let wallBox = new THREE.Box3().setFromObject(walls[i], true);
 
       this.collidableWalls.push({ box: wallBox, mesh: walls[i] });
+      //this.collidableAreas.push({box: wallBox, mesh: walls[i]});
     }
 
     // create the ground plane
