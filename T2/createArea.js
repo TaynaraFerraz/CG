@@ -479,7 +479,7 @@ export class Area {
 
 static segundoAltar() {
     let altar = this.altares[1];
-    altar.position.lerp(new THREE.Vector3(0.0, 2.0, 0.0), 0.01);
+    altar.position.lerp(new THREE.Vector3(0.0, 1.7, 0.0), 0.01);
 
     // Atualiza a Box3 do altar no vetor de colisão
     let altarCollidable = this.collidableAreas.find(obj => obj.mesh === altar);

@@ -44,7 +44,8 @@ light.shadow.radius = 4;
 scene.add(light);
 
 let secondLight;
-secondLight = new THREE.HemisphereLight('white','darkslategray',0.1);
+secondLight = new THREE.HemisphereLight('white','darkslategray',0.3);
+secondLight.castShadow = false;
 /* secondLight = new THREE.DirectionalLight('rgb(255,255,255)', 0.5);
 secondLight.position.set(-140.0, 100.0, -120.0);
 secondLight.shadow.mapSize.width = 1024;
@@ -242,10 +243,12 @@ function render() {
         moveAnimate(clock.getDelta());
     }
 
-    //TODO: colocar algo para verificar se a função pode ou não ser executada
-    Area.primeiroAltar();
-    Area.doorDown();
-    Area.segundoAltar();
+    //if(inimigosUmDerrotados)
+        Area.primeiroAltar();
+    //if(cahveUmColocada)
+        Area.doorDown();
+    //if(inimigosDoisDerrotados)
+        Area.segundoAltar();
     bulletsCollisionHandler.handleBulletsCollisions(collidables)
 
     //lidando com as colisões

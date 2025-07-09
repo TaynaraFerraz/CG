@@ -149,8 +149,8 @@ export class PlayerCollisionHandler {
             this.#player.position.y -= this.#fallingSpeed;
         }
 
-        if (!this.#movimentoCompleto || this.elevadorNear(this.#player) || Area.isDown) {
-            if (Area.isDown && this.isElevador()) {
+        if (!this.#movimentoCompleto || this.elevadorNear(this.#player)) {
+            if (Area.isDown && (this.isElevador() || !this.#movimentoCompleto)) {
                 this.#movimentoCompleto = this.elevadorUp(this.#player);
             }else if (!Area.isDown && this.#isUp) {
                 this.#movimentoCompleto = this.elevadorDown(this.#player);
