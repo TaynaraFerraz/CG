@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
+import { Collidables } from './Collidables.js';
 import { Area } from './createArea.js';
 
 export class PlayerCollisionHandler {
@@ -16,10 +17,10 @@ export class PlayerCollisionHandler {
     #movimentoCompleto = true;
     #isUp = true;
 
-    constructor(player, collidables) {
+    constructor(player) {
         this.#player = player;
-        this.#originalCollidables = collidables;
-        this.#currentCollidables = { ...collidables };
+        this.#originalCollidables = Collidables.collidables;
+        this.#currentCollidables = { ...Collidables.collidables };
 
         this.#oldPos = new THREE.Vector3();
         this.#player.getWorldPosition(this.#oldPos);
@@ -50,7 +51,6 @@ export class PlayerCollisionHandler {
             if (isAboveCheck.length > 0) {
                 if (isAboveCheck[0].distance < PLAYER_HEIGHT / 2 + 1) {
                     isAbove = true;
-                    console.log(isAbove);
                     break;
                 }
             }
@@ -86,8 +86,8 @@ export class PlayerCollisionHandler {
                     this.#oldPos.z != currentPos.z) //se tiver variação de posição do player
                 ) {
 
-                    deltaMovement.addVectors(currentPos, this.#oldPos.multiplyScalar(-1)); //pegando o vetor da direção do movimento subtraindo posição antiga da nova
-                    this.#oldPos.multiplyScalar(-1) //voltando com a posição antiga pro valor original
+                    deltaMovement.copy(currentPos);
+                    deltaMovement.addScaledVector(this.#oldPos, -1); //pegando o vetor da direção do movimento subtraindo posição antiga da nova
 
 
                     let normalizedMovementDirection = new THREE.Vector3(0, 0, 0);
@@ -97,7 +97,7 @@ export class PlayerCollisionHandler {
                     this.#raycaster.set(this.#oldPos, normalizedMovementDirection); //apontando o raio para a direção do movimento
 
                     if (isStair) {
-                        this.#raycaster.set(this.#player.position, new THREE.Vector3(0, -1, 0)); //se for uma escada, solta o raio pra baixo ao invés da direção de movimento
+                        this.#raycaster.set(this.#oldPos, new THREE.Vector3(0, -1, 0)); //se for uma escada, solta o raio pra baixo ao invés da direção de movimento
                     }
 
 
@@ -111,8 +111,7 @@ export class PlayerCollisionHandler {
                         let posAfterCollision = new THREE.Vector3();
 
                         posAfterCollision = currentPos; //pega posição atual
-                        posAfterCollision.add(deltaMovement.multiplyScalar(-1)); //tira o delta pra voltar na posição anterior à colisão
-                        deltaMovement.multiplyScalar(-1); //voltando o delta pro original
+                        posAfterCollision.addScaledVector(deltaMovement, -1); //tira o delta pra voltar na posição anterior à colisão
 
                         deltaMovement.projectOnPlane(normalToIntersection); //projeta a variação no plano com a normal da malha
 
@@ -149,10 +148,6 @@ export class PlayerCollisionHandler {
         let isAboveStair = this.#handleGroupCollisions(this.#currentCollidables.stairs, "stairs", true);
 
         this.#isFiltering = false; //para de filtrar
-        
-        console.log(this.#currentCollidables.areas.length);
-        
-        
 
         //vendo se pode cair
         if (this.#player.position.y > PLAYER_HEIGHT / 2 && !isAboveArea && !isAboveStair && !this.isElevador(this.#player)) {

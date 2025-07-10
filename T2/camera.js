@@ -7,10 +7,13 @@ import {
     initDefaultBasicLight,
     setDefaultMaterial,
     onWindowResize,
+    getMaxSize,
 } from "../libs/util/util.js";
 import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
 import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
+import { EnemiesHandler } from './EnemiesHandler.js';
+import { Collidables } from './Collidables.js'
 
 const clock = new THREE.Clock();
 let scene, renderer, camera, cameraHolder, light, keyboard; // Initial variables
@@ -72,8 +75,9 @@ window.addEventListener('keydown', (event) => {
 
 //inicio da configuração da camera
 camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, PLAYER_HEIGHT / 2, 0);
+camera.position.set(0, PLAYER_HEIGHT / 2);
 camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
+
 
 // Arma (cilindro)
 const armaGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 32);
@@ -87,8 +91,8 @@ camera.add(arma);
 
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
-cameraHolder = new THREE.Mesh(cameraHolderGeometry, Area.lambertMaterial('red'));
-cameraHolder.position.set(-0, PLAYER_HEIGHT+8, -0);
+cameraHolder = new THREE.Mesh(cameraHolderGeometry, material);
+cameraHolder.position.set(-120, PLAYER_HEIGHT / 2, 0);
 
 cameraHolder.add(camera);
 
@@ -136,25 +140,25 @@ window.addEventListener('keyup', (event) => movementControls(event.keyCode, fals
 function movementControls(key, value) {
     switch (key) {
         case 16: // SHIFT
-            shift = value;
-            break;
+        shift = value;
+        break;
         case 87: // W
         case 38: // Seta pra cima
-            moveForward = value;
-            break;
+        moveForward = value;
+        break;
         case 83: // S
         case 40: // Seta pra baixo
-            moveBackward = value;
-            break;
+        moveBackward = value;
+        break;
         case 65: // A
         case 37: // Seta pra esquerda
-            moveLeft = value;
-            break;
+        moveLeft = value;
+        break;
         case 68: // D
         case 39: // Seta pra direita
-            moveRight = value;
-            break;
-        }
+        moveRight = value;
+        break;
+    }
 }
 
 //realiza a movimentação utilizando metodos do PointerLockControls
@@ -167,7 +171,7 @@ function moveAnimate(delta) {
     else if (moveBackward) {
         controls.moveForward(-moveSpeed);
     }
-
+    
     if (moveRight) {
         controls.moveRight(moveSpeed);
     }
@@ -187,18 +191,18 @@ let intervalShoot;
 function shootBall() {
     let armaMundo = new THREE.Vector3();
     arma.getWorldPosition(armaMundo); // pega as coordenadas globais da arma
-
+    
     let worldPosition = new THREE.Vector3();
     camera.getWorldPosition(worldPosition)
-
+    
     const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 16);
     const materialSphere = Area.lambertMaterial('#7a7a7a');
     let sphere = new THREE.Mesh(sphereGeometry, materialSphere);
-
+    
     sphere.position.copy(armaMundo);
-
+    
     scene.add(sphere);
-    bulletsCollisionHandler.addSphere(sphere); 
+    bulletsCollisionHandler.addSphere(sphere);
 }
 
 //captura evento de clique no mouse, para chamar a função de disparar as bolinhas
@@ -206,7 +210,7 @@ document.addEventListener('mousedown', (event) => {
     if (!controls.isLocked) return; // jogador não está no jogo ainda
     // event.button === 0 -> botão esquerdo, event.button === 2 -> botão direito
     if (event.button !== 0 && event.button !== 2) return;
-
+    
     if (!shoot) {
         shoot = true;
         shootBall();
@@ -216,24 +220,26 @@ document.addEventListener('mousedown', (event) => {
 
 document.addEventListener('mouseup', (event) => {
     if (event.button !== 0 && event.button !== 2) return;
-
+    
     // Para o disparo contínuo
     shoot = false;
     clearInterval(intervalShoot);
 });
 
 //colisores
-let collidables = {
+Collidables.collidables = {
     areas: Area.collidableAreas,
     walls: Area.collidableWalls,
     stairs: Area.collidableStairs
 }
-let playerCollisionHandler = new PlayerCollisionHandler(cameraHolder, collidables);
+let playerCollisionHandler = new PlayerCollisionHandler(cameraHolder);
 let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
+let enemiesHandler = new EnemiesHandler(scene, cameraHolder);
+enemiesHandler.addEnemy('cacodemon');
+enemiesHandler.addEnemy('lostsoul');
 
 // Listen window size changes
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
-
 
 render();
 
@@ -250,11 +256,16 @@ function render() {
         Area.doorDown();
     //if(inimigosDoisDerrotados)
         Area.segundoAltar();
-    bulletsCollisionHandler.handleBulletsCollisions(collidables)
+    bulletsCollisionHandler.handleBulletsCollisions(Collidables.collidables)
 
     //lidando com as colisões
     playerCollisionHandler.handleCollisions();
 
+    //lidando com inimigos
+    enemiesHandler.handleEnemies();
+
     requestAnimationFrame(render);
     renderer.render(scene, camera) // Render scene
 }
+
+export { scene };
