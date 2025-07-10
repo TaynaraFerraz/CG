@@ -1,7 +1,4 @@
 import * as THREE from 'three';
-import {
-    setDefaultMaterial,
-} from "../libs/util/util.js";
 
 export class BulletsCollisionHandler {
     #spheres = []
@@ -17,6 +14,7 @@ export class BulletsCollisionHandler {
         this.#camera = camera;
         this.#scene = scene;
 
+        
         // Direção baseada na câmera
         const dir = new THREE.Vector3();
         this.direction = camera.getWorldDirection(dir);
@@ -26,10 +24,9 @@ export class BulletsCollisionHandler {
     }
 
     #updateSpherePosition(sphere) {
-            sphere.translateZ(-this.speed);
+        sphere.translateZ(-this.speed);
     }
 
-    // adiciona a esfera ao vetor de esferas
     addSphere(sphere) {
         this.#spheres.push(sphere);
 
@@ -42,15 +39,14 @@ export class BulletsCollisionHandler {
         this.direction.multiplyScalar(-1/4);// reverte para não alterar em outras partes
 
         sphere.lookAt(sphereLookAt);
-        sphere.translateZ(-0.3); //para sair da boca do cilindro e não do meio
+        sphere.translateZ(-0.1); //para sair da boca do cilindro e não do meio
     }
 
     // função de lidar com as colisões
     handleBulletsCollisions(collidables) {
         this.#camera.getWorldDirection(this.direction);
-        
-        // filtra o vetor de esferas, retirando ela da estrutura caso colidir
-        this.#spheres = this.#spheres.filter((sphere) => {  
+
+        this.#spheres = this.#spheres.filter((sphere) => {
             const prevPositionBall = sphere.position.clone();
 
             // realiza a movimentação/translação da esfera
@@ -78,7 +74,7 @@ export class BulletsCollisionHandler {
                 sphere = undefined;
                 return false;
             }
-            
+
             return true;
         })
         this.prevPosition = this.#camera.position;

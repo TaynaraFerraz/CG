@@ -10,10 +10,12 @@ import {
     getMaxSize,
 } from "../libs/util/util.js";
 import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
-import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
 import { EnemiesHandler } from './EnemiesHandler.js';
 import { Collidables } from './Collidables.js'
+import { Key} from './Key.js';
+import { ChainGun } from './ChainGun.js';
+import { Player } from './Player.js';
 
 const clock = new THREE.Clock();
 let scene, renderer, camera, cameraHolder, light, keyboard; // Initial variables
@@ -79,23 +81,11 @@ camera.position.set(0, PLAYER_HEIGHT / 2);
 camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 
 
-// Arma (cilindro)
-const armaGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 32);
-const arma = new THREE.Mesh(armaGeometry, Area.lambertMaterial('#3b3b3b'));
-arma.rotateX(Math.PI / 2);
-
-arma.position.set(0, -0.1, -0.1); // direita, baixo, frente
-
-camera.add(arma);
-
-
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, Area.lambertMaterial('red'));
 cameraHolder.position.set(-0, PLAYER_HEIGHT+8, -0);
-
 cameraHolder.add(camera);
-
 
 //inicializando o PointerLockControls customizado
 const controls = new PointerLockControls(cameraHolder, camera, renderer.domElement);
@@ -164,7 +154,7 @@ function movementControls(key, value) {
 //realiza a movimentação utilizando metodos do PointerLockControls
 function moveAnimate(delta) {
     let moveSpeed = shift ? SHIFT_MULTIPLIER * SPEED * delta : SPEED * delta;
-    
+
     if (moveForward) {
         controls.moveForward(moveSpeed);
     }
@@ -179,52 +169,7 @@ function moveAnimate(delta) {
         controls.moveRight(-moveSpeed);
     }
 }
-
-//testeMashs()
 Area.createMap(scene);
-
-//funções e intervalo para o sistema de disparo
-let shoot = false
-let intervalShoot;
-
-//cria a bolinha a aser disparada e chama  a classe para lidar com suas posíveis colisões
-function shootBall() {
-    let armaMundo = new THREE.Vector3();
-    arma.getWorldPosition(armaMundo); // pega as coordenadas globais da arma
-    
-    let worldPosition = new THREE.Vector3();
-    camera.getWorldPosition(worldPosition)
-    
-    const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 16);
-    const materialSphere = Area.lambertMaterial('#7a7a7a');
-    let sphere = new THREE.Mesh(sphereGeometry, materialSphere);
-    
-    sphere.position.copy(armaMundo);
-    
-    scene.add(sphere);
-    bulletsCollisionHandler.addSphere(sphere);
-}
-
-//captura evento de clique no mouse, para chamar a função de disparar as bolinhas
-document.addEventListener('mousedown', (event) => {
-    if (!controls.isLocked) return; // jogador não está no jogo ainda
-    // event.button === 0 -> botão esquerdo, event.button === 2 -> botão direito
-    if (event.button !== 0 && event.button !== 2) return;
-    
-    if (!shoot) {
-        shoot = true;
-        shootBall();
-        intervalShoot = setInterval(shootBall, 500);
-    }
-});
-
-document.addEventListener('mouseup', (event) => {
-    if (event.button !== 0 && event.button !== 2) return;
-    
-    // Para o disparo contínuo
-    shoot = false;
-    clearInterval(intervalShoot);
-});
 
 //colisores
 Collidables.collidables = {
@@ -232,18 +177,24 @@ Collidables.collidables = {
     walls: Area.collidableWalls,
     stairs: Area.collidableStairs
 }
-let playerCollisionHandler = new PlayerCollisionHandler(cameraHolder);
-let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
+
 let enemiesHandler = new EnemiesHandler(scene, cameraHolder);
 enemiesHandler.addEnemy('cacodemon');
 enemiesHandler.addEnemy('lostsoul');
 
-// Listen window size changes
-window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
-
-render();
 
 var movimentoCompleto = true;
+
+
+let player = new Player(scene, cameraHolder, camera);
+let playerCollisionHandler = new PlayerCollisionHandler(player.object, Collidables.collidables);
+let initialKey = new Key(scene, "rgb(223, 47, 47)"); // fazer um controle para aparecer apenas quando matar os inimigos
+
+player.actions(controls)
+
+// Listen window size changes
+window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
+render();
 
 function render() {
     if (controls.isLocked) {
@@ -256,13 +207,17 @@ function render() {
         Area.doorDown();
     //if(inimigosDoisDerrotados)
         Area.segundoAltar();
-    bulletsCollisionHandler.handleBulletsCollisions(Collidables.collidables)
+    player.handlePlayer();
+    player.addKey(initialKey)
 
     //lidando com as colisões
     playerCollisionHandler.handleCollisions();
 
     //lidando com inimigos
     enemiesHandler.handleEnemies();
+    if (player.activeGun instanceof ChainGun) {
+        player.activeGun.spriteUpdate(); // animação do sprite tem que ser no render
+    }
 
     requestAnimationFrame(render);
     renderer.render(scene, camera) // Render scene
