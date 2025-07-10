@@ -91,8 +91,8 @@ camera.add(arma);
 
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
-cameraHolder = new THREE.Mesh(cameraHolderGeometry, material);
-cameraHolder.position.set(-120, PLAYER_HEIGHT / 2, 0);
+cameraHolder = new THREE.Mesh(cameraHolderGeometry, Area.lambertMaterial('red'));
+cameraHolder.position.set(-0, PLAYER_HEIGHT+8, -0);
 
 cameraHolder.add(camera);
 
