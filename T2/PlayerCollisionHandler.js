@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
+import { Area } from './createArea.js';
 
 export class PlayerCollisionHandler {
     #fallingSpeed = 0.7;
@@ -10,8 +11,10 @@ export class PlayerCollisionHandler {
     #raycaster;
     #boundingBox;
     #usefulCollisionAreaBox;
-    #usefulBoxCheckingDelaySeconds = 1;
     #isFiltering;
+    #usefulBoxCheckingDelaySeconds = 2;
+    #movimentoCompleto = true;
+    #isUp = true;
 
     constructor(player, collidables) {
         this.#player = player;
@@ -73,10 +76,10 @@ export class PlayerCollisionHandler {
 
         filteredCollidables = filteredCollidables.filter((object) => {
             if (this.#boundingBox.intersectsBox(object.box)) {
-                if (Math.abs(this.#player.position.x) > 249 || Math.abs(this.#player.position.z) > 249) {
+                /* if(Math.abs(this.#player.position.x) > 249 || Math.abs(this.#player.position.z) > 249){
                     this.#player.position.copy(this.#oldPos);
                     return;
-                }
+                } */
 
                 if ((this.#oldPos.x != currentPos.x ||
                     this.#oldPos.y != currentPos.y ||
@@ -91,7 +94,7 @@ export class PlayerCollisionHandler {
                     normalizedMovementDirection.copy(deltaMovement);
                     normalizedMovementDirection.normalize(); //direção normalizada
 
-                    this.#raycaster.set(this.#player.position, normalizedMovementDirection); //apontando o raio para a direção do movimento
+                    this.#raycaster.set(this.#oldPos, normalizedMovementDirection); //apontando o raio para a direção do movimento
 
                     if (isStair) {
                         this.#raycaster.set(this.#player.position, new THREE.Vector3(0, -1, 0)); //se for uma escada, solta o raio pra baixo ao invés da direção de movimento
@@ -152,10 +155,124 @@ export class PlayerCollisionHandler {
         
 
         //vendo se pode cair
-        if (this.#player.position.y > PLAYER_HEIGHT / 2 && !isAboveArea && !isAboveStair) {
+        if (this.#player.position.y > PLAYER_HEIGHT / 2 && !isAboveArea && !isAboveStair && !this.isElevador(this.#player)) {
             this.#player.position.y -= this.#fallingSpeed;
         }
-        
+
+        if (!this.#movimentoCompleto || this.elevadorNear(this.#player)) {
+            if (Area.isDown && (this.isElevador() || !this.#movimentoCompleto)) {
+                this.#movimentoCompleto = this.elevadorUp(this.#player);
+            }else if (!Area.isDown && this.#isUp) {
+                this.#movimentoCompleto = this.elevadorDown(this.#player);
+            }
+        }
+        if(!this.elevadorNear() && !this.#isUp && !Area.isDown && this.#movimentoCompleto){
+            this.#isUp = true;
+        }
         this.#player.getWorldPosition(this.#oldPos);
     }
+
+    elevadorUp() {
+    let elevadorObj = Area.elevador[0];
+    let elevador = elevadorObj.mesh;
+    const velocidade = 0.08;
+    const targetY = 0.0;
+
+    if (this.isElevador(this.#player) || this.#boundingBox.intersectsBox(Area.elevadorCheck)) {
+        // Move elevador para cima
+        if (elevador.position.y + velocidade < targetY) {
+            elevador.position.y += velocidade;
+        } else {
+            elevador.position.y = targetY;
+        }
+        // Sempre coloca o player em cima do elevador
+        let elevadorWorldY = new THREE.Vector3();
+        elevador.getWorldPosition(elevadorWorldY);
+        if(elevadorWorldY.y >= -3.0)
+        this.#player.position.y = elevadorWorldY.y + PLAYER_HEIGHT / 2 + 3;
+    } else {
+        // Só o elevador sobe
+        if (elevador.position.y + velocidade < targetY) {
+            elevador.position.y += velocidade;
+        } else {
+            elevador.position.y = targetY;
+        }
+    }
+
+    // Atualiza a Box3 do elevador
+    elevadorObj.box.setFromObject(elevador, true);
+
+    let elevadorCollidable = Area.collidableAreas.find(obj => obj.mesh === elevador);
+    if (elevadorCollidable) {
+        elevadorCollidable.box.setFromObject(elevador, true);
+    }
+
+    // Checa se chegou ao topo
+    if (elevador.position.y >= targetY) {
+        elevador.position.y = targetY;
+        Area.isDown = false;
+        this.#isUp = false;
+        return true;
+    }
+    return false;
+}
+
+  elevadorDown() {
+    let elevadorObj = Area.elevador[0];
+    let elevador = elevadorObj.mesh;
+    const velocidade = 0.08; // ajuste conforme desejado
+    const targetY = -6.1;
+
+    if (this.isElevador(this.#player) && this.#player.position.y > PLAYER_HEIGHT / 2) {
+        // Move elevador e player juntos para baixo
+        if (elevador.position.y - velocidade > targetY) {
+            elevador.position.y -= velocidade;
+            this.#player.position.y -= velocidade;
+        } else {
+            elevador.position.y = targetY;
+            this.#player.position.y = PLAYER_HEIGHT / 2;
+        }
+    } else {
+        // Só o elevador desce
+        if (elevador.position.y - velocidade > targetY) {
+            elevador.position.y -= velocidade;
+        } else {
+            elevador.position.y = targetY;
+        }
+    }
+
+    elevadorObj.box.setFromObject(elevador, true);
+
+    let elevadorCollidable = Area.collidableAreas.find(obj => obj.mesh === elevador);
+    if (elevadorCollidable) {
+        elevadorCollidable.box.setFromObject(elevador, true);
+    }
+    if (elevador.position.y <= targetY) {
+        elevador.position.y = targetY;
+        Area.isDown = true;
+        return true;
+    }
+    return false;
+}
+
+  elevadorNear() {
+    this.#boundingBox.setFromObject(this.#player);
+    return this.#boundingBox.intersectsBox(Area.elevadorCheck);
+  }
+
+  isElevador() {
+    let elevadorMesh = Area.elevador[0].mesh;
+
+    let origin = this.#player.position.clone();
+    let direction = new THREE.Vector3(0, -1, 0);
+
+    let raycaster = new THREE.Raycaster(origin, direction, 0, 10);
+
+    let intersects = raycaster.intersectObject(elevadorMesh, true);
+
+    if (intersects.length > 0 && intersects[0].distance < PLAYER_HEIGHT / 2 + 0.5) {
+        return true;
+    }
+    return false;
+  }
 }
