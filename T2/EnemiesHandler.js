@@ -2,10 +2,14 @@ import * as THREE from 'three';
 import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 import { getMaxSize } from "../libs/util/util.js";
 import { Cacodemon } from "./Cacodemon.js";
+import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
+import { LostSoul } from './LostSoul.js';
 
 export class EnemiesHandler {
     #enemies = [];
-    #loader = new GLTFLoader();
+    #loader = {};
+    #GLTFLoader = new GLTFLoader();
+    #OBJLoader = new OBJLoader();
     #scene;
     #player;
     //carregador de assets
@@ -39,13 +43,16 @@ export class EnemiesHandler {
             case "cacodemon":
                 customPath = "cacodemon.glb"
             break;
-            case "skull":
+            case "lostsoul":
                 customPath = "skull.obj"
         }
 
+        this.#loader = enemyName == "cacodemon"? this.#GLTFLoader : this.#OBJLoader;
         this.#loader.load(`./assets/${customPath}`, (response) => {
+            console.log(enemyName);
             let obj = enemyName == "cacodemon"? response.scene : response;
 
+            
             obj.traverse(function (child) {
                 if (child.isMesh) {
                     child.castShadow = true;
@@ -56,7 +63,7 @@ export class EnemiesHandler {
 
             obj = this.#normalizeAndRescale(obj, 2);
             obj = this.#fixPosition(obj);
-            let enemy = enemyName == "cacodemon"? new Cacodemon(obj, this.#player) : null;
+            let enemy = enemyName == "cacodemon"? new Cacodemon(obj, this.#player) : new LostSoul(obj, this.#player);;
             this.#scene.add(obj);
             this.#enemies.push(enemy);
         })
@@ -64,9 +71,7 @@ export class EnemiesHandler {
 
     handleEnemies() {
         this.#enemies.forEach((enemy) => {
-            enemy.handleMovement();
-            enemy.handleCollisions();
-            enemy.handleHealthBar();
+            enemy.handle();
         });
     }
 };

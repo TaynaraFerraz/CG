@@ -7,6 +7,7 @@ export class Enemy {
     object;
     player;
     #health;
+    #minHeight;
     #maxHealth;
     angry = true;
     dead = false;
@@ -16,11 +17,13 @@ export class Enemy {
     lookAtQuaternion;
     #healthBar
 
-    constructor(object, player, maxHealth) {
+    constructor(object, player, maxHealth, minHeight = 4) {
         this.object = object;
         this.#maxHealth = maxHealth;
         this.#health = maxHealth;
         this.player = player;
+        
+        this.#minHeight = minHeight;
 
         this.#oldPos = new THREE.Vector3();
         this.object.getWorldPosition(this.#oldPos);
@@ -48,7 +51,7 @@ export class Enemy {
         this.object.quaternion.rotateTowards(this.lookAtQuaternion, alpha);
     }
 
-    lookAtPlayer() {
+    lookAtPlayer(alpha = 0.035) {
         let playerPosition = new THREE.Vector3();
         let lookAtMatrix = new THREE.Matrix4();
 
@@ -56,7 +59,7 @@ export class Enemy {
         lookAtMatrix.lookAt(playerPosition, this.object.position, this.object.up);
         this.lookAtQuaternion.setFromRotationMatrix(lookAtMatrix);
 
-        this.rotateTowardsQuaternion();
+        this.rotateTowardsQuaternion(alpha);
     };
 
     damage(amount) {
@@ -67,6 +70,8 @@ export class Enemy {
     };
 
     handleCollisions() {
+        //console.log(this.#minHeight);
+        
         let currentPos = new THREE.Vector3();
         let deltaMovement = new THREE.Vector3();
         this.object.getWorldPosition(currentPos);
@@ -107,7 +112,7 @@ export class Enemy {
                 this.#raycaster.set(this.object.position, new THREE.Vector3(0, -1, 0));
                 let intersectionResult = this.#raycaster.intersectObject(collidable.mesh, false)[0] // pega a interseção com o objeto mais próxima no raio
 
-                if ((intersectionResult && intersectionResult.distance < 4) || this.object.position.y < 4) {
+                if ((intersectionResult && intersectionResult.distance < this.#minHeight) || this.object.position.y < this.#minHeight) {
                     this.object.position.y += 0.02;
                 }
             });
@@ -119,6 +124,6 @@ export class Enemy {
 
     handleHealthBar(){
         this.#healthBar.update(this.#health, this.#maxHealth);
-        this.#health -= 0.005;
+        //this.#health -= 0.005;
     };
 }

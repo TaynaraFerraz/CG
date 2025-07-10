@@ -25,7 +25,7 @@ keyboard = new KeyboardState();
 
 //inicio da configuração da camera
 camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, PLAYER_HEIGHT);
+camera.position.set(0, PLAYER_HEIGHT / 2);
 camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 
 
@@ -42,7 +42,7 @@ camera.add(arma);
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, material);
-cameraHolder.position.set(-120, PLAYER_HEIGHT, 0);
+cameraHolder.position.set(-120, PLAYER_HEIGHT / 2, 0);
 
 cameraHolder.add(camera);
 
@@ -186,6 +186,7 @@ let playerCollisionHandler = new PlayerCollisionHandler(cameraHolder);
 let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
 let enemiesHandler = new EnemiesHandler(scene, cameraHolder);
 enemiesHandler.addEnemy('cacodemon');
+enemiesHandler.addEnemy('lostsoul');
 
 // Listen window size changes
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);

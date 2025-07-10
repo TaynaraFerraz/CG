@@ -1,11 +1,14 @@
+import { setDefaultMaterial } from "../libs/util/util.js";
+import { scene } from "./camera.js";
 import { Enemy } from "./Enemy.js";
 import * as THREE from 'three';
 
 export class Cacodemon extends Enemy {
     #randomized = false;
+    #canShoot = true;
 
-    constructor(object, player, collidables) {
-        super(object, player, 20, collidables);
+    constructor(object, player) {
+        super(object, player, 40);
         object.name = "cacodemon";
 
         this.randomizerCallback();
@@ -16,18 +19,18 @@ export class Cacodemon extends Enemy {
         if (!this.dead) {
             if (this.angry) {
                 if (this.#randomized) {
-                    this.#randomized = false;
 
                     setTimeout(() => {
+                        this.#randomized = false;
                         this.randomizerCallback();
-                    }, 2000);
+                    }, 1500);
                 } else {
-                    this.#randomized = true;
-                    this.randomizeQuaternion();
 
                     setTimeout(() => {
+                        this.#randomized = true;
+                        this.randomizeQuaternion();
                         this.randomizerCallback();
-                    }, 500);
+                    }, 3000);
                 }
             } else {
                 this.randomizeQuaternion();
@@ -55,5 +58,35 @@ export class Cacodemon extends Enemy {
             this.rotateTowardsQuaternion();
             this.object.translateZ(0.04);
         }
+    }
+
+    #shoot() {
+            let worldPosition = new THREE.Vector3();
+            this.object.getWorldPosition(worldPosition);
+
+            const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 16);
+            const materialSphere = setDefaultMaterial('#c2a500');
+            let sphere = new THREE.Mesh(sphereGeometry, materialSphere);
+            sphere.position.copy(worldPosition);
+
+            scene.add(sphere);
+    }
+
+    handleShooting() {
+        if (!this.#randomized && this.angry && this.#canShoot) {
+            this.#shoot();
+            this.#canShoot = false;
+
+            setTimeout(() => {
+                this.#canShoot = true;
+            }, 800);
+        }
+    }
+
+    handle() {
+        this.handleMovement();
+        this.handleCollisions();
+        this.handleHealthBar();
+        this.handleShooting();
     }
 };
