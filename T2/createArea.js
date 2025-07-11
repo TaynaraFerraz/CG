@@ -15,10 +15,10 @@ export class Area {
   static door = [];
   static elevadorCheck;
   static isDown = false;
-  static enemiesA1 = [];
-  static enemiesA2 = [];
-  static enemiesA3 = [];
-  static enemiesA4 = [];
+  static enemiesA1 = new EnemiesHandler();
+  static enemiesA2 = new EnemiesHandler();
+  static enemiesA3 = new EnemiesHandler();
+  static enemiesA4 = new EnemiesHandler();
 
 
   constructor(scene) {
@@ -26,11 +26,6 @@ export class Area {
   }
 
   static createMap(scene) {
-    this.enemiesA1 = new EnemiesHandler();
-    this.enemiesA2 = new EnemiesHandler();
-    this.enemiesA3 = new EnemiesHandler();
-    this.enemiesA4 = new EnemiesHandler();
-
     let positions = [];
 
     //posições para o bloco principal de cada área
