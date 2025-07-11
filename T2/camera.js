@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import KeyboardState from '../libs/util/KeyboardState.js'
 import { PointerLockControls } from './PointerLockControls.js'
-import { Area } from './createArea.js';
+import { Area, enemiesAreas } from './createArea.js';
 import {
     initRenderer,
     initDefaultBasicLight,
@@ -178,6 +178,13 @@ Collidables.collidables = {
     walls: Area.collidableWalls,
     stairs: Area.collidableStairs
 }
+
+enemiesAreas.inimigos = {
+    area1: Area.enemies.aera1.enemies,
+    area2: Area.enemies.area2.enemies,
+    area3: Area.enemies.area3.enemies,
+    area4: Area.enemies.area4.enemies,
+};
 
 let enemiesHandler = new EnemiesHandler(scene, cameraHolder);
 enemiesHandler.addEnemy('cacodemon');

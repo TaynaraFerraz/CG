@@ -518,10 +518,5 @@ static segundoAltar() {
 }
 
 export class enemiesAreas{
-  static inimigos = {
-    area1: enemies.aera1.enemies,
-    area2: enemies.area2.enemies,
-    area3: enemies.area3.enemies,
-    area4: enemies.area4.enemies,
-  };
+  static inimigos = {};
 }
