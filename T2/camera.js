@@ -170,7 +170,7 @@ function moveAnimate(delta) {
     }
 }
 
-Area.createMap(scene);
+Area.createMap(scene,cameraHolder);
 
 //colisores
 Collidables.collidables = {
@@ -217,9 +217,10 @@ function render() {
     player.addKey(initialKey)
 
     //lidando com as colisões
-    playerCollisionHandler.handleCollisions();
-
+    playerCollisionHandler.handleCollisions()
+    
     //lidando com inimigos
+    Area.handleEnemiesArea();
     enemiesHandler.handleEnemies();
     if (player.activeGun instanceof ChainGun) {
         player.activeGun.spriteUpdate(); // animação do sprite tem que ser no render

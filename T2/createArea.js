@@ -15,18 +15,22 @@ export class Area {
   static door = [];
   static elevadorCheck;
   static isDown = false;
-  static enemiesA1 = new EnemiesHandler();
-  static enemiesA2 = new EnemiesHandler();
-  static enemiesA3 = new EnemiesHandler();
-  static enemiesA4 = new EnemiesHandler();
+  static enemiesA1;
+  static enemiesA2;
+  static enemiesA3;
+  static enemiesA4;
 
 
   constructor(scene) {
     this.scene = scene;
   }
 
-  static createMap(scene) {
+  static createMap(scene, player) {
     let positions = [];
+    this.enemiesA1 = new EnemiesHandler(scene,player);
+    this.enemiesA2 = new EnemiesHandler(scene,player);
+    this.enemiesA3 = new EnemiesHandler(scene,player);
+    this.enemiesA4 = new EnemiesHandler(scene,player);
 
     //posições para o bloco principal de cada área
     positions.push(new THREE.Vector3(-160.0, 12.0, -172.0));
@@ -47,6 +51,7 @@ export class Area {
 
   //TODO: criar objeto de referencia para cada area
   static createAreaPilars(scene) {
+    this.enemiesA1.addEnemy('lostsoul');
     let position = new THREE.Vector3(-160.0, 2.0, -162.0);
     let height = 4.0;
     let length = 120.0;
@@ -513,6 +518,13 @@ static segundoAltar() {
     if (altarCollidable) {
         altarCollidable.box.setFromObject(altar, true);
     }
+}
+
+static handleEnemiesArea(){
+  this.enemiesA1.handleEnemies();
+  this.enemiesA2.handleEnemies();
+  this.enemiesA3.handleEnemies();
+  this.enemiesA4.handleEnemies();
 }
 }
 
