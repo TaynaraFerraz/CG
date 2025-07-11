@@ -13,6 +13,7 @@ export class Area {
   static altares = [];
   static elevador = [];
   static door = [];
+  static agroArea = [];
   static elevadorCheck;
   static isDown = false;
   static enemiesA1;
@@ -49,7 +50,6 @@ export class Area {
     this.createAreaCubes(scene);
   }
 
-  //TODO: criar objeto de referencia para cada area
   static createAreaPilars(scene) {
     this.enemiesA1.addEnemy('lostsoul');
     let position = new THREE.Vector3(-160.0, 2.0, -162.0);
@@ -113,6 +113,13 @@ export class Area {
     stair.receiveShadow = true;
 
     cube.add(stair);
+
+    let areaEnter = new THREE.Mesh(new THREE.BoxGeometry(30.0, 4.0, 8.0), this.lambertMaterial('white'));
+    areaEnter.visible = false;
+    areaEnter.position.set(stairPositionX,3.0,59.0);
+    cube.add(areaEnter);
+    let areaEnterBox = new THREE.Box3().setFromObject(areaEnter, true);
+    this.agroArea.push(areaEnterBox);
 
     let box = new THREE.Box3().setFromObject(stair, true);
     this.collidableStairs.push({ box: box, mesh: stair });
@@ -261,6 +268,13 @@ export class Area {
     let boxDoor = new THREE.Box3().setFromObject(door, true);
     this.collidableAreas.push({ box: boxDoor, mesh: door });
     this.door.push(door);
+
+    let areaEnter = new THREE.Mesh(new THREE.BoxGeometry(7.0, 4.0, 6.0), this.lambertMaterial('white'));
+    areaEnter.visible = false;
+    areaEnter.position.set(37.5,5.0,60.0);
+    cube.add(areaEnter);
+    let areaEnterBox = new THREE.Box3().setFromObject(areaEnter, true);
+    this.agroArea.push(areaEnterBox);
 
     //elevador
     let elevadorGeometry = new THREE.BoxGeometry(5.0, 6.0, 4.0);
@@ -520,11 +534,21 @@ static segundoAltar() {
     }
 }
 
-static handleEnemiesArea(){
+static handleEnemiesArea(player){
   this.enemiesA1.handleEnemies();
   this.enemiesA2.handleEnemies();
   this.enemiesA3.handleEnemies();
   this.enemiesA4.handleEnemies();
+}
+
+static enterArea(player, area){
+  let playerBox = new THREE.Box3().setFromObject(player, true);
+  area -= 1;
+  let boxArea = this.agroArea[area];
+  if(playerBox.intersectsBox(boxArea)){
+    return true;
+  }
+  return false;
 }
 }
 

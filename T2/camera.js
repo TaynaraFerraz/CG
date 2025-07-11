@@ -220,7 +220,7 @@ function render() {
     playerCollisionHandler.handleCollisions()
     
     //lidando com inimigos
-    Area.handleEnemiesArea();
+    Area.handleEnemiesArea(cameraHolder);
     //enemiesHandler.handleEnemies();
     if (player.activeGun instanceof ChainGun) {
         player.activeGun.spriteUpdate(); // animação do sprite tem que ser no render

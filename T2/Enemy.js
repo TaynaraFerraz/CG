@@ -13,7 +13,6 @@ export class Enemy {
     angry = true;
     dead = false;
     #oldPos;
-    #boundingBox;
     #raycaster;
     lookAtQuaternion;
     #healthBar
@@ -24,16 +23,14 @@ export class Enemy {
         this.#health = maxHealth;
         this.player = player;
 
-        this.#boundingBox = new THREE.Box3();
-        this.#boundingBox.setFromObject(object);
+        this.boundingBox = new THREE.Box3();
+        this.boundingBox.setFromObject(object);
         
         this.#minHeight = minHeight;
 
         this.#oldPos = new THREE.Vector3();
         this.object.getWorldPosition(this.#oldPos);
 
-        this.#boundingBox = new THREE.Box3();
-        this.#boundingBox.setFromObject(this.object);
         this.#raycaster = new THREE.Raycaster();
         this.#raycaster.far = 5;
 
@@ -87,7 +84,7 @@ export class Enemy {
 
         for (let key in Collidables.collidables) {
             Collidables.collidables[key].forEach((collidable) => {
-                if (this.#boundingBox.intersectsBox(collidable.box)) {
+                if (this.boundingBox.intersectsBox(collidable.box)) {
                     let direction = new THREE.Vector3();
                     this.object.getWorldDirection(direction);
                     this.#raycaster.set(this.object.position, direction);
