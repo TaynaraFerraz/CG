@@ -20,14 +20,14 @@ export class Gun {
         })
         const arma = new THREE.Mesh(armaGeometry, armaMaterial);
         arma.rotateX(Math.PI / 2);
-    
-        
         this.#arma = arma;
-        this.#scene.add(this.#arma);
-        this.#camera.add(this.#arma);
-        arma.position.set(0, -0.1, -0.1); // direita, baixo, frente
     }
 
+    add() {
+        this.#scene.add(this.#arma);
+        this.#camera.add(this.#arma);
+        this.#arma.position.set(0, -0.1, -0.1); // direita, baixo, frente
+    }
 
     shootBall() {
         let armaMundo = new THREE.Vector3();
@@ -48,11 +48,8 @@ export class Gun {
         this.#bulletsCollisionHandler.addSphere(sphere);
     }
 
-    remove(){
+    remove() {
         this.#camera.remove(this.#arma)
-        this.#arma.material.dispose()
-        this.#arma.geometry.dispose()
-        this.#arma = null
     }
 
     handleGun() {

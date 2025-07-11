@@ -84,7 +84,7 @@ camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, Area.lambertMaterial('red'));
-cameraHolder.position.set(-0, PLAYER_HEIGHT+8, -0);
+cameraHolder.position.set(-120, PLAYER_HEIGHT+8, -150);
 cameraHolder.add(camera);
 
 //inicializando o PointerLockControls customizado

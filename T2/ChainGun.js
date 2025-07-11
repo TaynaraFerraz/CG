@@ -16,7 +16,7 @@ export class ChainGun {
         this.#clock = new THREE.Clock()
         this.#scene = scene
         this.#spriteMixer = SpriteMixer();
-    
+
         let loader = new THREE.TextureLoader();
         loader.load("./spriteChainGun.png", (texture) => {
             this.#actionSprite = this.#spriteMixer.ActionSprite(texture, 5, 1);
@@ -24,12 +24,11 @@ export class ChainGun {
             this.#actionSprite.castShadow = true;
             this.#actionSprite.position.set(0, -0.1, -0.3);
             this.#actionSprite.scale.set(0.10, 0.10, 0.10);
-            this.#camera.add(this.#actionSprite);
         })
     }
 
-    addChainGun() {
-
+    add() {
+        this.#camera.add(this.#actionSprite);
     }
 
     shootBall() {
@@ -84,7 +83,5 @@ export class ChainGun {
 
     remove() {
         this.#camera.remove(this.#actionSprite)
-        this.#actionSprite = null
-        this.#action = null
     }
 }

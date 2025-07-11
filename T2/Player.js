@@ -21,9 +21,10 @@ export class Player {
         this.#camera = camera;
         this.object = object;
         this.#gun = new Gun(camera, scene);
+        this.#chainGun = new ChainGun(camera, scene)
         this.keys = [];
         this.activeGun = this.#gun
-
+        this.activeGun.add()
     }
 
     handlePlayer() {
@@ -34,19 +35,9 @@ export class Player {
     #switchGun(newGun) {
         if (this.activeGun === newGun) return;
 
-        if (this.activeGun === this.#gun)
-            this.#gun.remove();
-        else
-            this.#chainGun.remove();
-
-        if (newGun === this.#gun) {
-            this.#gun = new Gun(this.#camera, this.#scene)
-            this.activeGun = this.#gun
-        }
-        else if (newGun === this.#chainGun) {
-            this.#chainGun = new ChainGun(this.#camera, this.#scene)
-            this.activeGun = this.#chainGun
-        }
+        this.activeGun.remove()
+        this.activeGun = newGun
+        this.activeGun.add()
     }
 
     actions(controls) {
@@ -104,7 +95,7 @@ export class Player {
     }
 
     addKey(key) {
-        console.log(this.#camera.getWorldPosition(new THREE.Vector3()))
+        //console.log(this.#camera.getWorldPosition(new THREE.Vector3()))
 
         let position = this.#camera.getWorldPosition(new THREE.Vector3())
         let distance = key.position.distanceTo(position)
@@ -113,7 +104,7 @@ export class Player {
             key.removeKey()
             this.#catch = false;
         }
-        console.log(this.keys)
+        //console.log(this.keys)
     }
 
 }
