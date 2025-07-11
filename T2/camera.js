@@ -33,17 +33,18 @@ document.getElementById("webgl-output").appendChild(renderer.domElement);
 keyboard = new KeyboardState();
 
 light = new THREE.DirectionalLight('rgb(255,255,255)', 3);
-light.position.set(140.0, 200.0, 120.0);
+light.position.set(140.0, 220.0, 120.0);
 light.castShadow = true;
-light.shadow.mapSize.width = 1024;
-light.shadow.mapSize.height = 1024;
-light.shadow.camera.near = 0.1;
+light.shadow.mapSize.width = 1024*2;
+light.shadow.mapSize.height = 1024*2;
+light.shadow.camera.near = 0.01;
 light.shadow.camera.far = 600;
-light.shadow.camera.left = -500;
-light.shadow.camera.right = 500;
-light.shadow.camera.bottom = -500;
-light.shadow.camera.top = 500;
+light.shadow.camera.left = -450;
+light.shadow.camera.right = 450;
+light.shadow.camera.bottom = -450;
+light.shadow.camera.top = 450;
 light.shadow.bias = -0.0005;
+light.shadow.normalBias = 0.01;
 light.shadow.radius = 4;
 
 scene.add(light);
@@ -65,6 +66,19 @@ secondLight.shadow.bias = -0.0005;
 secondLight.shadow.radius = 4; */
 
 scene.add(secondLight);
+
+
+const lightCamera = new THREE.OrthographicCamera(
+    light.shadow.camera.left,
+    light.shadow.camera.right,
+    light.shadow.camera.top,
+    light.shadow.camera.bottom,
+    light.shadow.camera.near,
+    light.shadow.camera.far
+);
+lightCamera.position.copy(light.position);
+lightCamera.lookAt(light.target.position);
+
 
 const shadowCameraHelper = new THREE.CameraHelper(light.shadow.camera);
 //scene.add(shadowCameraHelper);
@@ -226,8 +240,19 @@ function render() {
         player.activeGun.spriteUpdate(); // animação do sprite tem que ser no render
     }
 
+    // Render principal
+    renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
+    renderer.setScissor(0, 0, window.innerWidth, window.innerHeight);
+    renderer.setScissorTest(true);
+    renderer.render(scene, camera);
+
+    // Render da câmera auxiliar no canto esquerdo superior (200x200 px)
+    renderer.setViewport(10, window.innerHeight - 210, 200, 200);
+    renderer.setScissor(10, window.innerHeight - 210, 200, 200);
+    renderer.setScissorTest(true);
+    //renderer.render(scene, lightCamera);
+
     requestAnimationFrame(render);
-    renderer.render(scene, camera) // Render scene
 }
 
 export { scene };
