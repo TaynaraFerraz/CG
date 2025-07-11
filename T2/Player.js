@@ -104,8 +104,6 @@ export class Player {
     }
 
     addKey(key) {
-        console.log(this.#camera.getWorldPosition(new THREE.Vector3()))
-
         let position = this.#camera.getWorldPosition(new THREE.Vector3())
         let distance = key.position.distanceTo(position)
         if (distance < 3.5 && this.#catch) {
@@ -113,7 +111,6 @@ export class Player {
             key.removeKey()
             this.#catch = false;
         }
-        console.log(this.keys)
     }
 
 }
