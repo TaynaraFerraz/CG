@@ -3,6 +3,7 @@ import {
   setDefaultMaterial} from "../libs/util/util.js";
 
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
+import { EnemiesHandler } from './EnemiesHandler.js';
 
 
 export class Area {
@@ -14,12 +15,18 @@ export class Area {
   static door = [];
   static elevadorCheck;
   static isDown = false;
+  static enemies = [area1, area2 , area3, area4];
 
   constructor(scene) {
     this.scene = scene;
   }
 
   static createMap(scene) {
+    this.enemies.area1 = new EnemiesHandler();
+    this.enemies.area2 = new EnemiesHandler();
+    this.enemies.area3 = new EnemiesHandler();
+    this.enemies.area4 = new EnemiesHandler();
+
     let positions = [];
 
     //posições para o bloco principal de cada área
@@ -508,4 +515,13 @@ static segundoAltar() {
         altarCollidable.box.setFromObject(altar, true);
     }
 }
+}
+
+export class enemiesAreas{
+  static inimigos = {
+    area1: enemies.aera1.enemies,
+    area2: enemies.area2.enemies,
+    area3: enemies.area3.enemies,
+    area4: enemies.area4.enemies,
+  };
 }

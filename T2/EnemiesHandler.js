@@ -6,7 +6,7 @@ import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
 import { LostSoul } from './LostSoul.js';
 
 export class EnemiesHandler {
-    #enemies = [];
+    enemies = [];
     #loader = {};
     #GLTFLoader = new GLTFLoader();
     #OBJLoader = new OBJLoader();
@@ -65,12 +65,12 @@ export class EnemiesHandler {
             obj = this.#fixPosition(obj);
             let enemy = enemyName == "cacodemon"? new Cacodemon(obj, this.#player) : new LostSoul(obj, this.#player);;
             this.#scene.add(obj);
-            this.#enemies.push(enemy);
+            this.enemies.push(enemy);
         })
     }
 
     handleEnemies() {
-        this.#enemies.forEach((enemy) => {
+        this.enemies.forEach((enemy) => {
             enemy.handle();
         });
     }

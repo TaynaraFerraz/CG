@@ -169,6 +169,7 @@ function moveAnimate(delta) {
         controls.moveRight(-moveSpeed);
     }
 }
+
 Area.createMap(scene);
 
 //colisores
@@ -182,8 +183,6 @@ let enemiesHandler = new EnemiesHandler(scene, cameraHolder);
 enemiesHandler.addEnemy('cacodemon');
 enemiesHandler.addEnemy('lostsoul');
 
-
-var movimentoCompleto = true;
 
 
 let player = new Player(scene, cameraHolder, camera);
