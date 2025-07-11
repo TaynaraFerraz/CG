@@ -15,17 +15,21 @@ export class Area {
   static door = [];
   static elevadorCheck;
   static isDown = false;
-  static enemies = [area1, area2 , area3, area4];
+  static enemiesA1 = [];
+  static enemiesA2 = [];
+  static enemiesA3 = [];
+  static enemiesA4 = [];
+
 
   constructor(scene) {
     this.scene = scene;
   }
 
   static createMap(scene) {
-    this.enemies.area1 = new EnemiesHandler();
-    this.enemies.area2 = new EnemiesHandler();
-    this.enemies.area3 = new EnemiesHandler();
-    this.enemies.area4 = new EnemiesHandler();
+    this.enemiesA1 = new EnemiesHandler();
+    this.enemiesA2 = new EnemiesHandler();
+    this.enemiesA3 = new EnemiesHandler();
+    this.enemiesA4 = new EnemiesHandler();
 
     let positions = [];
 

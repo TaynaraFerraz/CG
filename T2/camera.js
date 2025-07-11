@@ -180,10 +180,10 @@ Collidables.collidables = {
 }
 
 enemiesAreas.inimigos = {
-    area1: Area.enemies.aera1.enemies,
-    area2: Area.enemies.area2.enemies,
-    area3: Area.enemies.area3.enemies,
-    area4: Area.enemies.area4.enemies,
+    area1: Area.enemiesA1.enemies,
+    area2: Area.enemiesA2.enemies,
+    area3: Area.enemiesA3.enemies,
+    area4: Area.enemiesA4.enemies,
 };
 
 let enemiesHandler = new EnemiesHandler(scene, cameraHolder);
