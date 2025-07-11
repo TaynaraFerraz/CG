@@ -8,7 +8,7 @@ import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
 import { scene } from './camera.js';
 
 export class EnemiesHandler {
-    #enemies = [];
+    enemies = [];
     #amountOfEnemies;
     #killedEnemies = 0;
     #cleared = false;
@@ -89,11 +89,11 @@ export class EnemiesHandler {
     }
     
     addEnemy(enemyName) {
-        this.#addModel(enemyName, this, this.#enemies);
+        this.#addModel(enemyName, this, this.enemies);
     }
 
     handleEnemies() {
-        this.#enemies.filter((enemy) => {
+        this.enemies.filter((enemy) => {
             enemy.handle();
 
             if(enemy.dead){
