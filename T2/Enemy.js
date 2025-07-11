@@ -5,6 +5,7 @@ import { HealthBar } from './HealthBar.js';
 
 export class Enemy {
     object;
+    boundingBox;
     player;
     #health;
     #minHeight;
@@ -22,6 +23,9 @@ export class Enemy {
         this.#maxHealth = maxHealth;
         this.#health = maxHealth;
         this.player = player;
+
+        this.#boundingBox = new THREE.Box3();
+        this.#boundingBox.setFromObject(object);
         
         this.#minHeight = minHeight;
 
@@ -79,7 +83,7 @@ export class Enemy {
         deltaMovement.copy(currentPos);
         deltaMovement.addScaledVector(this.#oldPos, -1); //pegando o vetor da direção do movimento subtraindo posição antiga da nova
 
-        this.#boundingBox.setFromObject(this.object);
+        this.boundingBox.setFromObject(this.object);
 
         for (let key in Collidables.collidables) {
             Collidables.collidables[key].forEach((collidable) => {
