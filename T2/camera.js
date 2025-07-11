@@ -186,9 +186,9 @@ enemiesAreas.inimigos = {
     area4: Area.enemiesA4.enemies,
 };
 
-let enemiesHandler = new EnemiesHandler(scene, cameraHolder);
+/* let enemiesHandler = new EnemiesHandler(scene, cameraHolder);
 enemiesHandler.addEnemy('cacodemon');
-enemiesHandler.addEnemy('lostsoul');
+enemiesHandler.addEnemy('lostsoul'); */
 
 
 
@@ -221,7 +221,7 @@ function render() {
     
     //lidando com inimigos
     Area.handleEnemiesArea();
-    enemiesHandler.handleEnemies();
+    //enemiesHandler.handleEnemies();
     if (player.activeGun instanceof ChainGun) {
         player.activeGun.spriteUpdate(); // animação do sprite tem que ser no render
     }
