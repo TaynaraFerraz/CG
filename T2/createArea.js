@@ -365,6 +365,8 @@ export class Area {
     //inverte a posição para a area maior ficar voltada para o centro
     if (i == 3)
       cube.rotation.y = Math.PI;
+    cube.castShadow = true;
+    cube.receiveShadow = true;
     scene.add(cube);
 
     let boxCube = new THREE.Box3().setFromObject(cube, true);
@@ -374,11 +376,15 @@ export class Area {
     let cubeGeometry2 = new THREE.BoxGeometry(leftLength, height, height);
     let cubeLeft = new THREE.Mesh(cubeGeometry2, material);
     cubeLeft.position.set(-(length - leftLength) / 2, 0.0, 60.0);
+    cubeLeft.castShadow = true;
+    cubeLeft.receiveShadow = true;
     cube.add(cubeLeft);
 
     let cubeGeometry3 = new THREE.BoxGeometry(rightLength, height, height);
     let cubeRight = new THREE.Mesh(cubeGeometry3, material);
     cubeRight.position.set((length - rightLength) / 2, 0.0, 60.0);
+    cubeRight.castShadow = true;
+    cubeRight.receiveShadow = true;
     cube.add(cubeRight);
 
     let leftBoxCube = new THREE.Box3().setFromObject(cubeLeft, true);
@@ -414,6 +420,8 @@ export class Area {
       } else {
         stairStep.position.set(stairPositionX, -10.5 + stairHeight * i, 60 - (stairHeight * i) / 2);
       }
+      stairStep.castShadow = true;
+      stairStep.receiveShadow = true;
       cube.add(stairStep);
     }
   }
