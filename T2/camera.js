@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import KeyboardState from '../libs/util/KeyboardState.js'
 import { PointerLockControls } from './PointerLockControls.js'
-import { Area } from './createArea.js';
+import { Area, enemiesAreas } from './createArea.js';
 import {
     initRenderer,
     initDefaultBasicLight,
@@ -13,7 +13,7 @@ import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
 import { EnemiesHandler } from './EnemiesHandler.js';
 import { Collidables } from './Collidables.js'
-import { Key} from './Key.js';
+import { Key } from './Key.js';
 import { ChainGun } from './ChainGun.js';
 import { Player } from './Player.js';
 
@@ -49,7 +49,7 @@ light.shadow.radius = 4;
 scene.add(light);
 
 let secondLight;
-secondLight = new THREE.HemisphereLight('white','darkslategray',0.3);
+secondLight = new THREE.HemisphereLight('white', 'darkslategray', 0.3);
 secondLight.castShadow = false;
 /* secondLight = new THREE.DirectionalLight('rgb(255,255,255)', 0.5);
 secondLight.position.set(-140.0, 100.0, -120.0);
@@ -84,7 +84,7 @@ camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, Area.lambertMaterial('red'));
-cameraHolder.position.set(-120, PLAYER_HEIGHT+8, -150);
+cameraHolder.position.set(-120, PLAYER_HEIGHT + 8, -150);
 cameraHolder.add(camera);
 
 //inicializando o PointerLockControls customizado
@@ -130,24 +130,24 @@ window.addEventListener('keyup', (event) => movementControls(event.keyCode, fals
 function movementControls(key, value) {
     switch (key) {
         case 16: // SHIFT
-        shift = value;
-        break;
+            shift = value;
+            break;
         case 87: // W
         case 38: // Seta pra cima
-        moveForward = value;
-        break;
+            moveForward = value;
+            break;
         case 83: // S
         case 40: // Seta pra baixo
-        moveBackward = value;
-        break;
+            moveBackward = value;
+            break;
         case 65: // A
         case 37: // Seta pra esquerda
-        moveLeft = value;
-        break;
+            moveLeft = value;
+            break;
         case 68: // D
         case 39: // Seta pra direita
-        moveRight = value;
-        break;
+            moveRight = value;
+            break;
     }
 }
 
@@ -161,7 +161,7 @@ function moveAnimate(delta) {
     else if (moveBackward) {
         controls.moveForward(-moveSpeed);
     }
-    
+
     if (moveRight) {
         controls.moveRight(moveSpeed);
     }
@@ -182,14 +182,18 @@ let enemiesHandler = new EnemiesHandler(scene, cameraHolder);
 enemiesHandler.addEnemy('cacodemon');
 enemiesHandler.addEnemy('lostsoul');
 
-
-var movimentoCompleto = true;
+enemiesAreas.inimigos = {
+    area1: Area.enemiesA1.enemies,
+    area2: Area.enemiesA2.enemies,
+    area3: Area.enemiesA3.enemies,
+    area4: Area.enemiesA4.enemies,
+};
 
 
 let player = new Player(scene, cameraHolder, camera);
 let playerCollisionHandler = new PlayerCollisionHandler(player.object, Collidables.collidables);
-let initialKey = new Key(scene, "rgb(223, 47, 47)"); // fazer um controle para aparecer apenas quando matar os inimigos
-
+let initialKey
+let secondKey
 player.actions(controls)
 
 // Listen window size changes
@@ -201,14 +205,47 @@ function render() {
         moveAnimate(clock.getDelta());
     }
 
-    //if(inimigosUmDerrotados)
-        Area.primeiroAltar();
-    //if(cahveUmColocada)
-        Area.doorDown();
+    if (enemiesAreas.inimigos.area1.length === 0 && player.keys.length === 0) {
+        if (!initialKey)
+            initialKey = new Key("rgb(223, 47, 47)");
+        else
+            Area.primeiroAltar(initialKey.csgFinal);
+    }
+
+    // Só tenta pegar a chave se existir e ainda não coletada
+    if (initialKey && !initialKey.coletada) {
+        player.addKey(initialKey);
+    }
+
+    if (player.keys.length === 1 && initialKey.coletada) {
+        let position = camera.getWorldPosition(new THREE.Vector3())
+        let target = new THREE.Vector3(37.5, 1.8, -92.0);
+        let distance = position.distanceTo(target)
+        if(distance < 3.5){
+            initialKey.csgFinal.position.set(37.5, 1.8, -92.0)
+            initialKey.csgFinal.visible = true
+            scene.add(initialKey.csgFinal)
+        }
+        
+        if(initialKey.csgFinal.position.equals(new THREE.Vector3(37.5, 1.8, -92.0)))
+            Area.doorDown();
+
+    }
+
+     if (enemiesAreas.inimigos.area2.length === 0 && player.keys.length === 1) {
+        if (!secondKey)
+            secondKey = new Key("rgba(247, 231, 15, 1)");   
+        else
+            Area.segundoAltar(secondKey.csgFinal);
+    }
+
+    if (secondKey && !secondKey.coletada) {
+        player.addKey(secondKey);
+    }
+
     //if(inimigosDoisDerrotados)
-        Area.segundoAltar();
+    
     player.handlePlayer();
-    player.addKey(initialKey)
 
     //lidando com as colisões
     playerCollisionHandler.handleCollisions();

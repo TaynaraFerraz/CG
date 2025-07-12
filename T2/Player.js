@@ -14,7 +14,6 @@ export class Player {
     #shoot = false
     #intervalShoot
     #lastShotTime = 0
-    #catch = true
 
     constructor(scene, object, camera) {
         this.#scene = scene;
@@ -78,6 +77,7 @@ export class Player {
         });
 
         document.addEventListener('keydown', (event) => {
+            if (!controls.isLocked) return;
             if (event.key === '1') {
                 this.#switchGun(this.#chainGun)
             }
@@ -87,6 +87,7 @@ export class Player {
         });
 
         document.addEventListener('wheel', (event) => {
+            if (!controls.isLocked) return;
             if (this.activeGun == this.#chainGun)
                 this.#switchGun(this.#gun);
             else
@@ -95,16 +96,18 @@ export class Player {
     }
 
     addKey(key) {
-        //console.log(this.#camera.getWorldPosition(new THREE.Vector3()))
+        if (key) {
+            let position = this.#camera.getWorldPosition(new THREE.Vector3())
+            let positionKey = key.csgFinal.getWorldPosition(new THREE.Vector3())
 
-        let position = this.#camera.getWorldPosition(new THREE.Vector3())
-        let distance = key.position.distanceTo(position)
-        if (distance < 3.5 && this.#catch) {
-            this.keys.push(key)
-            key.removeKey()
-            this.#catch = false;
+            let distance = positionKey.distanceTo(position)
+            if (distance < 3.5 ) {
+                this.keys.push(key)
+                key.removeKey();
+            }
+            console.log(this.keys)
         }
-        //console.log(this.keys)
+
     }
 
 }

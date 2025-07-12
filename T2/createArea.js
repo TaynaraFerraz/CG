@@ -3,6 +3,7 @@ import {
   setDefaultMaterial} from "../libs/util/util.js";
 
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
+import { EnemiesHandler } from './EnemiesHandler.js';
 
 
 export class Area {
@@ -14,12 +15,21 @@ export class Area {
   static door = [];
   static elevadorCheck;
   static isDown = false;
+  static enemiesA1 = [];
+  static enemiesA2 = [];
+  static enemiesA3 = [];
+  static enemiesA4 = [];
 
   constructor(scene) {
     this.scene = scene;
   }
 
   static createMap(scene) {
+    this.enemiesA1 = new EnemiesHandler();
+    this.enemiesA2 = new EnemiesHandler();
+    this.enemiesA3 = new EnemiesHandler();
+    this.enemiesA4 = new EnemiesHandler();
+
     let positions = [];
 
     //posições para o bloco principal de cada área
@@ -487,20 +497,29 @@ export class Area {
     }
   }
   
-  static primeiroAltar() {
+  static primeiroAltar(key) {
     let altar = this.altares[0];
     altar.position.lerp(new THREE.Vector3(0.0, 1.0, 0.0), 0.01);
-
+    if(key){
+      altar.add(key)
+      key.position.set(0, 3.4, 0)
+    }
+    
     // Atualiza a Box3 do altar no vetor de colisão
     let altarCollidable = this.collidableAreas.find(obj => obj.mesh === altar);
     if (altarCollidable) {
         altarCollidable.box.setFromObject(altar, true);
     }
+
 }
 
-static segundoAltar() {
+static segundoAltar(key) {
     let altar = this.altares[1];
     altar.position.lerp(new THREE.Vector3(0.0, 1.7, 0.0), 0.01);
+    if(key){
+      altar.add(key)
+      key.position.set(0, 3.3, 0)
+    }
 
     // Atualiza a Box3 do altar no vetor de colisão
     let altarCollidable = this.collidableAreas.find(obj => obj.mesh === altar);
@@ -508,4 +527,8 @@ static segundoAltar() {
         altarCollidable.box.setFromObject(altar, true);
     }
 }
+}
+
+export class enemiesAreas{
+  static inimigos = {};
 }
