@@ -11,7 +11,6 @@ import {
 } from "../libs/util/util.js";
 import { PlayerCollisionHandler } from './PlayerCollisionHandler.js';
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
-import { EnemiesHandler } from './EnemiesHandler.js';
 import { Collidables } from './Collidables.js'
 import { Key } from './Key.js';
 import { ChainGun } from './ChainGun.js';
@@ -205,10 +204,10 @@ enemiesAreas.inimigos = {
 let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera, enemiesAreas);
 let player = new Player(scene, cameraHolder, camera, bulletsCollisionHandler, enemiesAreas);
 let playerCollisionHandler = new PlayerCollisionHandler(player.object, Collidables.collidables);
-let initialKey
+let initialKey = false
 let secondKey
-player.actions(controls)
 
+player.actions(controls)
 
 // Listen window size changes
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
@@ -219,10 +218,10 @@ function render() {
         moveAnimate(clock.getDelta());
     }
     
-    console.log(enemiesAreas.inimigos)
-    console.log(enemiesAreas.inimigos.area1.length)
+    // console.log(enemiesAreas.inimigos)
+    // console.log(enemiesAreas.inimigos.area1.length)
     console.log(player.keys.length, 'chave')
-    console.log(typeof enemiesAreas.inimigos)
+    // console.log(typeof enemiesAreas.inimigos)
     //verifica a morte dos inimigos da area 1
     if (enemiesAreas.inimigos.area1.length === 0 && player.keys.length === 0) {
         if (!initialKey)

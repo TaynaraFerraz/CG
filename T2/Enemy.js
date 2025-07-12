@@ -160,7 +160,7 @@ export class Enemy {
             }
         }
         if (this.dying) {
-            console.log(this.object);
+           // console.log(this.object);
             dimMeshesOpacities(this.object);
             if (opacity <= 0) {
                 this.#healthBar.remove();

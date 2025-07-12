@@ -43,7 +43,7 @@ export class EnemiesHandler {
         return obj;
     };
 
-    #addModel(enemyName, classThis, enemies, position) {
+    #addModel(enemyName, classThis, enemies, position, enemiesArea) {
         if (enemyName == "cacodemon") {
             let gtfLoader = new GLTFLoader();
             gtfLoader.load(`./assets/cacodemon.glb`, function (response) {
@@ -64,7 +64,7 @@ export class EnemiesHandler {
 
                 scene.add(obj);
 
-                enemies.push(new Cacodemon(obj, classThis.#player, position));
+                enemies.push(new Cacodemon(obj, classThis.#player, position, enemiesArea));
             })
         } else {
             let mtlLoader = new MTLLoader();
@@ -93,8 +93,8 @@ export class EnemiesHandler {
         }
     }
 
-    addEnemy(enemyName,position) {
-        this.#addModel(enemyName, this, this.enemies, position);
+    addEnemy(enemyName,position, enemiesArea) {
+        this.#addModel(enemyName, this, this.enemies, position, enemiesArea);
     }
 
     handleEnemies() {

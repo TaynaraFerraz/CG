@@ -99,17 +99,15 @@ export class Player {
     }
 
     addKey(key) {
-        if (key) {
-            let position = this.#camera.getWorldPosition(new THREE.Vector3())
-            let positionKey = key.csgFinal.getWorldPosition(new THREE.Vector3())
+        let position = this.#camera.getWorldPosition(new THREE.Vector3())
+        let positionKey = key.csgFinal.getWorldPosition(new THREE.Vector3())
 
-            let distance = positionKey.distanceTo(position)
-            if (distance < 3.5 ) {
-                this.keys.push(key)
-                key.removeKey();
-            }
-            //console.log(this.keys)
+        let distance = positionKey.distanceTo(position)
+        if (distance < 3.5) {
+            this.keys.push(key)
+            key.removeKey();
         }
+        //console.log(this.keys)
 
     }
 

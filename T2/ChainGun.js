@@ -54,9 +54,9 @@ export class ChainGun {
 
         const raycaster = new THREE.Raycaster(initialPosition, direction.normalize());
 
-        //console.log(this.enemiesArea.inimigos)
+        console.log(this.enemiesArea.inimigos, 'chaingun')
         const allEnemies = Object.values(this.enemiesArea.inimigos).flat();
-        const enemyMeshes = allEnemies.map(e => e.object);
+        const enemyMeshes = allEnemies.map(e => e.object).filter(Boolean);
 
         console.log(enemyMeshes)
 
