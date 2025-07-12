@@ -59,7 +59,7 @@ export class EnemiesHandler {
                     }
                 });
 
-                obj = classThis.normalizeAndRescale(obj, 2);
+                obj = classThis.normalizeAndRescale(obj, 4);
                 obj = classThis.fixPosition(obj);
 
                 scene.add(obj);
@@ -83,7 +83,7 @@ export class EnemiesHandler {
                         }
                     });
 
-                    obj = classThis.normalizeAndRescale(obj, 2);
+                    obj = classThis.normalizeAndRescale(obj, 3);
                     obj = classThis.fixPosition(obj);
                     scene.add(obj);
 
@@ -95,14 +95,9 @@ export class EnemiesHandler {
 
     addEnemy(enemyName,position) {
         this.#addModel(enemyName, this, this.enemies, position);
-        //console.log("adicionou");
-        //console.log(this.enemies);
     }
 
     handleEnemies() {
-        //console.log(this.enemies.length);
-
-        //this.addEnemy('cacodemon')
         if (this.enemies.length != 0) {
             this.enemies = this.enemies.filter((enemy) => {
                 enemy.handle();

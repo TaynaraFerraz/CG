@@ -1,15 +1,20 @@
 import { setDefaultMaterial } from "../libs/util/util.js";
+import { BulletsCollisionHandler } from "./BulletsCollisionHandler.js";
 import { scene } from "./camera.js";
+import { Collidables } from "./Collidables.js";
 import { Enemy } from "./Enemy.js";
 import * as THREE from 'three';
 
 export class Cacodemon extends Enemy {
     #randomized = false;
     #canShoot = true;
+    #bulletsCollisionHandler;
 
     constructor(object, player, initialPosition) {
         super(object, player, 40, undefined, initialPosition);
         object.name = "cacodemon";
+        this.#bulletsCollisionHandler = new BulletsCollisionHandler(scene, this.object);
+        this.#bulletsCollisionHandler.speed = 1;
 
         this.randomizerCallback();
     }
@@ -23,14 +28,14 @@ export class Cacodemon extends Enemy {
                     setTimeout(() => {
                         this.#randomized = false;
                         this.randomizerCallback();
-                    }, 1500);
+                    }, Math.random() * 1000 + 1000);
                 } else {
 
                     setTimeout(() => {
                         this.#randomized = true;
                         this.randomizeQuaternion();
                         this.randomizerCallback();
-                    }, 3000);
+                    }, Math.random() * 2500 + 1000);
                 }
             } else {
                 this.randomizeQuaternion();
@@ -70,6 +75,7 @@ export class Cacodemon extends Enemy {
             sphere.position.copy(worldPosition);
 
             scene.add(sphere);
+            this.#bulletsCollisionHandler.addSphere(sphere);
     }
 
     handleShooting() {
@@ -90,5 +96,6 @@ export class Cacodemon extends Enemy {
         }
         this.handleCollisions();
         this.handleHealth();
+        this.#bulletsCollisionHandler.handleBulletsCollisions(Collidables.collidables);
     }
 };

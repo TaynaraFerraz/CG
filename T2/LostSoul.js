@@ -24,14 +24,14 @@ export class LostSoul extends Enemy {
                     setTimeout(() => {
                         this.#randomized = false;
                         this.randomizerCallback();
-                    }, 800);
+                    }, Math.random() * 200 + 800);
                 } else {
                     
                     setTimeout(() => {
                         this.#randomized = true;
                         this.randomizeQuaternion();
                         this.randomizerCallback();
-                    }, 1500);
+                    }, Math.random() * 1000 + 1000);
                 }
             } else {
                 this.randomizeQuaternion();
@@ -80,7 +80,7 @@ export class LostSoul extends Enemy {
                     this.#moveTowardsPlayer(turnSpeed, speed);
                 } else {
                     this.rotateTowardsQuaternion();
-                    this.object.translateZ(0.08);
+                    this.object.translateZ(0.05);
                 }
             }
         } else {
