@@ -1,6 +1,8 @@
 import { Vector3 } from "../build/three.module.js";
 import { SpriteMixer } from "../libs/sprites/SpriteMixer.js";
 import * as THREE from 'three';
+import { BulletsCollisionHandler } from "./BulletsCollisionHandler.js";
+import { Collidables } from "./Collidables.js";
 
 export class ChainGun {
 
@@ -10,13 +12,17 @@ export class ChainGun {
     #spriteMixer
     #action
     #clock
+    #bulletsCollisionHandler
+    enemiesArea
 
-    constructor(camera, scene) {
+    constructor(camera, scene, bulletsCollisionHandler, enemiesArea) {
         this.#camera = camera
         this.#clock = new THREE.Clock()
         this.#scene = scene
+        this.enemiesArea = enemiesArea
         this.#spriteMixer = SpriteMixer();
-    
+        this.#bulletsCollisionHandler = bulletsCollisionHandler
+
         let loader = new THREE.TextureLoader();
         loader.load("./spriteChainGun.png", (texture) => {
             this.#actionSprite = this.#spriteMixer.ActionSprite(texture, 5, 1);
@@ -24,12 +30,15 @@ export class ChainGun {
             this.#actionSprite.castShadow = true;
             this.#actionSprite.position.set(0, -0.1, -0.3);
             this.#actionSprite.scale.set(0.10, 0.10, 0.10);
-            this.#camera.add(this.#actionSprite);
         })
     }
 
-    addChainGun() {
+    add() {
+        this.#camera.add(this.#actionSprite);
+    }
 
+    handleGun() {
+        this.#bulletsCollisionHandler.handleBulletsCollisions(Collidables.collidables);
     }
 
     shootBall() {
@@ -45,46 +54,42 @@ export class ChainGun {
 
         const raycaster = new THREE.Raycaster(initialPosition, direction.normalize());
 
-        // ---------------------- apenas para ver a direção atraves da linha ---------------------
-        // const length = 10; // tamanho da linha
-        // const endPoint = new THREE.Vector3().copy(initialPosition).add(direction.clone().multiplyScalar(length));
+        //console.log(this.enemiesArea.inimigos)
+        const allEnemies = Object.values(this.enemiesArea.inimigos).flat();
+        const enemyMeshes = allEnemies.map(e => e.object);
 
-        // const geometry = new THREE.BufferGeometry().setFromPoints([
-        //     initialPosition,
-        //     endPoint
-        // ]);
+        console.log(enemyMeshes)
 
-        // const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+        //raio para identificar objetos nessa direção
+        const intersect = raycaster.intersectObjects(enemyMeshes, true);
 
-        // const line = new THREE.Line(geometry, material);
-        // this.#scene.add(line);
+        if (intersect.length > 0) {
+            const hit = intersect[0].object
 
-        //-----------------------------considerar apenas os inimigos para efeitos de danos
-        // const collidableMeshes = [
-        //     ...collidables.areas.map(obj => obj.mesh),
-        //     ...collidables.walls.map(obj => obj.mesh),
-        // ];
+            const enemyHit = allEnemies.find(e =>
+                e.object === hit || e.object.children.includes(hit) || e.object.getObjectById(hit.id) !== undefined
+            );
 
-        // const intersect = raycaster.intersectObjects(collidableMeshes, true);
-
-        // if (intersect.length > 0 ) {
-        //     console.log("colidiu")
-        // }
-
+            if (enemyHit) {
+                console.log('colidiu com inimigo')
+                console.log(enemyHit)
+                enemyHit.damage(1)
+            }
+            else
+                console.log('colidiu normal')
+            
+        }
     }
+        spriteUpdate() {
+            let delta = this.#clock.getDelta()
+            this.#spriteMixer.update(delta)
+        }
 
-    spriteUpdate() {
-        let delta = this.#clock.getDelta()
-        this.#spriteMixer.update(delta)
-    }
+        stopAction() {
+            this.#action.stop();
+        }
 
-    stopAction() {
-        this.#action.stop();
+        remove() {
+            this.#camera.remove(this.#actionSprite)
+        }
     }
-
-    remove() {
-        this.#camera.remove(this.#actionSprite)
-        this.#actionSprite = null
-        this.#action = null
-    }
-}

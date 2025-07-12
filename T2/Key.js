@@ -3,13 +3,13 @@ import { CSG } from "../libs/other/CSGMesh.js";
 
 export class Key {
 
-    #scene
     position
     color
-    #csgFinal
+    material
+    csgFinal
+    coletada = false
 
-    constructor(scene, color) {
-        this.#scene = scene;
+    constructor(color) {
         this.color = color;
         let cubeGeometry = new THREE.BoxGeometry(2, 2, 2);
         let cube = new THREE.Mesh(cubeGeometry);
@@ -38,21 +38,23 @@ export class Key {
         let csgObject = cubeCSG.subtract(cylinder1CSG);
         let csgObject1 = csgObject.subtract(cylinder2CSG);
         let csgObject2 = csgObject1.subtract(cylinder3CSG);
-        this.#csgFinal = CSG.toMesh(csgObject2, new THREE.Matrix4())
-        this.#csgFinal.material = new THREE.MeshPhongMaterial({
+        this.csgFinal = CSG.toMesh(csgObject2, new THREE.Matrix4())
+        this.material = new THREE.MeshPhongMaterial({
             "color": color,
             "shininess": "200",
             "specular": "rgb(255,255,255)"
         })
-
-        this.#csgFinal.scale.set(0.3, 0.3, 0.3);
-        this.position = this.#csgFinal.position.set(-160.0, 6.9, -162.0);
-        this.#scene.add(this.#csgFinal);
+        this.csgFinal.material = this.material
+        this.csgFinal.scale.set(0.3, 0.3, 0.3);
+        //this.position = this.csgFinal.position.set(-160.0, 6.9, -162.0);
+        //this.#scene.add(this.csgFinal);
     }
 
-    removeKey(){
-        this.#scene.remove(this.#csgFinal)
-        this.#csgFinal.geometry.dispose()
-        this.#csgFinal.material.dispose()
+    removeKey() {
+        if (this.coletada) return;
+
+        this.csgFinal.visible = false
+        this.coletada = true;
+
     }
 }

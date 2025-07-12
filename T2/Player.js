@@ -14,39 +14,32 @@ export class Player {
     #shoot = false
     #intervalShoot
     #lastShotTime = 0
-    #catch = true
+    bulletsCollisionHandler
+    enemiesAreas
 
-    constructor(scene, object, camera) {
+    constructor(scene, object, camera, bulletsCollisionHandler, enemiesAreas) {
         this.#scene = scene;
         this.#camera = camera;
         this.object = object;
-        this.#gun = new Gun(camera, scene);
+        this.enemiesAreas = enemiesAreas
+        this.bulletsCollisionHandler = bulletsCollisionHandler
+        this.#gun = new Gun(camera, scene, bulletsCollisionHandler);
+        this.#chainGun = new ChainGun(camera, scene, bulletsCollisionHandler, enemiesAreas)
         this.keys = [];
         this.activeGun = this.#gun
-
+        this.activeGun.add()
     }
 
     handlePlayer() {
-        if (this.activeGun == this.#gun)
-            this.#gun.handleGun();
+        this.activeGun.handleGun();
     }
 
     #switchGun(newGun) {
         if (this.activeGun === newGun) return;
 
-        if (this.activeGun === this.#gun)
-            this.#gun.remove();
-        else
-            this.#chainGun.remove();
-
-        if (newGun === this.#gun) {
-            this.#gun = new Gun(this.#camera, this.#scene)
-            this.activeGun = this.#gun
-        }
-        else if (newGun === this.#chainGun) {
-            this.#chainGun = new ChainGun(this.#camera, this.#scene)
-            this.activeGun = this.#chainGun
-        }
+        this.activeGun.remove()
+        this.activeGun = newGun
+        this.activeGun.add()
     }
 
     actions(controls) {
@@ -72,7 +65,7 @@ export class Player {
                         this.activeGun.shootBall();
                         this.#lastShotTime = now;
                     }
-                }, 50);
+                }, 100);
             }
         });
 
@@ -87,6 +80,7 @@ export class Player {
         });
 
         document.addEventListener('keydown', (event) => {
+            if (!controls.isLocked) return;
             if (event.key === '1') {
                 this.#switchGun(this.#chainGun)
             }
@@ -96,6 +90,7 @@ export class Player {
         });
 
         document.addEventListener('wheel', (event) => {
+            if (!controls.isLocked) return;
             if (this.activeGun == this.#chainGun)
                 this.#switchGun(this.#gun);
             else
@@ -104,13 +99,18 @@ export class Player {
     }
 
     addKey(key) {
-        let position = this.#camera.getWorldPosition(new THREE.Vector3())
-        let distance = key.position.distanceTo(position)
-        if (distance < 3.5 && this.#catch) {
-            this.keys.push(key)
-            key.removeKey()
-            this.#catch = false;
+        if (key) {
+            let position = this.#camera.getWorldPosition(new THREE.Vector3())
+            let positionKey = key.csgFinal.getWorldPosition(new THREE.Vector3())
+
+            let distance = positionKey.distanceTo(position)
+            if (distance < 3.5 ) {
+                this.keys.push(key)
+                key.removeKey();
+            }
+            //console.log(this.keys)
         }
+
     }
 
 }
