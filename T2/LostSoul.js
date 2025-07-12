@@ -51,7 +51,7 @@ export class LostSoul extends Enemy {
                     this.dashingCallBack();
                 }, 600);
             } else {
-                const nextDash = Math.random() * 1000 + 3000;
+                const nextDash = Math.random() * 2000 + 2000;
                 setTimeout(() => {
                     this.#dashing = true;
                     this.#dynamicTurnSpeed = this.#dashingTurnSpeed;

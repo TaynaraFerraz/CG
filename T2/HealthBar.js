@@ -15,25 +15,31 @@ export class HealthBar {
         let greenPlaneGeometry = new THREE.PlaneGeometry(barWidth, barHeight);
         let greenPlaneMaterial = new THREE.MeshBasicMaterial({ color: '#00910c', side: THREE.DoubleSide });
         this.#greenBar = new THREE.Mesh(greenPlaneGeometry, greenPlaneMaterial);
-        this.#greenBar.translateY(2.3);
-
-
+        
+        
         let redPlaneGeometry = new THREE.PlaneGeometry(0, barHeight);
         let redPlaneMaterial = new THREE.MeshBasicMaterial({ color: '#8d0000', side: THREE.DoubleSide });
         this.#redBar = new THREE.Mesh(redPlaneGeometry, redPlaneMaterial);
-        this.#redBar.translateY(2.3);
-
+        
+        this.#greenBar.position.copy(enemy.object.position)
         scene.add(this.#greenBar);
-        enemy.object.attach(this.#greenBar);
-
+        
+        this.#redBar.position.copy(enemy.object.position)
         scene.add(this.#redBar);
-        enemy.object.attach(this.#redBar);
+    }
+
+    #positionBars(){
+        this.#greenBar.position.copy(this.#enemy.object.position);
+        this.#greenBar.translateY(2.3);
+        this.#redBar.position.copy(this.#enemy.object.position);
+        this.#redBar.translateY(2.3);
     }
 
     #rotateBars() {
         let playerPosition = new THREE.Vector3();
 
         playerPosition = this.#enemy.player.getWorldPosition(playerPosition);
+        playerPosition.y = this.#greenBar.position.y;
 
         this.#greenBar.lookAt(playerPosition);
         this.#redBar.lookAt(playerPosition);
@@ -51,12 +57,12 @@ export class HealthBar {
         this.#redBar.geometry.dispose();
         this.#redBar.geometry = new THREE.PlaneGeometry(this.#barWidth - greenBarWidth, this.#barHeight);
         this.#redBar.geometry.translate(this.#barWidth / 2 - redBarWidth / 2, 0, 0)
-
     }
 
     update(health, maxHealth) {
-        this.#rotateBars();
+        this.#positionBars();
         this.#resizeBars(health, maxHealth);
+        this.#rotateBars();
     }
 
     remove() {
