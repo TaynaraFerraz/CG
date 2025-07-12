@@ -38,7 +38,7 @@ export class ChainGun {
     }
 
     handleGun() {
-        this.#bulletsCollisionHandler.handleBulletsCollisions(Collidables.collidables);
+        this.#bulletsCollisionHandler.handleCollisionsGun(Collidables.collidables, this.enemiesArea);
     }
 
     shootBall() {

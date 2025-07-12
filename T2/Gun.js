@@ -8,10 +8,12 @@ export class Gun {
     #camera
     #scene
     #bulletsCollisionHandler
+    enemiesAreas
 
-    constructor(camera, scene, bulletsCollisionHandler) {
+    constructor(camera, scene, bulletsCollisionHandler, enemiesAreas) {
         this.#camera = camera;
         this.#scene = scene;
+        this.enemiesAreas = enemiesAreas
         this.#bulletsCollisionHandler = bulletsCollisionHandler
 
         const armaGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 32);
@@ -53,7 +55,6 @@ export class Gun {
     }
 
     handleGun() {
-        this.#bulletsCollisionHandler.handleBulletsCollisions(Collidables.collidables);
-        //console.log(this.#arma.position);
+        this.#bulletsCollisionHandler.handleCollisionsGun(Collidables.collidables, this.enemiesAreas);
     }
 }

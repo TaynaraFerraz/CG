@@ -201,7 +201,7 @@ enemiesAreas.inimigos = {
 };
 
 
-let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera, enemiesAreas);
+let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
 let player = new Player(scene, cameraHolder, camera, bulletsCollisionHandler, enemiesAreas);
 let playerCollisionHandler = new PlayerCollisionHandler(player.object, Collidables.collidables);
 let initialKey = false
@@ -218,11 +218,10 @@ function render() {
         moveAnimate(clock.getDelta());
     }
     
-    // console.log(enemiesAreas.inimigos)
-    // console.log(enemiesAreas.inimigos.area1.length)
+    //lidando com inimigos
+    Area.handleEnemiesArea(cameraHolder);
     console.log(player.keys.length, 'chave')
-    // console.log(typeof enemiesAreas.inimigos)
-    //verifica a morte dos inimigos da area 1
+    
     if (enemiesAreas.inimigos.area1.length === 0 && player.keys.length === 0) {
         if (!initialKey)
             initialKey = new Key("rgb(223, 47, 47)");
@@ -262,13 +261,9 @@ function render() {
     }
     
     player.handlePlayer();
-
     //lidando com as colisões
     playerCollisionHandler.handleCollisions()
     
-    //lidando com inimigos
-    Area.handleEnemiesArea(cameraHolder);
-    //enemiesHandler.handleEnemies();
     if (player.activeGun instanceof ChainGun) {
         player.activeGun.spriteUpdate(); // animação do sprite tem que ser no render
     }

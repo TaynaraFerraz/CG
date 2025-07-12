@@ -23,7 +23,7 @@ export class Player {
         this.object = object;
         this.enemiesAreas = enemiesAreas
         this.bulletsCollisionHandler = bulletsCollisionHandler
-        this.#gun = new Gun(camera, scene, bulletsCollisionHandler);
+        this.#gun = new Gun(camera, scene, bulletsCollisionHandler, enemiesAreas);
         this.#chainGun = new ChainGun(camera, scene, bulletsCollisionHandler, enemiesAreas)
         this.keys = [];
         this.activeGun = this.#gun
