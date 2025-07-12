@@ -45,17 +45,29 @@ export class HealthBar {
 
         this.#greenBar.geometry.dispose();
         this.#greenBar.geometry = new THREE.PlaneGeometry(greenBarWidth, this.#barHeight);
-        this.#greenBar.geometry.translate((-this.#barWidth/2 + greenBarWidth/2), 0, 0);
+        this.#greenBar.geometry.translate((-this.#barWidth / 2 + greenBarWidth / 2), 0, 0);
 
         let redBarWidth = this.#barWidth - greenBarWidth;
         this.#redBar.geometry.dispose();
         this.#redBar.geometry = new THREE.PlaneGeometry(this.#barWidth - greenBarWidth, this.#barHeight);
-        this.#redBar.geometry.translate(this.#barWidth/2 - redBarWidth/2, 0, 0)
+        this.#redBar.geometry.translate(this.#barWidth / 2 - redBarWidth / 2, 0, 0)
 
     }
 
     update(health, maxHealth) {
         this.#rotateBars();
         this.#resizeBars(health, maxHealth);
+    }
+
+    remove() {
+        scene.remove(this.#greenBar);
+        scene.remove(this.#redBar);
+        this.#greenBar.geometry.dispose();
+        this.#greenBar.material.dispose();
+        this.#greenBar = undefined;
+
+        this.#redBar.geometry.dispose();
+        this.#redBar.material.dispose();
+        this.#redBar = undefined;
     }
 }

@@ -85,7 +85,7 @@ camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, Area.lambertMaterial('red'));
-cameraHolder.position.set(-120, PLAYER_HEIGHT + 8, -150);
+cameraHolder.position.set(0, PLAYER_HEIGHT + 8, 0);
 cameraHolder.add(camera);
 
 //inicializando o PointerLockControls customizado
@@ -170,7 +170,7 @@ function moveAnimate(delta) {
         controls.moveRight(-moveSpeed);
     }
 }
-Area.createMap(scene);
+Area.createMap(scene, cameraHolder);
 
 //colisores
 Collidables.collidables = {
@@ -179,10 +179,6 @@ Collidables.collidables = {
     stairs: Area.collidableStairs
 }
 
-let enemiesHandler = new EnemiesHandler(scene, cameraHolder);
-enemiesHandler.addEnemy('cacodemon');
-enemiesHandler.addEnemy('lostsoul');
-
 enemiesAreas.inimigos = {
     area1: Area.enemiesA1.enemies,
     area2: Area.enemiesA2.enemies,
@@ -190,8 +186,10 @@ enemiesAreas.inimigos = {
     area4: Area.enemiesA4.enemies,
 };
 
-let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
-let player = new Player(scene, cameraHolder, camera, bulletsCollisionHandler);
+console.log(enemiesAreas.inimigos)
+
+let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera, enemiesAreas);
+let player = new Player(scene, cameraHolder, camera, bulletsCollisionHandler, enemiesAreas);
 let playerCollisionHandler = new PlayerCollisionHandler(player.object, Collidables.collidables);
 let initialKey
 let secondKey
@@ -252,7 +250,8 @@ function render() {
     playerCollisionHandler.handleCollisions();
 
     //lidando com inimigos
-    enemiesHandler.handleEnemies();
+    Area.handleEnemiesArea(cameraHolder);
+    //enemiesHandler.handleEnemies();
 
     if (player.activeGun instanceof ChainGun) {
         player.activeGun.spriteUpdate(); // animação do sprite tem que ser no render

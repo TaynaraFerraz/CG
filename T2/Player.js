@@ -15,14 +15,16 @@ export class Player {
     #intervalShoot
     #lastShotTime = 0
     bulletsCollisionHandler
+    enemiesAreas
 
-    constructor(scene, object, camera, bulletsCollisionHandler) {
+    constructor(scene, object, camera, bulletsCollisionHandler, enemiesAreas) {
         this.#scene = scene;
         this.#camera = camera;
         this.object = object;
+        this.enemiesAreas = enemiesAreas
         this.bulletsCollisionHandler = bulletsCollisionHandler
         this.#gun = new Gun(camera, scene, bulletsCollisionHandler);
-        this.#chainGun = new ChainGun(camera, scene, bulletsCollisionHandler)
+        this.#chainGun = new ChainGun(camera, scene, bulletsCollisionHandler, enemiesAreas)
         this.keys = [];
         this.activeGun = this.#gun
         this.activeGun.add()
@@ -63,7 +65,7 @@ export class Player {
                         this.activeGun.shootBall();
                         this.#lastShotTime = now;
                     }
-                }, 50);
+                }, 100);
             }
         });
 
@@ -106,7 +108,7 @@ export class Player {
                 this.keys.push(key)
                 key.removeKey();
             }
-            console.log(this.keys)
+            //console.log(this.keys)
         }
 
     }

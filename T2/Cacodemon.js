@@ -7,8 +7,8 @@ export class Cacodemon extends Enemy {
     #randomized = false;
     #canShoot = true;
 
-    constructor(object, player) {
-        super(object, player, 40);
+    constructor(object, player, initialPosition) {
+        super(object, player, 40, undefined, initialPosition);
         object.name = "cacodemon";
 
         this.randomizerCallback();
@@ -84,9 +84,11 @@ export class Cacodemon extends Enemy {
     }
 
     handle() {
-        this.handleMovement();
+        if(!this.dying){
+            this.handleMovement();
+            this.handleShooting();
+        }
         this.handleCollisions();
-        this.handleHealthBar();
-        this.handleShooting();
+        this.handleHealth();
     }
 };

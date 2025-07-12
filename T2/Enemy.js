@@ -5,31 +5,37 @@ import { HealthBar } from './HealthBar.js';
 
 export class Enemy {
     object;
+    #initialPosition;
+    boundingBox;
     player;
     #health;
     #minHeight;
     #maxHealth;
-    angry = true;
+    angry = false;
     dead = false;
+    dying = false;
     #oldPos;
-    #boundingBox;
     #raycaster;
     lookAtQuaternion;
     #healthBar
 
-    constructor(object, player, maxHealth, minHeight = 4) {
+    constructor(object, player, maxHealth, minHeight = 4, initialPosition = new THREE.Vector3()) {
         this.object = object;
         this.#maxHealth = maxHealth;
+        this.#initialPosition = new THREE.Vector3();
+        this.#initialPosition.copy(initialPosition);
         this.#health = maxHealth;
         this.player = player;
-        
+
+        object.position.copy(initialPosition);
+        this.boundingBox = new THREE.Box3();
+        this.boundingBox.setFromObject(object);
+
         this.#minHeight = minHeight;
 
         this.#oldPos = new THREE.Vector3();
         this.object.getWorldPosition(this.#oldPos);
 
-        this.#boundingBox = new THREE.Box3();
-        this.#boundingBox.setFromObject(this.object);
         this.#raycaster = new THREE.Raycaster();
         this.#raycaster.far = 5;
 
@@ -38,8 +44,10 @@ export class Enemy {
         this.#healthBar = new HealthBar(this, 3, 0.7);
     }
 
-    #kill() {
-        //this.object
+    #die() {
+        if (!this.dying) {
+            this.dying = true;
+        }
     };
 
     randomizeQuaternion() {
@@ -63,27 +71,38 @@ export class Enemy {
     };
 
     damage(amount) {
-        this.#health -= amount;
+        if (this.#health >= 0) {
+            this.#health -= amount;
+        }
         if (this.#health <= 0) {
-            this.#kill();
+            this.#die();
         }
     };
 
     handleCollisions() {
         //console.log(this.#minHeight);
-        
+
         let currentPos = new THREE.Vector3();
         let deltaMovement = new THREE.Vector3();
         this.object.getWorldPosition(currentPos);
 
+        if (!this.angry) {
+            const distanceFromSpawn = new THREE.Vector3();
+            distanceFromSpawn.subVectors(currentPos, this.#initialPosition);
+            if (distanceFromSpawn.length() > 5) {
+                this.object.position.copy(this.#oldPos);
+                return;
+            }
+        }
+
         deltaMovement.copy(currentPos);
         deltaMovement.addScaledVector(this.#oldPos, -1); //pegando o vetor da direção do movimento subtraindo posição antiga da nova
 
-        this.#boundingBox.setFromObject(this.object);
+        this.boundingBox.setFromObject(this.object);
 
         for (let key in Collidables.collidables) {
             Collidables.collidables[key].forEach((collidable) => {
-                if (this.#boundingBox.intersectsBox(collidable.box)) {
+                if (this.boundingBox.intersectsBox(collidable.box)) {
                     let direction = new THREE.Vector3();
                     this.object.getWorldDirection(direction);
                     this.#raycaster.set(this.object.position, direction);
@@ -122,8 +141,31 @@ export class Enemy {
         this.object.getWorldPosition(this.#oldPos);
     };
 
-    handleHealthBar(){
+    handleHealth() {
+        let opacity = 1;
         this.#healthBar.update(this.#health, this.#maxHealth);
-        //this.#health -= 0.005;
+        //this.damage(0.05);
+
+        const dimMeshesOpacities = (object) => {
+            object.traverse((child) => {
+                if (child.isMesh) {
+                    child.material.transparent = true;
+                    child.material.opacity -= 0.01;
+                    opacity = child.material.opacity;
+                }
+            })
+            if (object.material) {
+                object.material.transparent = true;
+                object.material.opacity -= 0.01;
+            }
+        }
+        if (this.dying) {
+            //console.log(this.object);
+            dimMeshesOpacities(this.object);
+            if (opacity <= 0) {
+                this.#healthBar.remove();
+                this.dead = true;
+            }
+        }
     };
 }

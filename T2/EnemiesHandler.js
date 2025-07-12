@@ -4,23 +4,28 @@ import { getMaxSize } from "../libs/util/util.js";
 import { Cacodemon } from "./Cacodemon.js";
 import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
 import { LostSoul } from './LostSoul.js';
+import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
+import { scene } from './camera.js';
 
 export class EnemiesHandler {
     enemies = [];
-    #loader = {};
-    #GLTFLoader = new GLTFLoader();
-    #OBJLoader = new OBJLoader();
+    #amountOfEnemies;
+    #killedEnemies = 0;
+    #cleared = false;
+    #clearanceCallback;
     #scene;
     #player;
     //carregador de assets
 
-    constructor(scene, player) {
+    constructor(scene, player, amountOfEnemies = 20, clearanceCallback) {
         this.#scene = scene;
         this.#player = player;
+        this.#amountOfEnemies = amountOfEnemies;
+        this.#clearanceCallback = clearanceCallback;
     }
 
     // Normalize scale and multiple by the newScale
-    #normalizeAndRescale(obj, newScale) {
+    normalizeAndRescale(obj, newScale) {
         var scale = getMaxSize(obj);
         obj.scale.set(newScale * (1.0 / scale),
             newScale * (1.0 / scale),
@@ -28,7 +33,7 @@ export class EnemiesHandler {
         return obj;
     }
 
-    #fixPosition(obj) {
+    fixPosition(obj) {
         // Fix position of the object over the ground plane
         var box = new THREE.Box3().setFromObject(obj);
         if (box.min.y > 0)
@@ -37,41 +42,91 @@ export class EnemiesHandler {
             obj.translateY(-1 * box.min.y);
         return obj;
     };
-    addEnemy(enemyName) {
-        let customPath = '';
-        switch(enemyName) {
-            case "cacodemon":
-                customPath = "cacodemon.glb"
-            break;
-            case "lostsoul":
-                customPath = "skull.obj"
-        }
 
-        this.#loader = enemyName == "cacodemon"? this.#GLTFLoader : this.#OBJLoader;
-        this.#loader.load(`./assets/${customPath}`, (response) => {
-            console.log(enemyName);
-            let obj = enemyName == "cacodemon"? response.scene : response;
-
-            
-            obj.traverse(function (child) {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
+    #addModel(enemyName, classThis, enemies, position) {
+        if (enemyName == "cacodemon") {
+            let gtfLoader = new GLTFLoader();
+            gtfLoader.load(`./assets/cacodemon.glb`, function (response) {
+                let obj = response.scene;
+                if(obj.material){
+                    obj.material.transparent = true;
                 }
-                //if (child.material) child.material.side = THREE.DoubleSide;
-            });
+                obj.traverse(function (child) {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                        child.material.transparent = true;
+                    }
+                });
 
-            obj = this.#normalizeAndRescale(obj, 2);
-            obj = this.#fixPosition(obj);
-            let enemy = enemyName == "cacodemon"? new Cacodemon(obj, this.#player) : new LostSoul(obj, this.#player);;
-            this.#scene.add(obj);
-            this.enemies.push(enemy);
-        })
+                obj = classThis.normalizeAndRescale(obj, 2);
+                obj = classThis.fixPosition(obj);
+
+                scene.add(obj);
+
+                enemies.push(new Cacodemon(obj, classThis.#player, position));
+            })
+        } else {
+            let mtlLoader = new MTLLoader();
+            mtlLoader.load("./assets/skull/skull.mtl", function (materials) {
+                materials.preload();
+
+                const objLoader = new OBJLoader();
+                objLoader.setMaterials(materials);
+                objLoader.load("./assets/skull.obj", function (obj) {
+
+                    obj.traverse(function (child) {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                            child.material.transparent = true;
+                        }
+                    });
+
+                    obj = classThis.normalizeAndRescale(obj, 2);
+                    obj = classThis.fixPosition(obj);
+                    scene.add(obj);
+
+                    enemies.push(new LostSoul(obj, classThis.#player, position));
+                });
+            });
+        }
+    }
+
+    addEnemy(enemyName,position) {
+        this.#addModel(enemyName, this, this.enemies, position);
+        //console.log("adicionou");
+        //console.log(this.enemies);
     }
 
     handleEnemies() {
-        this.enemies.forEach((enemy) => {
-            enemy.handle();
-        });
+        //console.log(this.enemies.length);
+
+        //this.addEnemy('cacodemon')
+        if (this.enemies.length != 0) {
+            this.enemies = this.enemies.filter((enemy) => {
+                enemy.handle();
+
+                if (enemy.dead) {
+                    this.#killedEnemies++;
+
+                    scene.remove(enemy.object);
+                    enemy.object.children.forEach((child) => {
+                        if (child.isMesh) {
+                            child.geometry.dispose();
+                            child.material.dispose();
+                        }
+                    })
+                    return false;
+                }
+
+                return true;
+            });
+        }
+
+        if (this.#killedEnemies == this.#amountOfEnemies && !this.#cleared) {
+            this.#clearanceCallback();
+            this.#cleared = true;
+        }
     }
 };
