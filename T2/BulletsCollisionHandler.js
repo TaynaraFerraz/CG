@@ -68,6 +68,7 @@ export class BulletsCollisionHandler {
 
             //verificação da altura para remover caso ultrapassar o chão e o máximo da altura
             if (intersectsBall.length > 0 || sphere.position.y >= 72 || sphere.position.y <= 0) {
+                console.log('colidiu')
                 this.#scene.remove(sphere);
                 sphere.geometry.dispose();
                 sphere.material.dispose();

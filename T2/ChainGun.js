@@ -1,6 +1,8 @@
 import { Vector3 } from "../build/three.module.js";
 import { SpriteMixer } from "../libs/sprites/SpriteMixer.js";
 import * as THREE from 'three';
+import { BulletsCollisionHandler } from "./BulletsCollisionHandler.js";
+import { Collidables } from "./Collidables.js";
 
 export class ChainGun {
 
@@ -10,12 +12,14 @@ export class ChainGun {
     #spriteMixer
     #action
     #clock
+    #bulletsCollisionHandler
 
-    constructor(camera, scene) {
+    constructor(camera, scene, bulletsCollisionHandler) {
         this.#camera = camera
         this.#clock = new THREE.Clock()
         this.#scene = scene
         this.#spriteMixer = SpriteMixer();
+        this.#bulletsCollisionHandler = bulletsCollisionHandler
 
         let loader = new THREE.TextureLoader();
         loader.load("./spriteChainGun.png", (texture) => {
@@ -29,6 +33,10 @@ export class ChainGun {
 
     add() {
         this.#camera.add(this.#actionSprite);
+    }
+
+    handleGun() {
+        this.#bulletsCollisionHandler.handleBulletsCollisions(Collidables.collidables);
     }
 
     shootBall() {

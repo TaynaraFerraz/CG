@@ -14,21 +14,22 @@ export class Player {
     #shoot = false
     #intervalShoot
     #lastShotTime = 0
+    bulletsCollisionHandler
 
-    constructor(scene, object, camera) {
+    constructor(scene, object, camera, bulletsCollisionHandler) {
         this.#scene = scene;
         this.#camera = camera;
         this.object = object;
-        this.#gun = new Gun(camera, scene);
-        this.#chainGun = new ChainGun(camera, scene)
+        this.bulletsCollisionHandler = bulletsCollisionHandler
+        this.#gun = new Gun(camera, scene, bulletsCollisionHandler);
+        this.#chainGun = new ChainGun(camera, scene, bulletsCollisionHandler)
         this.keys = [];
         this.activeGun = this.#gun
         this.activeGun.add()
     }
 
     handlePlayer() {
-        if (this.activeGun == this.#gun)
-            this.#gun.handleGun();
+        this.activeGun.handleGun();
     }
 
     #switchGun(newGun) {

@@ -16,6 +16,7 @@ import { Collidables } from './Collidables.js'
 import { Key } from './Key.js';
 import { ChainGun } from './ChainGun.js';
 import { Player } from './Player.js';
+import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 
 const clock = new THREE.Clock();
 let scene, renderer, camera, cameraHolder, light, keyboard; // Initial variables
@@ -189,12 +190,13 @@ enemiesAreas.inimigos = {
     area4: Area.enemiesA4.enemies,
 };
 
-
-let player = new Player(scene, cameraHolder, camera);
+let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
+let player = new Player(scene, cameraHolder, camera, bulletsCollisionHandler);
 let playerCollisionHandler = new PlayerCollisionHandler(player.object, Collidables.collidables);
 let initialKey
 let secondKey
 player.actions(controls)
+
 
 // Listen window size changes
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
@@ -205,6 +207,7 @@ function render() {
         moveAnimate(clock.getDelta());
     }
 
+    //verifica a morte dos inimigos da area 1
     if (enemiesAreas.inimigos.area1.length === 0 && player.keys.length === 0) {
         if (!initialKey)
             initialKey = new Key("rgb(223, 47, 47)");
@@ -212,7 +215,6 @@ function render() {
             Area.primeiroAltar(initialKey.csgFinal);
     }
 
-    // Só tenta pegar a chave se existir e ainda não coletada
     if (initialKey && !initialKey.coletada) {
         player.addKey(initialKey);
     }
@@ -232,6 +234,7 @@ function render() {
 
     }
 
+    //verifica morte dos inimigos da area 2
      if (enemiesAreas.inimigos.area2.length === 0 && player.keys.length === 1) {
         if (!secondKey)
             secondKey = new Key("rgba(247, 231, 15, 1)");   
@@ -242,8 +245,6 @@ function render() {
     if (secondKey && !secondKey.coletada) {
         player.addKey(secondKey);
     }
-
-    //if(inimigosDoisDerrotados)
     
     player.handlePlayer();
 
@@ -252,6 +253,7 @@ function render() {
 
     //lidando com inimigos
     enemiesHandler.handleEnemies();
+
     if (player.activeGun instanceof ChainGun) {
         player.activeGun.spriteUpdate(); // animação do sprite tem que ser no render
     }

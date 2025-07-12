@@ -9,10 +9,10 @@ export class Gun {
     #scene
     #bulletsCollisionHandler
 
-    constructor(camera, scene) {
+    constructor(camera, scene, bulletsCollisionHandler) {
         this.#camera = camera;
         this.#scene = scene;
-        this.#bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
+        this.#bulletsCollisionHandler = bulletsCollisionHandler
 
         const armaGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 32);
         const armaMaterial = new THREE.MeshLambertMaterial({
