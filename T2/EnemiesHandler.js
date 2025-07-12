@@ -17,7 +17,7 @@ export class EnemiesHandler {
     #player;
     //carregador de assets
 
-    constructor(scene, player, amountOfEnemies, clearanceCallback) {
+    constructor(scene, player, amountOfEnemies = 20, clearanceCallback) {
         this.#scene = scene;
         this.#player = player;
         this.#amountOfEnemies = amountOfEnemies;
@@ -48,68 +48,85 @@ export class EnemiesHandler {
             let gtfLoader = new GLTFLoader();
             gtfLoader.load(`./assets/cacodemon.glb`, function (response) {
                 let obj = response.scene;
+                if(obj.material){
+                    obj.material.transparent = true;
+                }
                 obj.traverse(function (child) {
                     if (child.isMesh) {
                         child.castShadow = true;
                         child.receiveShadow = true;
+                        child.material.transparent = true;
                     }
                 });
-                
+
                 obj = classThis.normalizeAndRescale(obj, 2);
                 obj = classThis.fixPosition(obj);
-                
+
                 scene.add(obj);
-                
+
                 enemies.push(new Cacodemon(obj, classThis.#player));
             })
         } else {
             let mtlLoader = new MTLLoader();
             mtlLoader.load("./assets/skull/skull.mtl", function (materials) {
                 materials.preload();
-                
+
                 const objLoader = new OBJLoader();
                 objLoader.setMaterials(materials);
                 objLoader.load("./assets/skull.obj", function (obj) {
-                    
+
                     obj.traverse(function (child) {
                         if (child.isMesh) {
                             child.castShadow = true;
                             child.receiveShadow = true;
+                            child.material.transparent = true;
                         }
                     });
-                    
+
                     obj = classThis.normalizeAndRescale(obj, 2);
                     obj = classThis.fixPosition(obj);
                     scene.add(obj);
-                    
+
                     enemies.push(new LostSoul(obj, classThis.#player));
                 });
             });
         }
     }
-    
+
     addEnemy(enemyName) {
         this.#addModel(enemyName, this, this.enemies);
+        //console.log("adicionou");
+        //console.log(this.enemies);
     }
 
     handleEnemies() {
-        this.enemies.filter((enemy) => {
-            enemy.handle();
+        //console.log(this.enemies.length);
 
-            if(enemy.dead){
-                this.#killedEnemies++;
-                scene.remove(enemy);
-                enemy.geometry.dispose();
-                enemy.material.dispose();
-                enemy = undefined;
-                return false;
-            }
+        //this.addEnemy('cacodemon')
+        if (this.enemies.length != 0) {
+            this.enemies = this.enemies.filter((enemy) => {
+                enemy.handle();
 
-            if(this.#killedEnemies == this.#amountOfEnemies && !this.#cleared){
-                this.#clearanceCallback();
-                this.#cleared = true;
-            }
-            return true;
-        });
+                if (enemy.dead) {
+                    this.#killedEnemies++;
+
+                    scene.remove(enemy.object);
+                    enemy.object.children.forEach((child) => {
+                        if (child.isMesh) {
+                            child.geometry.dispose();
+                            child.material.dispose();
+                        }
+                    })
+                    return false;
+                }
+
+                return true;
+            });
+        }
+
+        if (this.#killedEnemies == this.#amountOfEnemies && !this.#cleared) {
+            this.#clearanceCallback();
+            this.#cleared = true;
+        }
     }
 };
