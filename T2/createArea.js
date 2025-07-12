@@ -497,15 +497,23 @@ static segundoAltar() {
 }
 
 static handleEnemiesArea(player){
+  if(this.enterArea(player,0))
+    this.#agressiveEnemies(this.enemiesA1);
+  if(this.enterArea(player,1))
+    this.#agressiveEnemies(this.enemiesA2);
   this.enemiesA1.handleEnemies();
   this.enemiesA2.handleEnemies();
   this.enemiesA3.handleEnemies();
   this.enemiesA4.handleEnemies();
 }
 
+static #agressiveEnemies(enemies){
+  for(let i = 0; i < enemies.enemies.length; i++)
+    enemies.enemies.angry = true;
+}
+
 static enterArea(player, area){
   let playerBox = new THREE.Box3().setFromObject(player, true);
-  area -= 1;
   let boxArea = this.agroArea[area];
   if(playerBox.intersectsBox(boxArea)){
     return true;

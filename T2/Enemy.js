@@ -10,7 +10,7 @@ export class Enemy {
     #health;
     #minHeight;
     #maxHealth;
-    angry = true;
+    angry = false;
     dead = false;
     #oldPos;
     #raycaster;
