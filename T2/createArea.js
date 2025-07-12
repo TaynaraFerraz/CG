@@ -23,8 +23,8 @@ export class Area {
 
   static createMap(scene, player) {
     let positions = [];
-    this.enemiesA1 = new EnemiesHandler(scene,player);
-    this.enemiesA2 = new EnemiesHandler(scene,player);
+    this.enemiesA1 = new EnemiesHandler(scene,player,5);
+    this.enemiesA2 = new EnemiesHandler(scene,player,3);
     this.enemiesA3 = new EnemiesHandler(scene,player);
     this.enemiesA4 = new EnemiesHandler(scene,player);
 
@@ -45,7 +45,11 @@ export class Area {
   }
 
   static createAreaPilars(scene) {
-    this.enemiesA1.addEnemy('lostsoul');
+    this.enemiesA1.addEnemy('lostsoul', new THREE.Vector3(-130.0, 5.0, -130.0));
+    this.enemiesA1.addEnemy('lostsoul', new THREE.Vector3(-130.0, 5.0, -180.0));
+    this.enemiesA1.addEnemy('lostsoul', new THREE.Vector3(-150.0, 5.0, -150.0));
+    this.enemiesA1.addEnemy('lostsoul', new THREE.Vector3(-200.0, 5.0, -170.0));
+    this.enemiesA1.addEnemy('lostsoul', new THREE.Vector3(-190.0, 5.0, -140.0));
     let position = new THREE.Vector3(-160.0, 2.0, -162.0);
     let height = 4.0;
     let length = 120.0;
@@ -497,6 +501,7 @@ static segundoAltar() {
 }
 
 static handleEnemiesArea(player){
+  console.log(this.enemiesA1.enemies);
   if(this.enterArea(player,0))
     this.#agressiveEnemies(this.enemiesA1);
   if(this.enterArea(player,1))
@@ -508,8 +513,9 @@ static handleEnemiesArea(player){
 }
 
 static #agressiveEnemies(enemies){
-  for(let i = 0; i < enemies.enemies.length; i++)
-    enemies.enemies.angry = true;
+  for(let i = 0; i < enemies.enemies.length; i++){
+    enemies.enemies[i].angry = true;
+  }
 }
 
 static enterArea(player, area){

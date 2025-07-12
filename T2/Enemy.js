@@ -144,7 +144,7 @@ export class Enemy {
     handleHealth() {
         let opacity = 1;
         this.#healthBar.update(this.#health, this.#maxHealth);
-        this.damage(0.05);
+        //this.damage(0.05);
 
         const dimMeshesOpacities = (object) => {
             object.traverse((child) => {
