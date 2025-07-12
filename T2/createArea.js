@@ -198,6 +198,11 @@ export class Area {
   }
 
   static createAreaCubes(scene) {
+    this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(10.0, 23.0, -112.0));
+    this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(10.0, 23.0, -195.0));
+    this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(-35.0, 30.0, -135.0));
+
+
     let position = new THREE.Vector3(0.0, 3.0, -162.0);
     let height = 6.0;
     let length = 120.0;
@@ -501,7 +506,6 @@ static segundoAltar() {
 }
 
 static handleEnemiesArea(player){
-  console.log(this.enemiesA1.enemies);
   if(this.enterArea(player,0))
     this.#agressiveEnemies(this.enemiesA1);
   if(this.enterArea(player,1))
