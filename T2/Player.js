@@ -58,13 +58,16 @@ export class Player {
                 }, 50); // verifica a cada 50ms para caso não estiver mais disparando
 
             } else {
-                this.#intervalShoot = setInterval(() => {
-
+                const shoot = () => {
                     const now = Date.now();
                     if (this.#shoot && now - this.#lastShotTime >= 500) {
                         this.activeGun.shootBall();
                         this.#lastShotTime = now;
                     }
+                }
+                shoot();
+                this.#intervalShoot = setInterval(() => {
+                    shoot();
                 }, 100);
             }
         });

@@ -12,12 +12,13 @@ export class EnemiesHandler {
     #amountOfEnemies;
     #killedEnemies = 0;
     #cleared = false;
+    #notBeggining = false;
     #clearanceCallback;
     #scene;
     #player;
     //carregador de assets
 
-    constructor(scene, player, amountOfEnemies = 20, clearanceCallback) {
+    constructor(scene, player, amountOfEnemies = 100, clearanceCallback = ()=>{}) {
         this.#scene = scene;
         this.#player = player;
         this.#amountOfEnemies = amountOfEnemies;
@@ -112,6 +113,7 @@ export class EnemiesHandler {
                             child.material.dispose();
                         }
                     })
+                    this.#notBeggining = true;
                     return false;
                 }
 
@@ -119,7 +121,10 @@ export class EnemiesHandler {
             });
         }
 
-        if (this.#killedEnemies == this.#amountOfEnemies && !this.#cleared) {
+        
+        if (((this.#killedEnemies === this.#amountOfEnemies) || (this.#notBeggining && this.enemies.length == 0)) && !this.#cleared) {
+            console.log("rodou");
+            console.log(this.#killedEnemies, this.#amountOfEnemies, this.#killedEnemies === this.#amountOfEnemies);
             this.#clearanceCallback();
             this.#cleared = true;
         }

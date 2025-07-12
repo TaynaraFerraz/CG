@@ -71,11 +71,13 @@ export class Enemy {
     };
 
     damage(amount) {
-        if (this.#health >= 0) {
-            this.#health -= amount;
-        }
-        if (this.#health <= 0) {
-            this.#die();
+        if (this.angry && !this.dying) {
+            if (this.#health > 0) {
+                this.#health -= amount;
+            }
+            if (this.#health <= 0) {
+                this.#die();
+            }
         }
     };
 
@@ -160,7 +162,7 @@ export class Enemy {
             }
         }
         if (this.dying) {
-           // console.log(this.object);
+            // console.log(this.object);
             dimMeshesOpacities(this.object);
             if (opacity <= 0) {
                 this.#healthBar.remove();
