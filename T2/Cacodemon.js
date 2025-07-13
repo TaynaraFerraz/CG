@@ -66,16 +66,18 @@ export class Cacodemon extends Enemy {
     }
 
     #shoot() {
-            let worldPosition = new THREE.Vector3();
-            this.object.getWorldPosition(worldPosition);
+        let worldPosition = new THREE.Vector3();
+        this.object.getWorldPosition(worldPosition);
 
-            const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 16);
-            const materialSphere = setDefaultMaterial('#c2a500');
-            let sphere = new THREE.Mesh(sphereGeometry, materialSphere);
-            sphere.position.copy(worldPosition);
+        const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 16);
+        const materialSphere = new THREE.MeshLambertMaterial({
+            color: '#c2a500'
+        });
+        let sphere = new THREE.Mesh(sphereGeometry, materialSphere);
+        sphere.position.copy(worldPosition);
 
-            scene.add(sphere);
-            this.#bulletsCollisionHandler.addSphere(sphere);
+        scene.add(sphere);
+        this.#bulletsCollisionHandler.addSphere(sphere);
     }
 
     handleShooting() {
@@ -90,7 +92,7 @@ export class Cacodemon extends Enemy {
     }
 
     handle() {
-        if(!this.dying){
+        if (!this.dying) {
             this.handleMovement();
             this.handleShooting();
         }
