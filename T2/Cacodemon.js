@@ -14,7 +14,7 @@ export class Cacodemon extends Enemy {
         super(object, player, 40, undefined, initialPosition);
         object.name = "cacodemon";
         this.#bulletsCollisionHandler = new BulletsCollisionHandler(scene, this.object);
-        this.#bulletsCollisionHandler.speed = 4.5;
+        this.#bulletsCollisionHandler.speed = 1.2;
 
         this.randomizerCallback();
     }
