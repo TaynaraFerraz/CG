@@ -222,7 +222,7 @@ function render() {
     Area.handleEnemiesArea(cameraHolder);
     console.log(player.keys.length, 'chave')
     
-    if (enemiesAreas.inimigos.area1.length === 0 && player.keys.length === 0) {
+    if (enemiesAreas.inimigos.area1.length === 0 && Area.isSpawn[0]) {
         if (!initialKey)
             initialKey = new Key("rgb(223, 47, 47)");
         else
@@ -249,7 +249,7 @@ function render() {
     }
 
     //verifica morte dos inimigos da area 2
-     if (enemiesAreas.inimigos.area2.length === 0 && player.keys.length === 1) {
+     if (enemiesAreas.inimigos.area2.length === 0 && Area.isSpawn[1]) {
         if (!secondKey)
             secondKey = new Key("rgba(247, 231, 15, 1)");   
         else

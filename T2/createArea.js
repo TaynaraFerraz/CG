@@ -21,6 +21,7 @@ export class Area {
   static enemiesA2;
   static enemiesA3;
   static enemiesA4;
+  static isSpawn = [false,false,false,false];
 
   static createMap(scene, player) {
     let positions = [];
@@ -57,6 +58,7 @@ export class Area {
     this.enemiesA1.addEnemy('lostsoul', new THREE.Vector3(-150.0, 5.0, -150.0));
     this.enemiesA1.addEnemy('lostsoul', new THREE.Vector3(-200.0, 5.0, -170.0));
     this.enemiesA1.addEnemy('lostsoul', new THREE.Vector3(-190.0, 5.0, -140.0));
+    this.isSpawn[0] = true;
     let position = new THREE.Vector3(-160.0, 2.0, -162.0);
     let height = 4.0;
     let length = 120.0;
@@ -208,7 +210,7 @@ export class Area {
     this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(10.0, 23.0, -112.0));
     this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(10.0, 23.0, -195.0));
     this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(-35.0, 30.0, -135.0));
-
+    this.isSpawn[1] = true;
 
     let position = new THREE.Vector3(0.0, 3.0, -162.0);
     let height = 6.0;
