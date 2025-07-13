@@ -232,7 +232,7 @@ function render() {
                 Area.primeiroAltar(initialKey.csgFinal);
         }
 
-    }, 700)
+    }, 1000)
 
     if (initialKey && !initialKey.coletada) {
         player.addKey(initialKey);
