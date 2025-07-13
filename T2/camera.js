@@ -225,7 +225,7 @@ function render() {
     console.log(enemiesAreas.inimigos.area1.length, 'tamanho do inimigo')
     
     setTimeout(()=> {
-        if (enemiesAreas.inimigos.area1.length === 0 && player.keys.length === 0) {
+        if (enemiesAreas.inimigos.area1.length === 0) {
             if (!initialKey)
                 initialKey = new Key("rgb(223, 47, 47)");
             else
