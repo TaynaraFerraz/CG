@@ -221,13 +221,18 @@ function render() {
     //lidando com inimigos
     Area.handleEnemiesArea(cameraHolder);
     console.log(player.keys.length, 'chave')
+    console.log(initialKey)
+    console.log(enemiesAreas.inimigos.area1.length, 'tamanho do inimigo')
     
-    if (enemiesAreas.inimigos.area1.length === 0 && player.keys.length === 0) {
-        if (!initialKey)
-            initialKey = new Key("rgb(223, 47, 47)");
-        else
-            Area.primeiroAltar(initialKey.csgFinal);
-    }
+    setTimeout(()=> {
+        if (enemiesAreas.inimigos.area1.length === 0 && player.keys.length === 0) {
+            if (!initialKey)
+                initialKey = new Key("rgb(223, 47, 47)");
+            else
+                Area.primeiroAltar(initialKey.csgFinal);
+        }
+
+    }, 700)
 
     if (initialKey && !initialKey.coletada) {
         player.addKey(initialKey);

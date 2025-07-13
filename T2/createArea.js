@@ -30,7 +30,7 @@ export class Area {
     });
     this.enemiesA2 = new EnemiesHandler(scene, player, 3, () => {
       enemiesAreas.inimigos.area2 = [];
-      console.log("Área 1 limpa. Inimigos removidos.");
+      console.log("Área 2 limpa. Inimigos removidos.");
     });
     this.enemiesA3 = new EnemiesHandler(scene, player);
     this.enemiesA4 = new EnemiesHandler(scene, player);
