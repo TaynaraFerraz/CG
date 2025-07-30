@@ -14,6 +14,10 @@ export class ChainGun {
     #clock
     #bulletsCollisionHandler
     enemiesArea
+    lastFrameTime
+    currentFrame
+    totalFrames
+    isFiring
 
     constructor(camera, scene, bulletsCollisionHandler, enemiesArea) {
         this.#camera = camera
@@ -22,14 +26,18 @@ export class ChainGun {
         this.enemiesArea = enemiesArea
         this.#spriteMixer = SpriteMixer();
         this.#bulletsCollisionHandler = bulletsCollisionHandler
+        this.lastFrameTime = performance.now();
+        this.currentFrame = 0;
+        this.totalFrames = 3;
+        this.isFiring = false
 
         let loader = new THREE.TextureLoader();
-        loader.load("./spriteChainGun.png", (texture) => {
-            this.#actionSprite = this.#spriteMixer.ActionSprite(texture, 5, 1);
+        loader.load("./assets/chaingun.png", (texture) => {
+            this.#actionSprite = this.#spriteMixer.ActionSprite(texture, 3, 1);
             this.#actionSprite.setFrame(0);
             this.#actionSprite.castShadow = true;
             this.#actionSprite.position.set(0, -0.1, -0.3);
-            this.#actionSprite.scale.set(0.10, 0.10, 0.10);
+            this.#actionSprite.scale.set(0.1, 0.1, 0.1);
         })
     }
 
@@ -42,8 +50,14 @@ export class ChainGun {
     }
 
     shootBall() {
-        this.#action = this.#spriteMixer.Action(this.#actionSprite, 0, 4, 20)
-        this.#action.playLoop(); // trocar para playLoop e ver um método de parar ao soltar o clique
+        if (!this.#actionSprite) return;
+
+        // Só inicia a animação uma vez
+        if (!this.isFiring) {
+            this.isFiring = true;
+            this.#action = this.#spriteMixer.Action(this.#actionSprite, 0, 2, 120);
+            this.#action.playLoop();
+        }
 
         const initialPosition = this.#actionSprite.getWorldPosition(new Vector3())
         console.log(initialPosition)
@@ -77,19 +91,23 @@ export class ChainGun {
             }
             else
                 console.log('colidiu normal')
-            
+
         }
     }
-        spriteUpdate() {
-            let delta = this.#clock.getDelta()
-            this.#spriteMixer.update(delta)
-        }
 
-        stopAction() {
+    spriteUpdate() {
+        const delta = this.#clock.getDelta();
+        this.#spriteMixer.update(delta);
+    }
+
+    stopAction() {
+        if (this.#action) {
             this.#action.stop();
         }
-
-        remove() {
-            this.#camera.remove(this.#actionSprite)
-        }
+        this.isFiring = false;
     }
+
+    remove() {
+        this.#camera.remove(this.#actionSprite)
+    }
+}

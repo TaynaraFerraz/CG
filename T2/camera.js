@@ -269,7 +269,7 @@ function render() {
     //lidando com as colisões
     playerCollisionHandler.handleCollisions()
     
-    if (player.activeGun instanceof ChainGun) {
+    if (player.activeGun instanceof ChainGun && player.activeGun.isFiring) {
         player.activeGun.spriteUpdate(); // animação do sprite tem que ser no render
     }
 
