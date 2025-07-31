@@ -35,8 +35,8 @@ keyboard = new KeyboardState();
 light = new THREE.DirectionalLight('rgb(255,255,255)', 3);
 light.position.set(140.0, 220.0, 120.0);
 light.castShadow = true;
-light.shadow.mapSize.width = 1024*2;
-light.shadow.mapSize.height = 1024*2;
+light.shadow.mapSize.width = 1024 * 2;
+light.shadow.mapSize.height = 1024 * 2;
 light.shadow.camera.near = 0.01;
 light.shadow.camera.far = 600;
 light.shadow.camera.left = -450;
@@ -184,7 +184,7 @@ function moveAnimate(delta) {
     }
 }
 
-Area.createMap(scene,cameraHolder);
+Area.createMap(scene, cameraHolder);
 
 //colisores
 Collidables.collidables = {
@@ -204,71 +204,40 @@ enemiesAreas.inimigos = {
 let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
 let player = new Player(scene, cameraHolder, camera, bulletsCollisionHandler, enemiesAreas);
 let playerCollisionHandler = new PlayerCollisionHandler(player.object, Collidables.collidables);
-let initialKey = false
-let secondKey
+
 
 player.actions(controls)
+let inimigosNaArea1 = false
 
 // Listen window size changes
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
 render();
 
 function render() {
+
+    // espera carregar os inimigos da area 1 e consequentemente da area 2
+    if (!inimigosNaArea1) {
+        if (enemiesAreas.inimigos.area1.length == 5) {
+            inimigosNaArea1 = true;
+        } else {
+            requestAnimationFrame(render);
+            return;
+        }
+    }
+
     if (controls.isLocked) {
         moveAnimate(clock.getDelta());
     }
-    
+
     //lidando com inimigos
     Area.handleEnemiesArea(cameraHolder);
-    console.log(player.keys.length, 'chave')
-    console.log(initialKey)
-    console.log(enemiesAreas.inimigos.area1.length, 'tamanho do inimigo')
-    
-    setTimeout(()=> {
-        if (enemiesAreas.inimigos.area1.length === 0 && player.keys.length === 0) {
-            if (!initialKey)
-                initialKey = new Key("rgb(223, 47, 47)");
-            else
-                Area.primeiroAltar(initialKey.csgFinal);
-        }
 
-    }, 1000)
-
-    if (initialKey && !initialKey.coletada) {
-        player.addKey(initialKey);
-    }
-
-    if (player.keys.length === 1 && initialKey.coletada) {
-        let position = camera.getWorldPosition(new THREE.Vector3())
-        let target = new THREE.Vector3(37.5, 1.8, -92.0);
-        let distance = position.distanceTo(target)
-        if(distance < 3.5){
-            initialKey.csgFinal.position.set(37.5, 1.8, -92.0)
-            initialKey.csgFinal.visible = true
-            scene.add(initialKey.csgFinal)
-        }
-        
-        if(initialKey.csgFinal.position.equals(new THREE.Vector3(37.5, 1.8, -92.0)))
-            Area.doorDown();
-
-    }
-
-    //verifica morte dos inimigos da area 2
-     if (enemiesAreas.inimigos.area2.length === 0 && player.keys.length === 1) {
-        if (!secondKey)
-            secondKey = new Key("rgba(247, 231, 15, 1)");   
-        else
-            Area.segundoAltar(secondKey.csgFinal);
-    }
-
-    if (secondKey && !secondKey.coletada) {
-        player.addKey(secondKey);
-    }
-    
+    player.checkArea1(enemiesAreas)
+    player.checkArea2(enemiesAreas)
     player.handlePlayer();
     //lidando com as colisões
     playerCollisionHandler.handleCollisions()
-    
+
     if (player.activeGun instanceof ChainGun && player.activeGun.isFiring) {
         player.activeGun.spriteUpdate(); // animação do sprite tem que ser no render
     }

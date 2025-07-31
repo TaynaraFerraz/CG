@@ -32,8 +32,8 @@ export class ChainGun {
         this.isFiring = false
 
         let loader = new THREE.TextureLoader();
-        loader.load("./assets/chaingun.png", (texture) => {
-            this.#actionSprite = this.#spriteMixer.ActionSprite(texture, 3, 1);
+        loader.load("./spriteChainGun.png", (texture) => {
+            this.#actionSprite = this.#spriteMixer.ActionSprite(texture, 5, 1);
             this.#actionSprite.setFrame(0);
             this.#actionSprite.castShadow = true;
             this.#actionSprite.position.set(0, -0.1, -0.3);
@@ -55,7 +55,7 @@ export class ChainGun {
         // Só inicia a animação uma vez
         if (!this.isFiring) {
             this.isFiring = true;
-            this.#action = this.#spriteMixer.Action(this.#actionSprite, 0, 2, 120);
+            this.#action = this.#spriteMixer.Action(this.#actionSprite, 0, 4, 100);
             this.#action.playLoop();
         }
 
@@ -75,8 +75,14 @@ export class ChainGun {
         console.log(enemyMeshes)
 
         //raio para identificar objetos nessa direção
-        const intersect = raycaster.intersectObjects(enemyMeshes, true);
-
+        const collidableMeshes = [
+            ...Collidables.collidables.areas.map(obj => obj.mesh),
+            ...Collidables.collidables.walls.map(obj => obj.mesh),
+            ...enemyMeshes
+        ];
+        
+        const intersect = raycaster.intersectObjects(collidableMeshes, true);
+        
         if (intersect.length > 0) {
             const hit = intersect[0].object
 

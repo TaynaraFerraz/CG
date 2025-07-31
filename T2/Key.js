@@ -7,6 +7,7 @@ export class Key {
     color
     material
     csgFinal
+    visible
     coletada = false
 
     constructor(color) {
@@ -46,6 +47,7 @@ export class Key {
         })
         this.csgFinal.material = this.material
         this.csgFinal.scale.set(0.3, 0.3, 0.3);
+        this.visible = false;
         //this.position = this.csgFinal.position.set(-160.0, 6.9, -162.0);
         //this.#scene.add(this.csgFinal);
     }

@@ -495,9 +495,10 @@ export class Area {
   static primeiroAltar(key) {
     let altar = this.altares[0];
     altar.position.lerp(new THREE.Vector3(0.0, 1.0, 0.0), 0.01);
-    if (key) {
-      altar.add(key)
-      key.position.set(0, 3.3, 0)
+    key.visible = true
+    if (key.csgFinal) {
+      altar.add(key.csgFinal)
+      key.csgFinal.position.set(0, 3.3, 0)
     }
 
     let altarCollidable = this.collidableAreas.find(obj => obj.mesh === altar);

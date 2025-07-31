@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { ChainGun } from "./ChainGun.js";
 import { Gun } from "./Gun.js";
+import { Area } from './createArea.js';
+import { Key } from './Key.js';
 
 export class Player {
 
@@ -16,6 +18,8 @@ export class Player {
     #lastShotTime = 0
     bulletsCollisionHandler
     enemiesAreas
+    initialKey
+    secondKey
 
     constructor(scene, object, camera, bulletsCollisionHandler, enemiesAreas) {
         this.#scene = scene;
@@ -101,7 +105,7 @@ export class Player {
         });
     }
 
-    addKey(key) {
+    #addKey(key) {
         let position = this.#camera.getWorldPosition(new THREE.Vector3())
         let positionKey = key.csgFinal.getWorldPosition(new THREE.Vector3())
 
@@ -111,7 +115,48 @@ export class Player {
             key.removeKey();
         }
         //console.log(this.keys)
+        key.visible = true
+    }
 
+    checkArea1(enemiesAreas) {
+        console.log(this.initialKey)
+        if (enemiesAreas.inimigos.area1.length === 0 && this.keys.length === 0) {
+            if (!this.initialKey)
+                this.initialKey = new Key("rgb(223, 47, 47)");
+            else
+                Area.primeiroAltar(this.initialKey);
+        }
+
+        if (this.initialKey && !this.initialKey.coletada && this.initialKey.visible) {
+            this.#addKey(this.initialKey);
+        }
+
+        if (this.keys.length === 1 && this.initialKey.coletada) {
+            let position = this.#camera.getWorldPosition(new THREE.Vector3())
+            let target = new THREE.Vector3(37.5, 1.8, -92.0);
+            let distance = position.distanceTo(target)
+            if (distance < 3.5) {
+                this.initialKey.csgFinal.position.set(37.5, 1.8, -92.0)
+                this.initialKey.csgFinal.visible = true
+                this.#scene.add(this.initialKey.csgFinal)
+            }
+
+            if (this.initialKey.csgFinal.position.equals(new THREE.Vector3(37.5, 1.8, -92.0)))
+                Area.doorDown();
+        }
+    }
+
+    checkArea2(enemiesAreas) {
+        if (enemiesAreas.inimigos.area2.length === 0 && this.keys.length === 1) {
+            if (!this.secondKey)
+                this.secondKey = new Key("rgba(247, 231, 15, 1)");
+            else
+                Area.segundoAltar(this.secondKey.csgFinal);
+        }
+
+        if (this.secondKey && !this.secondKey.coletada) {
+            this.#addKey(this.secondKey);
+        }
     }
 
 }
