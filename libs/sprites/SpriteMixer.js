@@ -1,6 +1,7 @@
 
 // Author: Felix Mariotto
-
+// Updates: 
+//    RLSS - Hability to read Vertical and Horizontal sprites added
 // Based on Lee Stemkoski's work who coded the core texture offsetting part :
 // http://stemkoski.github.io/Three.js/Texture-Animation.html
 
@@ -10,8 +11,7 @@ export function SpriteMixer() {
 
 	var actionSprites = []; // Will store every new actionSprite.
 	var listeners = []; // Will store the user callbacks to call upon loop, finished, etc..
-
-
+   let playOnceStopInLastSpriteFlag = false; // Used to store the last sprite played with playOnce2
 
 	var api = {
 		actionSprites: actionSprites,
@@ -20,8 +20,6 @@ export function SpriteMixer() {
 		Action: Action,
 		addEventListener: addEventListener
 	};
-
-
 
 	// It can be used to make SpriteMixer call a callback function
 	// when an action is finished or looping. eventName argument can
@@ -33,7 +31,6 @@ export function SpriteMixer() {
 			throw 'Error : an argument is missing';
 		};
 	};
-
 
 	// Update every stored actionSprite if needed.
 	function update( delta ) { 
@@ -52,29 +49,29 @@ export function SpriteMixer() {
 		actionSprite.material.map.offset.y = (actionSprite.tilesVert - actionSprite.getRow() -1 ) / actionSprite.tilesVert;
 	};
 
-
-
-	// This is called during the loop, it first check if the animation must
+   // This is called during the loop, it first check if the animation must
 	// be updated, then increment actionSprite.currentTile, then call offsetTexture().
 	// Various operations are made depending on clampWhenFinished and hideWhenFinished
 	// options.
 	function updateAction( action, milliSec ) {
-		
 		action.actionSprite.currentDisplayTime += milliSec;
 
 		while (action.actionSprite.currentDisplayTime > action.tileDisplayDuration) {
 		
 			action.actionSprite.currentDisplayTime -= action.tileDisplayDuration;
-			action.actionSprite.currentTile = (action.actionSprite.currentTile + 1) ;
+         if( !action.isColumn ){
+			   action.actionSprite.currentTile = (action.actionSprite.currentTile + 1) ;
 
+         }else{
+            action.actionSprite.currentTile = (action.actionSprite.currentTile += action.actionSprite.tilesHoriz) ;         
+         }  
 			// Restarts the animation if the last frame was reached at last call.
-			if (action.actionSprite.currentTile > action.indexEnd) {
-				
+			if (action.actionSprite.currentTile > action.indexEnd) {		
+
 				action.actionSprite.currentTile = action.indexStart ;
 
 				// Call the user callbacks on the event 'loop'
 				if ( action.mustLoop == true ) {
-
 					listeners.forEach( (listener)=> {
 						if ( listener.eventName == 'loop' ) {
 							listener.callback({
@@ -83,11 +80,13 @@ export function SpriteMixer() {
 							});
 						};
 					});
-
 				} else { // action must not loop
+               if(playOnceStopInLastSpriteFlag) // If playOnce2 was used, stop in the last sprite
+				      action.actionSprite.currentTile = action.indexEnd+1 ;
+               else
+                  action.actionSprite.currentTile = action.indexStart ;
 
 					if ( action.clampWhenFinished == true ) {
-
 						action.actionSprite.paused = true ;
 
 						if (action.hideWhenFinished == true) {
@@ -97,7 +96,6 @@ export function SpriteMixer() {
 						callFinishedListeners( action );
 
 					} else { // must restart the animation before to stop
-
 						action.actionSprite.paused = true ;
 
 						if (action.hideWhenFinished == true) {
@@ -115,10 +113,7 @@ export function SpriteMixer() {
 					};
 				};
 			};
-
-
 			offsetTexture( action.actionSprite );
-			
 
 			// Call the user callbacks on the event 'finished'.
 			function callFinishedListeners( action ) {
@@ -131,23 +126,9 @@ export function SpriteMixer() {
 					};
 				}, action.tileDisplayDuration );
 			};
-
-
 		};
-
 	};
 
-
-
-	// reveal the sprite and play the action only once
-	function playOnce() {
-		this.mustLoop = false ;
-		this.actionSprite.currentAction = this ;
-		this.actionSprite.currentTile = this.indexStart ;
-		offsetTexture( this.actionSprite );
-		this.actionSprite.paused = false ;
-		this.actionSprite.visible = true ;
-	};
 
 	// resume the action if it was paused
 	function resume() {
@@ -158,12 +139,25 @@ export function SpriteMixer() {
 			this.currentTile = this.indexStart;
 		};
 		this.actionSprite.paused = false ;
+	};
+
+
+	// reveal the sprite and play the action only once
+	function playOnce(StopLast = false) {
+		this.mustLoop = false ;
+		this.actionSprite.currentAction = this ;
+		this.actionSprite.currentTile = this.indexStart ;
+		offsetTexture( this.actionSprite );
+		this.actionSprite.paused = false ;
 		this.actionSprite.visible = true ;
+      this.actionSprite.finished = true;
+      playOnceStopInLastSpriteFlag = StopLast; // Will stop in last sprite
 	};
 
 	// reveal the sprite and play it in a loop
 	function playLoop() {
 		this.mustLoop = true ;
+      this.isInLoop = true; // Set the flag to true
 		this.actionSprite.currentAction = this ;
 		this.actionSprite.currentTile = this.indexStart ;
 		offsetTexture( this.actionSprite );
@@ -193,7 +187,12 @@ export function SpriteMixer() {
 	};
 
 	// Set manually a frame of the animation. Frame indexing starts at 0.
-	function setFrame( frameID ) {
+	function setFrame( line, column ) {
+
+      // if(line < 0 || column < 0 || column >= this.actionSprite.tilesHoriz || line >= this.tilesVert)
+      //    return -1;
+      let frameID = (line * this.tilesHoriz) + column;
+
 		this.paused = true ;
 		this.currentTile = frameID;
 		offsetTexture( this );
@@ -209,7 +208,7 @@ export function SpriteMixer() {
 		return this.currentTile % this.tilesHoriz;
 	};
 
-	/*
+   /*
 		SpriteMixer.ActionSprite() returns an extended THREE.Sprite.
 		All the parameters necessary for the animation are stored inside,
 		but you can still use it as any THREE.Sprite, like scale it etc..
@@ -241,18 +240,12 @@ export function SpriteMixer() {
 		actionSprite.setFrame = setFrame ;
 		actionSprite.getRow = getRow;
 		actionSprite.getColumn = getColumn;
-		
 		offsetTexture( actionSprite ) ;
 
 		actionSprites.push( actionSprite );
 
 		return actionSprite ;
-		
 	};
-
-
-
-
 
 	/*
 		SpriteMixer.Action returns an object containing the informations related to a
@@ -266,13 +259,24 @@ export function SpriteMixer() {
 			- tileDisplayDuration is the duration of ONE FRAME in the animation
 	*/
 	
-	function Action( actionSprite, indexStart, indexEnd, tileDisplayDuration ) {
+	//function Action( actionSprite, indexStart, indexEnd, tileDisplayDuration ) {
+   function Action( actionSprite, tileDisplayDuration, startLine, startColumn, endLine, endColumn) {   
 
 		if ( !actionSprite.isIndexedSprite ) {
 			throw 'Error : "texture" argument must be an indexedTexture.' ;
 			return
 		};
 
+      let indexStart, indexEnd, localIsColumn = false;
+      if(startLine == endLine) // Vertical animation
+      {
+         indexStart = startColumn + (startLine * actionSprite.tilesHoriz);   
+         indexEnd = endColumn + (endLine * actionSprite.tilesHoriz);
+      }else {
+         indexStart = (startLine * actionSprite.tilesHoriz) + startColumn; 
+         indexEnd = (endLine * actionSprite.tilesHoriz) + endColumn;  
+         localIsColumn = true; 
+      }
 
 		return {
 			type: "spriteAction",
@@ -281,22 +285,17 @@ export function SpriteMixer() {
 			resume,
 			pause,
 			pauseNextEnd,
-			stop,
-			clampWhenFinished: true,
+         stop,
+         isColumn: localIsColumn,         
+         clampWhenFinished: true,
 			hideWhenFinished: false,
 			mustLoop: true,
+         isInLoop: false, // Used to know if the action is in a loop         
 			indexStart,
 			indexEnd,
 			tileDisplayDuration,
-			actionSprite
+			actionSprite,
 		};
-
 	};
-
-
-
-
-
 	return api;
-
 };

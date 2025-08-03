@@ -27,7 +27,9 @@ scene.add(camera); // Add camera to the scene
 orbit = new OrbitControls(camera, renderer.domElement); // Enable mouse rotation, pan, zoom etc.
 clock = new THREE.Clock();
 keyboard = new KeyboardState();
-let up = [1, 1, 1, 1]; // Array to control movement in 4 directions
+
+let DOWN = 0, LEFT = 1, UP = 2, RIGHT = 3; // Directions
+let key = [0, 0, 0, 0]; // Array to control movement in 4 directions (DOWN, LEFT, UP, RIGHT)
 
 // Show axes (parameter is size of each axis)
 let axesHelper = new THREE.AxesHelper(12);
@@ -48,25 +50,25 @@ spriteMixer = SpriteMixer();
 // Make sure to use the texture once it's fully loaded, by
 // passing a callback function to the loader.
 let loader = new THREE.TextureLoader();
-loader.load("../assets/textures/sprites/character.png", (texture) => {
+loader.load("../assets/textures/sprites/fox.png", (texture) => {
 
    // An ActionSprite is instantiated with these arguments :
    // - which THREE.Texture to use
    // - the number of columns in your animation
    // - the number of rows in your animation
-   actionSprite = spriteMixer.ActionSprite(texture, 10, 2);
+   actionSprite = spriteMixer.ActionSprite(texture, 10, 2);   
    actionSprite.add(axesHelperSprite);
    actionSprite.position.y = 0.65; // Adjust the height of the sprite
    actionSprite.castShadow = true; // Enable shadow for this sprite
-   actionSprite.setFrame(9); // set initial frame of the sprite
+   actionSprite.setFrame(0,9); // set initial frame of the sprite
 
    // Two actions are created with these arguments :
    // - which actionSprite to use
-   // - index of the beginning of the action
-   // - index of the end of the action
    // - duration of ONE FRAME in the animation, in milliseconds
-   actions.runRight = spriteMixer.Action(actionSprite, 0, 8, 40);
-   actions.runLeft = spriteMixer.Action(actionSprite, 10, 18, 40);
+   // - line and column of the beginning of the action
+   // - line and column of the end of the action
+   actions.runLeft  = spriteMixer.Action(actionSprite, 40, 1, 0, 1, 8);
+   actions.runRight = spriteMixer.Action(actionSprite, 40, 0, 0, 0, 8);
 
    actionSprite.scale.set(1.7, 2, 1);
    scene.add(actionSprite);
@@ -107,30 +109,36 @@ function spriteUpdate() {
    }
 }   
 
+// Reset the isInLoop flags for all actions       
+// Key array (DOWN, LEFT, UP, RIGHT)
+function resetIsInLoopFlags(key) 
+{
+   if(actions.runLeft  && !key[1]) actions.runLeft.isInLoop = false;
+   if(actions.runRight && !key[3]) actions.runRight.isInLoop = false;   
+}
+
 function keyboardUpdate() {
    keyboard.update();
 
    if (keyboard.down("A")) axesHelperSprite.visible = !axesHelperSprite.visible; // Toggle axes visibility
    if (keyboard.down("P")) parallelMovement = !parallelMovement; // Toggle parallel movement
 
-   if (keyboard.down("left")) {
-      up[0] = 0;
-      if (running != 'left') {
-         actions.runLeft.playLoop();
-         lastRunning = running = 'left';
-      }
-   };
+   if ( keyboard.down("down"))  key[DOWN] = 1;      
+   if ( keyboard.down("left"))  key[LEFT] = 1;         
+   if ( keyboard.down("up"))    key[UP] = 1;      
+   if ( keyboard.down("right")) key[RIGHT] = 1; 
 
-   if (keyboard.down("right")) {
-      up[1] = 0;
-      if (running != 'right') {
-         actions.runRight.playLoop();
-         lastRunning = running = 'right';
-      };
+   if(key[LEFT]) { // If LEFT is pressed
+      lastRunning = running = 'left'; // Set running direction to left
+      if (!actions.runLeft.isInLoop) actions.runLeft.playLoop(); 
    }
 
-   if (keyboard.down("up")) {
-      up[2] = 0;
+   if(key[RIGHT]) { 
+      lastRunning = running = 'right'; 
+      if (!actions.runRight.isInLoop) actions.runRight.playLoop(); 
+   }  
+
+   if (key[UP]) {
       if (runningZ != 'up') {
          // Se o último movimento foi para a esquerda, continua com a animação para este lado
          if (lastRunning == 'left') 
@@ -141,39 +149,30 @@ function keyboardUpdate() {
       }
    };
 
-   if (keyboard.down("down")) {
-      up[3] = 0;
+   if (key[DOWN]) {
       if (runningZ != 'down') {
-         // Se o último movimento foi para a esquerda, continua com a animação para este lado        
-         if (lastRunning == 'left')
+         // Se o último movimento foi para a esquerda, continua com a animação para este lado
+         if (lastRunning == 'left') 
             actions.runLeft.playLoop();
          else
             actions.runRight.playLoop();
          runningZ = 'down';
       }
-   }
+   };
 
    // Atualiza o vetor up, que controla se o sprite está se movendo para os lados ou para cima/baixo
-   if (keyboard.up("left"))  up[0] = 1;
-   if (keyboard.up("right")) up[1] = 1;
-   if (keyboard.up("up"))    up[2] = 1;
-   if (keyboard.up("down"))  up[3] = 1;
+   if (keyboard.up("down"))  key[DOWN] = 0;
+   if (keyboard.up("left"))  key[LEFT] = 0;
+   if (keyboard.up("up"))    key[UP] = 0;
+   if (keyboard.up("right")) key[RIGHT] = 0;
+   resetIsInLoopFlags(key); // Reset the isInLoop flags for all actions       
 
    // Atualiza as variáveis de movimento
-   if(up[0] && up[1]) running  = undefined
-   if(up[2] && up[3]) runningZ = undefined   
+   if(!key[LEFT] && !key[RIGHT]) running  = undefined
+   if(!key[DOWN] && !key[UP])    runningZ = undefined   
 
-   if (up[0] && up[1] && up[2] && up[3] && actionSprite) {
-      if (running != undefined) {
-         lastRunning = running;
-      }
-      if (lastRunning == 'left') {
-         actionSprite.setFrame(19);
-      } else {
-         actionSprite.setFrame(9);
-      };
-      running = undefined;
-      runningZ = undefined;
+   if( running == undefined && runningZ == undefined && actionSprite ) {
+      (lastRunning == 'left') ? actionSprite.setFrame(1, 9) : actionSprite.setFrame(0, 9);
    }
 }
 
