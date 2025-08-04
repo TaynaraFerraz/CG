@@ -35,18 +35,7 @@ export class Area {
     this.enemiesA3 = new EnemiesHandler(scene, player);
     this.enemiesA4 = new EnemiesHandler(scene, player);
 
-    positions.push(new THREE.Vector3(-160.0, 12.0, -172.0));
-    positions.push(new THREE.Vector3(0.0, 12.0, -172.0));
-    positions.push(new THREE.Vector3(160.0, 12.0, -172.0));
-    positions.push(new THREE.Vector3(0.0, 12.0, 172.0));
-
-    //criação da base chão/parede
     this.createTerrain(scene);
-
-    //criação das areas
-    for (let i = 0; i < positions.length; i++) {
-      this.createArea(scene, positions[i], i);
-    }
     this.createAreaPilars(scene);
     this.createAreaCubes(scene);
   }
@@ -352,95 +341,6 @@ export class Area {
     this.collidableAreas.push({ box: pilarBox, mesh: pilar });
   }
 
-  static createArea(scene, position, i) {
-    if (i == 0 || i == 1)
-      return;
-
-    let material;
-    const height = 24.0;
-    let length = 120.0;
-    let leftLength = 47.5;
-    let rightLength = 47.5;
-
-    if (i == 2) {
-      material = this.lambertMaterial('#2c41ff');
-      leftLength = 47.5;
-      rightLength = 47.5;
-    }
-    if (i == 3) {
-      material = this.lambertMaterial('#00b109');
-      length = 360.0;
-      leftLength = 167.5;
-      rightLength = 167.5;
-    }
-
-    //criação do cubo principal
-    let cubeGeometry = new THREE.BoxGeometry(length, height, 96.0);
-    let cube = new THREE.Mesh(cubeGeometry, material);
-    cube.position.copy(position);
-    //inverte a posição para a area maior ficar voltada para o centro
-    if (i == 3)
-      cube.rotation.y = Math.PI;
-    cube.castShadow = true;
-    cube.receiveShadow = true;
-    scene.add(cube);
-
-    let boxCube = new THREE.Box3().setFromObject(cube, true);
-    this.collidableAreas.push({ box: boxCube, mesh: cube });
-
-    //cubos laterais
-    let cubeGeometry2 = new THREE.BoxGeometry(leftLength, height, height);
-    let cubeLeft = new THREE.Mesh(cubeGeometry2, material);
-    cubeLeft.position.set(-(length - leftLength) / 2, 0.0, 60.0);
-    cubeLeft.castShadow = true;
-    cubeLeft.receiveShadow = true;
-    cube.add(cubeLeft);
-
-    let cubeGeometry3 = new THREE.BoxGeometry(rightLength, height, height);
-    let cubeRight = new THREE.Mesh(cubeGeometry3, material);
-    cubeRight.position.set((length - rightLength) / 2, 0.0, 60.0);
-    cubeRight.castShadow = true;
-    cubeRight.receiveShadow = true;
-    cube.add(cubeRight);
-
-    let leftBoxCube = new THREE.Box3().setFromObject(cubeLeft, true);
-    let rightBoxCube = new THREE.Box3().setFromObject(cubeRight, true);
-    this.collidableAreas.push({ box: leftBoxCube, mesh: cubeLeft });
-    this.collidableAreas.push({ box: rightBoxCube, mesh: cubeRight });
-
-    //escadas
-    let stairHeight = height / 8;
-    let stairPositionX = 0.0;
-    if (leftLength < length / 2) {
-      stairPositionX = -(length - leftLength) / 2 + leftLength / 2 + 12.5;
-    } else {
-      stairPositionX = (length - rightLength) / 2 - rightLength / 2 - 12.5;
-    }
-
-    // colisão da escada
-    let stair = new THREE.Mesh(new THREE.PlaneGeometry(26, 38), this.lambertMaterial('green'));
-    stair.visible = false;
-    stair.position.set(stairPositionX, 0, 60.0);
-    stair.translateZ(1);
-    stair.rotateX(-1 * Math.PI / 3.8);
-
-    cube.add(stair);
-    let box = new THREE.Box3().setFromObject(stair, true);
-    this.collidableStairs.push({ box: box, mesh: stair });
-
-    for (let i = 0; i < 8; i++) {
-      let stairStepGeometry = new THREE.BoxGeometry(25.0, stairHeight, stairHeight * (1 + 7 - i));
-      let stairStep = new THREE.Mesh(stairStepGeometry, this.lambertMaterial('#ffe6d2'));
-      if (i == 0) {
-        stairStep.position.set(stairPositionX, -10.5, 60);
-      } else {
-        stairStep.position.set(stairPositionX, -10.5 + stairHeight * i, 60 - (stairHeight * i) / 2);
-      }
-      stairStep.castShadow = true;
-      stairStep.receiveShadow = true;
-      cube.add(stairStep);
-    }
-  }
 
   static createTerrain(scene) {
     let wallGeometry = new THREE.BoxGeometry(504, 72, 8);
