@@ -1,10 +1,12 @@
 import * as THREE from 'three';
 import {
+  getMaxSize,
   setDefaultMaterial
 } from "../libs/util/util.js";
 
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
 import { EnemiesHandler } from './EnemiesHandler.js';
+import { GLTFLoader } from '../build/jsm/loaders/GLTFLoader.js';
 
 
 export class Area {
@@ -38,8 +40,46 @@ export class Area {
     this.createTerrain(scene);
     this.createAreaPilars(scene);
     this.createAreaCubes(scene);
+    this.createArea3(scene)
   }
 
+  static createArea3(scene) {
+    function normalizeAndRescale(obj, newScale) {
+      var scale = getMaxSize(obj);
+      obj.scale.set(newScale * (1.0 / scale),
+        newScale * (1.0 / scale),
+        newScale * (1.0 / scale));
+      return obj;
+    }
+
+    function fixPosition(obj) {
+      // Fix position of the object over the ground plane
+      var box = new THREE.Box3().setFromObject(obj);
+      if (box.min.y > 0)
+        obj.translateY(-box.min.y);
+      else
+        obj.translateY(-1 * box.min.y);
+      return obj;
+    }
+
+    var loader = new GLTFLoader();
+    loader.load('../T2/' + 'hangar' + '.glb', function (gltf) {
+      var obj = gltf.scene;
+      obj.name = 'hangar';
+      obj.visible = true;
+      obj.traverse(function (child) {
+        if (child.isMesh) child.castShadow = true;
+        if (child.material) child.material.side = THREE.DoubleSide;
+      });
+
+      var obj = normalizeAndRescale(obj, 130);
+      var obj = fixPosition(obj);
+      obj.position.set(150, 0, -155)
+      obj.rotateY(Math.PI/2)
+      scene.add(obj);
+      //assetManager[modelName] = obj;        
+    });
+  }
   static createAreaPilars(scene) {
     this.enemiesA1.addEnemy('lostsoul', new THREE.Vector3(-130.0, 5.0, -130.0));
     this.enemiesA1.addEnemy('lostsoul', new THREE.Vector3(-130.0, 5.0, -180.0));
