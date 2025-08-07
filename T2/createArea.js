@@ -5,6 +5,9 @@ import {
 
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
 import { EnemiesHandler } from './EnemiesHandler.js';
+import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
+import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
+import { GLTFLoader } from '../build/jsm/loaders/GLTFLoader.js';
 
 
 export class Area {
@@ -38,6 +41,8 @@ export class Area {
     this.createTerrain(scene);
     this.createAreaPilars(scene);
     this.createAreaCubes(scene);
+
+    this.createAreaDesert(scene);
   }
 
   static createAreaPilars(scene) {
@@ -341,6 +346,48 @@ export class Area {
     this.collidableAreas.push({ box: pilarBox, mesh: pilar });
   }
 
+  static createAreaDesert(scene) {
+    let position = new THREE.Vector3(0.0, 6.0, 130.0);
+    let height = 12.0;
+    let length = 240.0;
+
+    let material = this.lambertMaterial('yellow');
+    let cubegeometry = new THREE.BoxGeometry(length, height, 140.0);
+    let cube = new THREE.Mesh(cubegeometry, material);
+    cube.position.copy(position);
+    cube.castShadow = true;
+    cube.receiveShadow = true;
+    scene.add(cube);
+
+    let boxCube = new THREE.Box3().setFromObject(cube, true);
+    this.collidableAreas.push({ box: boxCube, mesh: cube });
+
+    //carregar piramide
+    let gtfLoader = new GLTFLoader();
+    gtfLoader.load(`./assets/piramide.glb`, function (response) {  
+      let obj = response.scene;
+
+      obj.position.set(0, 5, 0);
+      obj.scale.set(1, 1, 1);
+
+      if(obj.material){
+          obj.material.transparent = true;
+      }
+      obj.traverse(function (child) {
+          if (child.isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+              child.material.transparent = true;
+          }
+      });
+      scene.add(obj);
+      
+      let boxPiramideGLTF = new THREE.Box3().setFromObject(obj, true);
+      Area.collidableAreas.push({ box: boxPiramideGLTF, mesh: obj });
+
+    });
+
+  }
 
   static createTerrain(scene) {
     let wallGeometry = new THREE.BoxGeometry(504, 72, 8);

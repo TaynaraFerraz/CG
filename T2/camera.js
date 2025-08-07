@@ -35,8 +35,8 @@ keyboard = new KeyboardState();
 light = new THREE.DirectionalLight('rgb(255,255,255)', 3);
 light.position.set(140.0, 220.0, 120.0);
 light.castShadow = true;
-light.shadow.mapSize.width = 1024 * 2;
-light.shadow.mapSize.height = 1024 * 2;
+light.shadow.mapSize.width = 1024;
+light.shadow.mapSize.height = 1024;
 light.shadow.camera.near = 0.01;
 light.shadow.camera.far = 600;
 light.shadow.camera.left = -450;
@@ -98,7 +98,7 @@ camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, Area.lambertMaterial('red'));
-cameraHolder.position.set(0, PLAYER_HEIGHT + 8, 0);
+cameraHolder.position.set(0, PLAYER_HEIGHT + 14, 80);
 cameraHolder.add(camera);
 
 //inicializando o PointerLockControls customizado

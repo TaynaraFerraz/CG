@@ -1,7 +1,7 @@
 const PLAYER_HEIGHT = 2;
 const PLAYER_WIDTH = 0.4;
 const SPEED = 25;
-const SHIFT_MULTIPLIER = 1.5;
+const SHIFT_MULTIPLIER = 2.0;
 
 const CACODEMON_HEIGHT = 2;
 

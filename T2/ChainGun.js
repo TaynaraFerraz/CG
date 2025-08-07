@@ -34,7 +34,7 @@ export class ChainGun {
         let loader = new THREE.TextureLoader();
         loader.load("./spriteChainGun.png", (texture) => {
             this.#actionSprite = this.#spriteMixer.ActionSprite(texture, 5, 1);
-            this.#actionSprite.setFrame(0);
+            this.#actionSprite.setFrame(0,0);
             this.#actionSprite.castShadow = true;
             this.#actionSprite.position.set(0, -0.1, -0.3);
             this.#actionSprite.scale.set(0.1, 0.1, 0.1);
@@ -55,7 +55,7 @@ export class ChainGun {
         // Só inicia a animação uma vez
         if (!this.isFiring) {
             this.isFiring = true;
-            this.#action = this.#spriteMixer.Action(this.#actionSprite, 0, 4, 100);
+            this.#action = this.#spriteMixer.Action(this.#actionSprite, 100, 0, 0, 0, 4);
             this.#action.playLoop();
         }
 
