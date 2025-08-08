@@ -16,6 +16,7 @@ import { Key } from './Key.js';
 import { ChainGun } from './ChainGun.js';
 import { Player } from './Player.js';
 import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
+import { CubeTextureLoaderSingleFile } from '../libs/util/cubeTextureLoaderSingleFile.js';
 
 const clock = new THREE.Clock();
 let scene, renderer, camera, cameraHolder, light, keyboard; // Initial variables
@@ -89,6 +90,11 @@ window.addEventListener('keydown', (event) => {
     }
 });
 
+//skybox
+let cubeTexture = new CubeTextureLoaderSingleFile().loadSingle('./assets/skybox/skybox.png', 1);
+scene.background = cubeTexture;
+
+
 //inicio da configuração da camera
 camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, PLAYER_HEIGHT / 2);
@@ -98,7 +104,7 @@ camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, Area.lambertMaterial('red'));
-cameraHolder.position.set(0, PLAYER_HEIGHT + 8, 0);
+cameraHolder.position.set(-180, PLAYER_HEIGHT + 8 + 10, -50);
 cameraHolder.add(camera);
 
 //inicializando o PointerLockControls customizado

@@ -40,7 +40,9 @@ export class Area {
     this.createAreaCubes(scene);
   }
 
+
   static createAreaPilars(scene) {
+    const textureLoader = new THREE.TextureLoader();
     this.enemiesA1.addEnemy('lostsoul', new THREE.Vector3(-130.0, 5.0, -130.0));
     this.enemiesA1.addEnemy('lostsoul', new THREE.Vector3(-130.0, 5.0, -180.0));
     this.enemiesA1.addEnemy('lostsoul', new THREE.Vector3(-150.0, 5.0, -150.0));
@@ -52,10 +54,36 @@ export class Area {
     let leftLength = 20.0;
     let rightLength = 75.0;
 
+    let mainCubeMaterials = [
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+    ];
+
+    let leftFrontCubeMaterials = [
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+    ];
+
+    let rightFrontCubeMaterials = [
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+    ];
+
     //cubo principal
-    let material = this.lambertMaterial('lightblue');
     let cubeGeometry = new THREE.BoxGeometry(length, height, 116.0);
-    let cube = new THREE.Mesh(cubeGeometry, material);
+    let cube = new THREE.Mesh(cubeGeometry, mainCubeMaterials);
     cube.castShadow = true;
     cube.receiveShadow = true;
     cube.position.copy(position);
@@ -65,18 +93,81 @@ export class Area {
     scene.add(cube);
 
     let cubeGeometry2 = new THREE.BoxGeometry(leftLength, height, 4.0);
-    let cubeLeft = new THREE.Mesh(cubeGeometry2, material);
+    let cubeLeft = new THREE.Mesh(cubeGeometry2, leftFrontCubeMaterials);
     cubeLeft.position.set(-(length - leftLength) / 2, 0.0, 60.0);
     cubeLeft.castShadow = true;
     cubeLeft.receiveShadow = true;
     cube.add(cubeLeft);
 
     let cubeGeometry3 = new THREE.BoxGeometry(rightLength, height, 4.0);
-    let cubeRight = new THREE.Mesh(cubeGeometry3, material);
+    let cubeRight = new THREE.Mesh(cubeGeometry3, rightFrontCubeMaterials);
     cubeRight.position.set((length - rightLength) / 2, 0.0, 60.0);
     cubeRight.castShadow = true;
     cubeRight.receiveShadow = true;
     cube.add(cubeRight);
+
+    const applyTexturesToCube = (cube, paramsVec) => {
+      paramsVec.forEach(({ texture, normalMap, x, y }, i) => {
+        const texCopy = new THREE.Texture().copy(texture);
+        console.log(cube.map);
+
+        cube.material[i].map = texCopy;
+        if (normalMap) {
+          const texNormalCopy = new THREE.Texture().copy(normalMap);
+          cube.material[i].normalMap = texNormalCopy;
+          texNormalCopy.repeat.set(x, y);
+        }
+        texCopy.repeat.set(x, y);
+      })
+    }
+    //iniciando texturas
+    const plasteredStoneTexture = textureLoader.load('./assets/textures/a1/forest_ground.jpg');
+    const plasteredStoneNormal = textureLoader.load('./assets/textures/a1/forest_ground_normal.jpg');
+    plasteredStoneTexture.wrapS = THREE.RepeatWrapping;
+    plasteredStoneTexture.wrapT = THREE.RepeatWrapping;
+
+    plasteredStoneNormal.wrapS = THREE.RepeatWrapping;
+    plasteredStoneNormal.wrapT = THREE.RepeatWrapping;
+
+    const stoneBrickWall = textureLoader.load('./assets/textures/a1/stone_brick_wall.jpg');
+    const stoneBrickWallNormal = textureLoader.load('./assets/textures/a1/stone_brick_wall_normal.jpg');
+    stoneBrickWall.wrapS = THREE.RepeatWrapping;
+    stoneBrickWall.wrapT = THREE.RepeatWrapping;
+
+    stoneBrickWallNormal.wrapS = THREE.RepeatWrapping;
+    stoneBrickWallNormal.wrapT = THREE.RepeatWrapping;
+
+
+
+    //cubo 1
+    applyTexturesToCube(cube, [
+      { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 35, y: 1.5 }, // +X (right)
+      { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 35, y: 1.5 }, // -X (left)
+      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 25, y: 25 }, // +Y (top)
+      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 2, y: 1 }, // -Y (bottom)
+      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 10, y: 1 }, // +Z (front)
+      { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 35, y: 1.5 }, // -Z (back)
+    ])
+
+    //cubo 2 e 3
+    applyTexturesToCube(cubeLeft, [
+      { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 1, y: 1.5 }, // +X (right)
+      { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 1, y: 1.5 }, // -X (left)
+      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 6, y: 1 }, // +Y (top)
+      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 2, y: 1 }, // -Y (bottom)
+      { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 10, y: 1.5 }, // +Z (front)
+      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 2, y: 1 }, // -Z (back)
+    ]);
+
+    applyTexturesToCube(cubeRight, [
+      { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 1, y: 1.5 }, // +X (right)
+      { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 1, y: 1.5 }, // -X (left)
+      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 12, y: 1 }, // +Y (top)
+      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 10, y: 1 }, // -Y (bottom)
+      { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 18, y: 1.5 }, // +Z (front)
+      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 10, y: 1 }, // -Z (back)
+    ]);
+
 
     //colisão
     let leftBoxCube = new THREE.Box3().setFromObject(cubeLeft, true);
@@ -130,9 +221,30 @@ export class Area {
       cube.add(stairStep);
     }
 
+    const loader = new THREE.TextureLoader();
+    const pillarDisplacement = loader.load('./assets/textures/a1/pillars_displacement.png');
+    pillarDisplacement.wrapS = THREE.RepeatWrapping;
+    pillarDisplacement.wrapT = THREE.RepeatWrapping;
+    pillarDisplacement.repeat.set(8, 8);
+
+    const stoneTexture = textureLoader.load('./assets/textures/a1/stone.jpg');
+    const stoneNormal = textureLoader.load('./assets/textures/a1/stone_normal.jpg');
+    stoneTexture.wrapS = THREE.RepeatWrapping;
+    stoneTexture.wrapT = THREE.RepeatWrapping;
+    stoneNormal.wrapS = THREE.RepeatWrapping;
+    stoneNormal.wrapT = THREE.RepeatWrapping;
+    stoneTexture.repeat.set(1, 1);
+    stoneNormal.repeat.set(1, 1);
     for (let i = 0; i < 12; i++) {
-      let pilarGeometry = new THREE.CylinderGeometry(2.5, 2.5, 20.0);
-      let pilarMaterial = this.lambertMaterial('#a7a7a7');
+
+      let pilarGeometry = new THREE.CylinderGeometry(2.5, 2.5, 20.0, 300);
+      let pilarMaterial = this.lambertMaterial("#fffde0");
+      pilarMaterial.displacementMap = pillarDisplacement;
+      pilarMaterial.displacementScale = 0.2;
+
+      //pilarMaterial.map = stoneTexture;
+      //pilarMaterial.normalMap = stoneNormal;
+
       let pilar = new THREE.Mesh(pilarGeometry, pilarMaterial);
       pilar.position.set(-50.0 + (100 / 11) * i, 12.0, -48.0);
 
@@ -160,26 +272,43 @@ export class Area {
       this.collidableAreas.push({ box: boxPilarRight, mesh: pilarRight });
     }
 
-    let blocoMaterial = this.lambertMaterial('rgb(180, 72, 0)');
+    let blocoMaterial = [
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+      new THREE.MeshStandardMaterial(),
+    ];
+
+    
     let r1 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), blocoMaterial);
     r1.position.set(0.0, 24.5, -48.0);
     r1.castShadow = true;
     r1.receiveShadow = true;
     cube.add(r1);
-
+    
     let r2 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), blocoMaterial);
     r2.rotateY(Math.PI / 2);
     r2.position.set(50.0, 24.5, 2.0);
     r2.castShadow = true;
     r2.receiveShadow = true;
     cube.add(r2);
-
+    
     let r3 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), blocoMaterial);
     r3.rotateY(Math.PI / -2);
     r3.position.set(-50.0, 24.5, 2.0);
     r3.castShadow = true;
     r3.receiveShadow = true;
     cube.add(r3);
+    applyTexturesToCube(r1, [
+      { texture: stoneTexture, normalMap: stoneNormal, x: 2, y: 0.5 }, // +X (right)
+      { texture: stoneTexture, normalMap: stoneNormal, x: 2, y: 0.5 }, // -X (left)
+      { texture: stoneTexture, normalMap: stoneNormal, x: 5, y: 0.5 }, // +Y (top)
+      { texture: stoneTexture, normalMap: stoneNormal, x: 5, y: 0.5 }, // -Y (bottom)
+      { texture: stoneTexture, normalMap: stoneNormal, x: 10, y: 0.5 }, // +Z (front)
+      { texture: stoneTexture, normalMap: stoneNormal, x: 10, y: 0.5 }, // -Z (back)
+    ])
 
     let altar = new THREE.Mesh(new THREE.BoxGeometry(4.0, 6.0, 4.0), this.lambertMaterial('#a7a7a7'));
     altar.castShadow = true;
@@ -343,12 +472,24 @@ export class Area {
 
 
   static createTerrain(scene) {
+    const textureLoader = new THREE.TextureLoader();
     let wallGeometry = new THREE.BoxGeometry(504, 72, 8);
     let wallMaterial = this.lambertMaterial('#a7a7a7');
+
+    const wallTexture = textureLoader.load('./assets/textures/walls/rock_wall.jpg');
+
+    wallTexture.wrapS = THREE.RepeatWrapping;
+    wallTexture.wrapT = THREE.RepeatWrapping;
+
+    wallTexture.repeat.set(45, 10);
+    wallMaterial.map = wallTexture;
+
     let walls = [];
 
     for (let i = 0; i < 4; ++i) {
-      walls.push(new THREE.Mesh(wallGeometry, wallMaterial));
+      let wall = new THREE.Mesh(wallGeometry, wallMaterial);
+
+      walls.push(wall);
     }
 
     walls[0].position.set(0, 36, -254);
@@ -365,6 +506,8 @@ export class Area {
     for (let i = 0; i < walls.length; i++) {
       walls[i].castShadow = true;
       walls[i].receiveShadow = true;
+
+
       scene.add(walls[i]);
       let wallBox = new THREE.Box3().setFromObject(walls[i], true);
 
@@ -374,6 +517,15 @@ export class Area {
     let plane = new THREE.Mesh(new THREE.PlaneGeometry(510, 510), this.lambertMaterial('#a7a7a7'));
     plane.receiveShadow = true;
     plane.rotateX(-Math.PI / 2);
+
+    const floorTexture = textureLoader.load('./assets/textures/floor/floor.jpg');
+
+    floorTexture.wrapS = THREE.RepeatWrapping;
+    floorTexture.wrapT = THREE.RepeatWrapping;
+
+    floorTexture.repeat.set(200, 200);
+
+    plane.material.map = floorTexture;
 
     scene.add(plane);
   }
