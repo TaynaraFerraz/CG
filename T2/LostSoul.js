@@ -49,7 +49,7 @@ export class LostSoul extends Enemy {
                 setTimeout(() => {
                     this.#dashing = false;
                     this.dashingCallBack();
-                }, 600);
+                }, 1000);
             } else {
                 const nextDash = Math.random() * 2000 + 2000;
                 setTimeout(() => {

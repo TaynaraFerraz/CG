@@ -227,23 +227,22 @@ export class Area {
     pillarDisplacement.wrapT = THREE.RepeatWrapping;
     pillarDisplacement.repeat.set(8, 8);
 
-    const stoneTexture = textureLoader.load('./assets/textures/a1/stone.jpg');
-    const stoneNormal = textureLoader.load('./assets/textures/a1/stone_normal.jpg');
-    stoneTexture.wrapS = THREE.RepeatWrapping;
-    stoneTexture.wrapT = THREE.RepeatWrapping;
-    stoneNormal.wrapS = THREE.RepeatWrapping;
-    stoneNormal.wrapT = THREE.RepeatWrapping;
-    stoneTexture.repeat.set(1, 1);
-    stoneNormal.repeat.set(1, 1);
+    const stoneTexture = textureLoader.load('./assets/textures/a1/plastered_stone.jpg');
+    const stoneNormal = textureLoader.load('./assets/textures/a1/plastered_stone_normal.jpg');
+    stoneTexture.wrapS = THREE.MirroredRepeatWrapping;
+    stoneTexture.wrapT = THREE.MirroredRepeatWrapping;
+    stoneNormal.wrapS = THREE.MirroredRepeatWrapping;
+    stoneNormal.wrapT = THREE.MirroredRepeatWrapping;
+    
     for (let i = 0; i < 12; i++) {
 
       let pilarGeometry = new THREE.CylinderGeometry(2.5, 2.5, 20.0, 300);
       let pilarMaterial = this.lambertMaterial("#fffde0");
-      pilarMaterial.displacementMap = pillarDisplacement;
       pilarMaterial.displacementScale = 0.2;
-
-      //pilarMaterial.map = stoneTexture;
-      //pilarMaterial.normalMap = stoneNormal;
+      
+      pilarMaterial.map = stoneTexture;
+      pilarMaterial.normalMap = stoneNormal;
+      pilarMaterial.displacementMap = pillarDisplacement;
 
       let pilar = new THREE.Mesh(pilarGeometry, pilarMaterial);
       pilar.position.set(-50.0 + (100 / 11) * i, 12.0, -48.0);
