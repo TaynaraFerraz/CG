@@ -109,12 +109,81 @@ export class Area {
       })
     })
 
+    let materialDoorHangar = this.lambertMaterial('red');
+    let geometryDoorHangar = new THREE.BoxGeometry(79, 50, 3);
+    let geometryDoorHangar3 = new THREE.BoxGeometry(113, 50, 3);
+    let geometryDoorHangar4 = new THREE.BoxGeometry(34, 40, 3);
+    let doorHangar = new THREE.Mesh(geometryDoorHangar, materialDoorHangar);
+    let doorHangar2 = new THREE.Mesh(geometryDoorHangar, materialDoorHangar);
+    let doorHangar3 = new THREE.Mesh(geometryDoorHangar3, materialDoorHangar);
+    let doorHangar4 = new THREE.Mesh(geometryDoorHangar4, materialDoorHangar)
+    let doorHangar5 = new THREE.Mesh(geometryDoorHangar4, materialDoorHangar)
+    doorHangar.position.set(92,0.89999,-155.5)
+    doorHangar2.position.set(205.3,0.89999,-155.5)
+    doorHangar3.position.set(148,0.89999,-193)
+    doorHangar4.position.set(108.5,0.89999,-117.5)
+    doorHangar5.position.set(189,0.89999,-117.5)
+    
+    doorHangar.rotateY(Math.PI/2)
+    doorHangar2.rotateY(Math.PI/2)
+    doorHangar.visible = false
+    doorHangar2.visible = false
+    doorHangar3.visible = false
+    doorHangar4.visible = false
+    doorHangar5.visible = false
+
+    let doorHangarBox = new THREE.Box3().setFromObject(doorHangar, true);
+    let doorHangarBox2 = new THREE.Box3().setFromObject(doorHangar2, true);
+    let doorHangarBox3 = new THREE.Box3().setFromObject(doorHangar3, true);
+    let doorHangarBox4 = new THREE.Box3().setFromObject(doorHangar4, true);
+    let doorHangarBox5 = new THREE.Box3().setFromObject(doorHangar5, true);
+
+    this.collidableAreas.push({ box: doorHangarBox, mesh: doorHangar });
+    this.collidableAreas.push({ box: doorHangarBox2, mesh: doorHangar2 });
+    this.collidableAreas.push({ box: doorHangarBox3, mesh: doorHangar3 });
+    this.collidableAreas.push({ box: doorHangarBox4, mesh: doorHangar4 });
+    this.collidableAreas.push({ box: doorHangarBox5, mesh: doorHangar5 });
+
+    scene.add(doorHangar)
+    scene.add(doorHangar2)
+    scene.add(doorHangar3)
+    scene.add(doorHangar4)
+    scene.add(doorHangar5)
+
+    let geometryWheel = new THREE.BoxGeometry(1, 5, 1.5)
+    let wheel = new THREE.Mesh(geometryWheel, materialDoorHangar)
+    let wheel2 = new THREE.Mesh(geometryWheel, materialDoorHangar)
+    let wheel3 = new THREE.Mesh(geometryWheel, materialDoorHangar)
+    wheel.position.set(154.5, 0.05, -159.4)
+    wheel2.position.set(145.5, 0.05, -159.4)
+    wheel3.position.set(150, 0.05, -143)
+    wheel.visible = false
+    wheel2.visible = false
+    wheel3.visible = false
+
+    let wheelBox = new THREE.Box3().setFromObject(wheel, true);
+    let wheelBox2 = new THREE.Box3().setFromObject(wheel2, true);
+    let wheelBox3 = new THREE.Box3().setFromObject(wheel3, true);
+
+    this.collidableAreas.push({ box: wheelBox, mesh: wheel });
+    this.collidableAreas.push({ box: wheelBox2, mesh: wheel2 });
+    this.collidableAreas.push({ box: wheelBox3, mesh: wheel3 });
+    scene.add(wheel)
+    scene.add(wheel2)
+    scene.add(wheel3)
+
     let materialDoor = this.lambertMaterial('lightblue');
-    let geometryDoor = new THREE.BoxGeometry(45, 50, 1)
+    let geometryDoor = new THREE.BoxGeometry(40, 50, 1)
     let doorLeft = new THREE.Mesh(geometryDoor, materialDoor);
     let doorRight = new THREE.Mesh(geometryDoor, materialDoor);
-    doorLeft.position.set(125, 0.05, -114);
-    doorRight.position.set(170, 0.05, -114);
+    doorLeft.position.set(126, 0.05, -116);
+    doorRight.position.set(166, 0.05, -116);
+
+    let doorLeftBox = new THREE.Box3().setFromObject(doorLeft, true);
+    let doorRightBox = new THREE.Box3().setFromObject(doorRight, true);
+
+    this.collidableAreas.push({ box: doorLeftBox, mesh: doorLeft });
+    this.collidableAreas.push({ box: doorRightBox, mesh: doorRight });
     scene.add(doorLeft);
     scene.add(doorRight);
     this.doorArea3.push(doorLeft);
