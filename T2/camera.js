@@ -208,6 +208,7 @@ let playerCollisionHandler = new PlayerCollisionHandler(player.object, Collidabl
 
 player.actions(controls)
 let inimigosNaArea1 = false
+let isOpening = false;
 
 // Listen window size changes
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
@@ -224,11 +225,18 @@ function render() {
             return;
         }
     }
-
+    console.log(cameraHolder.getWorldPosition(new THREE.Vector3()))
     if (controls.isLocked) {
         moveAnimate(clock.getDelta());
     }
 
+    const targetPosition = new THREE.Vector3(139.49360,0.89999,-92.77344);
+    const playerPosition = cameraHolder.getWorldPosition(new THREE.Vector3());
+    const distance = playerPosition.distanceTo(targetPosition);
+    if (distance < 7)
+        isOpening = true;
+    if(isOpening)
+        Area.openArea3()
     //lidando com inimigos
     Area.handleEnemiesArea(cameraHolder);
 

@@ -7,6 +7,8 @@ import {
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
 import { EnemiesHandler } from './EnemiesHandler.js';
 import { GLTFLoader } from '../build/jsm/loaders/GLTFLoader.js';
+import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
+import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
 
 
 export class Area {
@@ -23,6 +25,7 @@ export class Area {
   static enemiesA2;
   static enemiesA3;
   static enemiesA4;
+  static doorArea3 = [];
 
   static createMap(scene, player) {
     let positions = [];
@@ -63,7 +66,7 @@ export class Area {
     }
 
     var loader = new GLTFLoader();
-    loader.load('../T2/' + 'hangar' + '.glb', function (gltf) {
+    loader.load('./assets/hangar/' + 'OK' + '.glb', function (gltf) {
       var obj = gltf.scene;
       obj.name = 'hangar';
       obj.visible = true;
@@ -74,12 +77,61 @@ export class Area {
 
       var obj = normalizeAndRescale(obj, 130);
       var obj = fixPosition(obj);
-      obj.position.set(150, 0, -155)
-      obj.rotateY(Math.PI/2)
+      obj.position.set(150, 0.05, -155)
+      obj.rotateY(Math.PI / 2)
       scene.add(obj);
       //assetManager[modelName] = obj;        
     });
+
+    var mtlLoader = new MTLLoader();
+    mtlLoader.setPath('./assets/plane/');
+    mtlLoader.load('plane' + '.mtl', function (materials) {
+      materials.preload();
+
+      var objLoader = new OBJLoader();
+      objLoader.setMaterials(materials);
+      objLoader.setPath('./assets/plane/');
+      objLoader.load('plane' + ".obj", function (obj) {
+        obj.visible = true;
+        obj.name = 'plane';
+        // Set 'castShadow' property for each children of the group
+        obj.traverse(function (child) {
+          if (child.isMesh) child.castShadow = true;
+          if (child.material) child.material.side = THREE.DoubleSide;
+        });
+
+        var obj = normalizeAndRescale(obj, 40);
+        var obj = fixPosition(obj);
+        obj.rotateY(THREE.MathUtils.degToRad(-90));
+
+        obj.position.set(150, 0.05, -155)
+        scene.add(obj);
+      })
+    })
+
+    let materialDoor = this.lambertMaterial('lightblue');
+    let geometryDoor = new THREE.BoxGeometry(45, 50, 1)
+    let doorLeft = new THREE.Mesh(geometryDoor, materialDoor);
+    let doorRight = new THREE.Mesh(geometryDoor, materialDoor);
+    doorLeft.position.set(125, 0.05, -114);
+    doorRight.position.set(170, 0.05, -114);
+    scene.add(doorLeft);
+    scene.add(doorRight);
+    this.doorArea3.push(doorLeft);
+    this.doorArea3.push(doorRight);
   }
+
+  static openArea3(){
+    let doorLeft = this.doorArea3[0];
+    let doorRight = this.doorArea3[1];
+
+    let finalPosLeft = new THREE.Vector3(110, doorLeft.position.y, doorLeft.position.z);
+    let finalPosRight = new THREE.Vector3(185, doorRight.position.y, doorRight.position.z);
+
+    doorLeft.position.lerp(finalPosLeft, 0.01);
+    doorRight.position.lerp(finalPosRight, 0.01);
+  }
+
   static createAreaPilars(scene) {
     this.enemiesA1.addEnemy('lostsoul', new THREE.Vector3(-130.0, 5.0, -130.0));
     this.enemiesA1.addEnemy('lostsoul', new THREE.Vector3(-130.0, 5.0, -180.0));
