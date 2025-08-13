@@ -20,6 +20,7 @@ export class Player {
     enemiesAreas
     initialKey
     secondKey
+    thirdkey
 
     constructor(scene, object, camera, bulletsCollisionHandler, enemiesAreas) {
         this.#scene = scene;
@@ -156,6 +157,19 @@ export class Player {
 
         if (this.secondKey && !this.secondKey.coletada) {
             this.#addKey(this.secondKey);
+        }
+    }
+
+    checkArea3(enemiesAreas) {
+        if (enemiesAreas.inimigos.area3.length === 0 ) {
+            if (!this.thirdkey)
+                this.thirdkey = new Key("rgba(15, 108, 247, 1)");
+            else
+                Area.terceiroAltar(this.thirdkey.csgFinal);
+        }
+
+        if (this.thirdkey && !this.thirdkey.coletada) {
+            this.#addKey(this.thirdkey);
         }
     }
 

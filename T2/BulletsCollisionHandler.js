@@ -66,6 +66,7 @@ export class BulletsCollisionHandler {
 
             //raio para identificar objetos nessa direção
             const raycasterBall = new THREE.Raycaster(prevPositionBall, directionBall, 0, distanceBall);
+            raycasterBall.camera = this.#camera;
             const intersectsBall = raycasterBall.intersectObjects(collidableMeshes, true);
 
             //verificação da altura para remover caso ultrapassar o chão e o máximo da altura

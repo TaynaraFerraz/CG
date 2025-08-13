@@ -37,7 +37,7 @@ export class Area {
       enemiesAreas.inimigos.area2 = [];
       console.log("Área 2 limpa. Inimigos removidos.");
     });
-    this.enemiesA3 = new EnemiesHandler(scene, player, 1, ()=> {
+    this.enemiesA3 = new EnemiesHandler(scene, player, 1, () => {
       enemiesAreas.inimigos.area3 = [];
       console.log("Área 3 limpa. Inimigos removidos");
     });
@@ -70,7 +70,7 @@ export class Area {
     }
 
     var loader = new GLTFLoader();
-    loader.load('./assets/hangar/' + 'OK' + '.glb', function (gltf) {
+    loader.load('./assets/hangar/' + 'hangar' + '.glb', function (gltf) {
       var obj = gltf.scene;
       obj.name = 'hangar';
       obj.visible = true;
@@ -79,7 +79,7 @@ export class Area {
         if (child.material) child.material.side = THREE.DoubleSide;
       });
 
-      var obj = normalizeAndRescale(obj, 130);
+      var obj = normalizeAndRescale(obj, 125);
       var obj = fixPosition(obj);
       obj.position.set(150, 0.05, -155)
       obj.rotateY(Math.PI / 2)
@@ -122,14 +122,14 @@ export class Area {
     let doorHangar3 = new THREE.Mesh(geometryDoorHangar3, materialDoorHangar);
     let doorHangar4 = new THREE.Mesh(geometryDoorHangar4, materialDoorHangar)
     let doorHangar5 = new THREE.Mesh(geometryDoorHangar4, materialDoorHangar)
-    doorHangar.position.set(92,0.89999,-155.5)
-    doorHangar2.position.set(205.3,0.89999,-155.5)
-    doorHangar3.position.set(148,0.89999,-193)
-    doorHangar4.position.set(108.5,0.89999,-117.5)
-    doorHangar5.position.set(189,0.89999,-117.5)
-    
-    doorHangar.rotateY(Math.PI/2)
-    doorHangar2.rotateY(Math.PI/2)
+    doorHangar.position.set(92, 0.89999, -155.5)
+    doorHangar2.position.set(205.3, 0.89999, -155.5)
+    doorHangar3.position.set(148, 0.89999, -193)
+    doorHangar4.position.set(108.5, 0.89999, -117.5)
+    doorHangar5.position.set(189, 0.89999, -117.5)
+
+    doorHangar.rotateY(Math.PI / 2)
+    doorHangar2.rotateY(Math.PI / 2)
     doorHangar.visible = false
     doorHangar2.visible = false
     doorHangar3.visible = false
@@ -154,6 +154,7 @@ export class Area {
     scene.add(doorHangar4)
     scene.add(doorHangar5)
 
+    // colisão com a roda do avião
     let geometryWheel = new THREE.BoxGeometry(1, 5, 1.5)
     let wheel = new THREE.Mesh(geometryWheel, materialDoorHangar)
     let wheel2 = new THREE.Mesh(geometryWheel, materialDoorHangar)
@@ -176,7 +177,12 @@ export class Area {
     scene.add(wheel2)
     scene.add(wheel3)
 
-    let materialDoor = this.lambertMaterial('lightblue');
+    const textureLoader = new THREE.TextureLoader();
+    const doorTexture = textureLoader.load('./assets/texturaHangar.png');
+    doorTexture.wrapS = THREE.RepeatWrapping;
+    doorTexture.wrapT = THREE.RepeatWrapping;
+    doorTexture.repeat.set(2,2); // mudar os valores para repetir mais ou menos
+    let materialDoor = new THREE.MeshPhongMaterial({ map: doorTexture });
     let geometryDoor = new THREE.BoxGeometry(40, 50, 1)
     let doorLeft = new THREE.Mesh(geometryDoor, materialDoor);
     let doorRight = new THREE.Mesh(geometryDoor, materialDoor);
@@ -199,9 +205,20 @@ export class Area {
     scene.add(areaEnter);
     let areaEnterBox = new THREE.Box3().setFromObject(areaEnter, true);
     this.agroArea.push(areaEnterBox);
+
+    let altar = new THREE.Mesh(new THREE.BoxGeometry(4.0, 3.0, 4.0), this.lambertMaterial('#a7a7a7'));
+    altar.castShadow = true;
+    altar.receiveShadow = true;
+    altar.position.set(183, -3, -170);
+
+    scene.add(altar);
+
+    let boxAltar = new THREE.Box3().setFromObject(altar, true);
+    this.collidableAreas.push({ box: boxAltar, mesh: altar });
+    this.altares.push(altar);
   }
 
-  static openArea3(){
+  static openArea3() {
     let doorLeft = this.doorArea3[0];
     let doorRight = this.doorArea3[1];
 
@@ -593,6 +610,21 @@ export class Area {
     }
   }
 
+  static terceiroAltar(key) {
+    let altar = this.altares[2];
+    console.log(this.altares.length)
+    altar.position.lerp(new THREE.Vector3(183, 0, -170), 0.01);
+    if (key) {
+      altar.add(key)
+      key.position.set(0, 1.8, 0)
+    }
+
+    let altarCollidable = this.collidableAreas.find(obj => obj.mesh === altar);
+    if (altarCollidable) {
+      altarCollidable.box.setFromObject(altar, true);
+    }
+  }
+
   static handleEnemiesArea(player) {
     if (this.enterArea(player, 0))
       this.#agressiveEnemies(this.enemiesA1);
@@ -609,6 +641,7 @@ export class Area {
   static #agressiveEnemies(enemies) {
     for (let i = 0; i < enemies.enemies.length; i++) {
       enemies.enemies[i].angry = true;
+      console.log(enemies.enemies[i])
     }
   }
 

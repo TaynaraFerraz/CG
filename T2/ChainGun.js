@@ -80,7 +80,7 @@ export class ChainGun {
             ...Collidables.collidables.walls.map(obj => obj.mesh),
             ...enemyMeshes
         ];
-        
+        raycaster.camera = this.#camera;
         const intersect = raycaster.intersectObjects(collidableMeshes, true);
         
         if (intersect.length > 0) {

@@ -8,19 +8,17 @@ export class Soldier extends Enemy {
     spriteMixer;
     minDistance;
     runDownAction;
-    dead;
+    deathAnimationPlayed = false;
 
     constructor(object, player, initialPosition, spriteMixer) {
-        super(object, player, 20, 2, initialPosition);
+        super(object, player, 30, 2, initialPosition);
         object.name = "soldier";
         this.object.scale.set(4, 4, 4);
 
         this.clock = new THREE.Clock();
-
         this.spriteMixer = spriteMixer;
         this.movementSpeed = 0.1;
         this.minDistance = 1.5;
-        this.dead = false;
         this.isMoving = false;
 
         this.initializeBasicAnimations();
@@ -28,23 +26,43 @@ export class Soldier extends Enemy {
 
     initializeBasicAnimations() {
         this.runDownAction = this.spriteMixer.Action(this.object, 100, 0, 0, 3, 0);
+        this.dyingAction = this.spriteMixer.Action(this.object, 160, 7, 0, 7, 4);
 
         //this.runDownAction.stop();
     }
 
     handle() {
-        if (this.dead) return;
+        if (!this.dead) {
+            const delta = this.clock.getDelta();
+            this.spriteMixer.update(delta);
 
-        const delta = this.clock.getDelta();
+            if (this.dying) {
+                this.#movimentDying(delta)
+            }
+            else {
+                // movimento normal
+                super.handleCollisions();
+                super.handleHealth();
+                this.lookAtPlayer();
+                this.moveTowardsPlayer();
+            }
+        }
+    }
 
-        this.spriteMixer.update(delta);
+    #movimentDying(delta) {
+        if (!this.deathAnimationPlayed) {
+            this.dyingAction.playOnce(true);
+            this.deathAnimationPlayed = true;
+            this.deathElapsed = 0;
+        } else {
+            this.deathElapsed += delta;
+            const deathDuration = (this.dyingAction.indexEnd - this.dyingAction.indexStart + 1) *
+                this.dyingAction.tileDisplayDuration / 1000; // tempo em segundos
 
-        super.handleCollisions();
-        super.handleHealth();
-
-        this.lookAtPlayer();
-
-        this.moveTowardsPlayer();
+            if (this.deathElapsed >= deathDuration) {
+                super.handleHealth(); // fade e remoção
+            }
+        }
     }
 
     lookAtPlayer() {
@@ -71,7 +89,7 @@ export class Soldier extends Enemy {
 
             this.object.position.addScaledVector(direction, this.movementSpeed);
 
-            if (!this.isMoving) {   
+            if (!this.isMoving) {
                 this.isMoving = true;
                 this.runDownAction.playLoop(); // inicia animação
             }
