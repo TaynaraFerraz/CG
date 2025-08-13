@@ -37,7 +37,10 @@ export class Area {
       enemiesAreas.inimigos.area2 = [];
       console.log("Área 2 limpa. Inimigos removidos.");
     });
-    this.enemiesA3 = new EnemiesHandler(scene, player);
+    this.enemiesA3 = new EnemiesHandler(scene, player, 1, ()=> {
+      enemiesAreas.inimigos.area3 = [];
+      console.log("Área 3 limpa. Inimigos removidos");
+    });
     this.enemiesA4 = new EnemiesHandler(scene, player);
 
     this.createTerrain(scene);
@@ -47,6 +50,7 @@ export class Area {
   }
 
   static createArea3(scene) {
+    this.enemiesA3.addEnemy('soldier', new THREE.Vector3(117, 3, -151));
     function normalizeAndRescale(obj, newScale) {
       var scale = getMaxSize(obj);
       obj.scale.set(newScale * (1.0 / scale),
@@ -188,6 +192,13 @@ export class Area {
     scene.add(doorRight);
     this.doorArea3.push(doorLeft);
     this.doorArea3.push(doorRight);
+
+    let areaEnter = new THREE.Mesh(new THREE.BoxGeometry(60.0, 4.0, 6.0), this.lambertMaterial('white'));
+    areaEnter.visible = false;
+    areaEnter.position.set(142, 0.89, -116);
+    scene.add(areaEnter);
+    let areaEnterBox = new THREE.Box3().setFromObject(areaEnter, true);
+    this.agroArea.push(areaEnterBox);
   }
 
   static openArea3(){
@@ -587,6 +598,8 @@ export class Area {
       this.#agressiveEnemies(this.enemiesA1);
     if (this.enterArea(player, 1))
       this.#agressiveEnemies(this.enemiesA2);
+    if (this.enterArea(player, 2))
+      this.#agressiveEnemies(this.enemiesA3);
     this.enemiesA1.handleEnemies();
     this.enemiesA2.handleEnemies();
     this.enemiesA3.handleEnemies();

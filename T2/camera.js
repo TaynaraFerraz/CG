@@ -52,18 +52,6 @@ scene.add(light);
 let secondLight;
 secondLight = new THREE.HemisphereLight('white', 'darkslategray', 0.3);
 secondLight.castShadow = false;
-/* secondLight = new THREE.DirectionalLight('rgb(255,255,255)', 0.5);
-secondLight.position.set(-140.0, 100.0, -120.0);
-secondLight.shadow.mapSize.width = 1024;
-secondLight.shadow.mapSize.height = 1024;
-secondLight.shadow.camera.near = 0.1;
-secondLight.shadow.camera.far = 600;
-secondLight.shadow.camera.left = -500;
-secondLight.shadow.camera.right = 500;
-secondLight.shadow.camera.bottom = -500;
-secondLight.shadow.camera.top = 500;
-secondLight.shadow.bias = -0.0005;
-secondLight.shadow.radius = 4; */
 
 scene.add(secondLight);
 
@@ -98,7 +86,7 @@ camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, Area.lambertMaterial('red'));
-cameraHolder.position.set(0, PLAYER_HEIGHT + 8, 0);
+cameraHolder.position.set(150, PLAYER_HEIGHT + 8, -155);
 cameraHolder.add(camera);
 
 //inicializando o PointerLockControls customizado

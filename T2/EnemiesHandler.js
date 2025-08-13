@@ -6,6 +6,8 @@ import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
 import { LostSoul } from './LostSoul.js';
 import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
 import { scene } from './camera.js';
+import { SpriteMixer } from '../libs/sprites/SpriteMixer.js';
+import { Soldier } from './Soldier.js';
 
 export class EnemiesHandler {
     enemies = [];
@@ -18,7 +20,7 @@ export class EnemiesHandler {
     #player;
     //carregador de assets
 
-    constructor(scene, player, amountOfEnemies = 100, clearanceCallback = ()=>{}) {
+    constructor(scene, player, amountOfEnemies = 100, clearanceCallback = () => { }) {
         this.#scene = scene;
         this.#player = player;
         this.#amountOfEnemies = amountOfEnemies;
@@ -49,7 +51,7 @@ export class EnemiesHandler {
             let gtfLoader = new GLTFLoader();
             gtfLoader.load(`./assets/cacodemon.glb`, function (response) {
                 let obj = response.scene;
-                if(obj.material){
+                if (obj.material) {
                     obj.material.transparent = true;
                 }
                 obj.traverse(function (child) {
@@ -67,7 +69,7 @@ export class EnemiesHandler {
 
                 enemies.push(new Cacodemon(obj, classThis.#player, position));
             })
-        } else {
+        } else if (enemyName == "lostsoul") {
             let mtlLoader = new MTLLoader();
             mtlLoader.load("./assets/skull/skull.mtl", function (materials) {
                 materials.preload();
@@ -92,9 +94,23 @@ export class EnemiesHandler {
                 });
             });
         }
+        else {
+            let loader = new THREE.TextureLoader();
+            let spriteMixer = SpriteMixer();
+            let texture = loader.load("./assets/soldier/zombieman.png", (texture) => {
+                let actionSprite = spriteMixer.ActionSprite(texture, 8, 8);
+                actionSprite.position.set(position.x, position.y, position.z )
+                actionSprite.setFrame(0, 0);
+                actionSprite.scale.set(5, 5, 5)
+                scene.add(actionSprite)
+                enemies.push(new Soldier(actionSprite, classThis.#player, position, spriteMixer));
+                //console.log('zombie adicionado', enemies)
+            })
+        }
     }
 
-    addEnemy(enemyName,position) {
+    addEnemy(enemyName, position) {
+        console.log(enemyName)
         this.#addModel(enemyName, this, this.enemies, position);
     }
 
@@ -121,7 +137,7 @@ export class EnemiesHandler {
             });
         }
 
-        
+        //console.log(this.enemies, 'enemies')
         if (((this.#killedEnemies === this.#amountOfEnemies) || (this.#notBeggining && this.enemies.length == 0)) && !this.#cleared) {
             console.log("rodou");
             console.log(this.#killedEnemies, this.#amountOfEnemies, this.#killedEnemies === this.#amountOfEnemies);

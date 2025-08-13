@@ -15,24 +15,35 @@ export class HealthBar {
         let greenPlaneGeometry = new THREE.PlaneGeometry(barWidth, barHeight);
         let greenPlaneMaterial = new THREE.MeshBasicMaterial({ color: '#00910c', side: THREE.DoubleSide });
         this.#greenBar = new THREE.Mesh(greenPlaneGeometry, greenPlaneMaterial);
-        
-        
+
+
         let redPlaneGeometry = new THREE.PlaneGeometry(0, barHeight);
         let redPlaneMaterial = new THREE.MeshBasicMaterial({ color: '#8d0000', side: THREE.DoubleSide });
         this.#redBar = new THREE.Mesh(redPlaneGeometry, redPlaneMaterial);
-        
+
+
         this.#greenBar.position.copy(enemy.object.position)
         scene.add(this.#greenBar);
-        
+
         this.#redBar.position.copy(enemy.object.position)
         scene.add(this.#redBar);
+
+
     }
 
-    #positionBars(){
-        this.#greenBar.position.copy(this.#enemy.object.position);
-        this.#greenBar.translateY(2.3);
-        this.#redBar.position.copy(this.#enemy.object.position);
-        this.#redBar.translateY(2.3);
+    #positionBars() {
+        if (this.#enemy.constructor.name == 'Soldier') {
+            this.#greenBar.position.set(this.#enemy.object.position.x, this.#enemy.object.position.y + 2, this.#enemy.object.position.z);
+            this.#greenBar.translateY(2.3);
+            this.#redBar.position.set(this.#enemy.object.position.x, this.#enemy.object.position.y + 2, this.#enemy.object.position.z);
+            this.#redBar.translateY(2.3);
+        }
+        else {
+            this.#greenBar.position.copy(this.#enemy.object.position);
+            this.#greenBar.translateY(2.3);
+            this.#redBar.position.copy(this.#enemy.object.position);
+            this.#redBar.translateY(2.3);
+        }
     }
 
     #rotateBars() {
