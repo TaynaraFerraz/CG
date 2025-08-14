@@ -120,14 +120,14 @@ export class Area {
         texCopy.repeat.set(x, y);
       })
     }
-    //iniciando texturas
-    const plasteredStoneTexture = textureLoader.load('./assets/textures/a1/forest_ground.jpg');
-    const plasteredStoneNormal = textureLoader.load('./assets/textures/a1/forest_ground_normal.jpg');
-    plasteredStoneTexture.wrapS = THREE.RepeatWrapping;
-    plasteredStoneTexture.wrapT = THREE.RepeatWrapping;
+    //iniciando texturas bloco principal
+    const sandyGroundTexture = textureLoader.load('./assets/textures/a1/forest_ground.jpg');
+    const sandyGroundNormal = textureLoader.load('./assets/textures/a1/forest_ground_normal.jpg');
+    sandyGroundTexture.wrapS = THREE.RepeatWrapping;
+    sandyGroundTexture.wrapT = THREE.RepeatWrapping;
 
-    plasteredStoneNormal.wrapS = THREE.RepeatWrapping;
-    plasteredStoneNormal.wrapT = THREE.RepeatWrapping;
+    sandyGroundNormal.wrapS = THREE.RepeatWrapping;
+    sandyGroundNormal.wrapT = THREE.RepeatWrapping;
 
     const stoneBrickWall = textureLoader.load('./assets/textures/a1/stone_brick_wall.jpg');
     const stoneBrickWallNormal = textureLoader.load('./assets/textures/a1/stone_brick_wall_normal.jpg');
@@ -143,9 +143,9 @@ export class Area {
     applyTexturesToCube(cube, [
       { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 35, y: 1.5 }, // +X (right)
       { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 35, y: 1.5 }, // -X (left)
-      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 25, y: 25 }, // +Y (top)
-      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 2, y: 1 }, // -Y (bottom)
-      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 10, y: 1 }, // +Z (front)
+      { texture: sandyGroundTexture, normalMap: sandyGroundNormal, x: 25, y: 25 }, // +Y (top)
+      { texture: sandyGroundTexture, normalMap: sandyGroundNormal, x: 2, y: 1 }, // -Y (bottom)
+      { texture: sandyGroundTexture, normalMap: sandyGroundNormal, x: 10, y: 1 }, // +Z (front)
       { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 35, y: 1.5 }, // -Z (back)
     ])
 
@@ -153,19 +153,19 @@ export class Area {
     applyTexturesToCube(cubeLeft, [
       { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 1, y: 1.5 }, // +X (right)
       { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 1, y: 1.5 }, // -X (left)
-      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 6, y: 1 }, // +Y (top)
-      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 2, y: 1 }, // -Y (bottom)
+      { texture: sandyGroundTexture, normalMap: sandyGroundNormal, x: 6, y: 1 }, // +Y (top)
+      { texture: sandyGroundTexture, normalMap: sandyGroundNormal, x: 2, y: 1 }, // -Y (bottom)
       { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 10, y: 1.5 }, // +Z (front)
-      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 2, y: 1 }, // -Z (back)
+      { texture: sandyGroundTexture, normalMap: sandyGroundNormal, x: 2, y: 1 }, // -Z (back)
     ]);
 
     applyTexturesToCube(cubeRight, [
       { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 1, y: 1.5 }, // +X (right)
       { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 1, y: 1.5 }, // -X (left)
-      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 12, y: 1 }, // +Y (top)
-      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 10, y: 1 }, // -Y (bottom)
+      { texture: sandyGroundTexture, normalMap: sandyGroundNormal, x: 12, y: 1 }, // +Y (top)
+      { texture: sandyGroundTexture, normalMap: sandyGroundNormal, x: 10, y: 1 }, // -Y (bottom)
       { texture: stoneBrickWall, normalMap: stoneBrickWallNormal, x: 18, y: 1.5 }, // +Z (front)
-      { texture: plasteredStoneTexture, normalMap: plasteredStoneNormal, x: 10, y: 1 }, // -Z (back)
+      { texture: sandyGroundTexture, normalMap: sandyGroundNormal, x: 10, y: 1 }, // -Z (back)
     ]);
 
 
@@ -174,6 +174,19 @@ export class Area {
     let rightBoxCube = new THREE.Box3().setFromObject(cubeRight, true);
     this.collidableAreas.push({ box: leftBoxCube, mesh: cubeLeft });
     this.collidableAreas.push({ box: rightBoxCube, mesh: cubeRight });
+
+    //inicializando texturas das escadas, pilares e blocos
+    const loader = new THREE.TextureLoader();
+    const stoneTexture = textureLoader.load('./assets/textures/a1/plastered_stone.jpg');
+    const stoneNormal = textureLoader.load('./assets/textures/a1/plastered_stone_normal.jpg');
+    const stairStoneTexture = stoneTexture.clone();
+    const stairStoneNormal = stoneNormal.clone();
+
+    stoneTexture.wrapS = THREE.RepeatWrapping;
+    stoneTexture.wrapT = THREE.RepeatWrapping;
+    stoneNormal.wrapS = THREE.RepeatWrapping;
+    stoneNormal.wrapT = THREE.RepeatWrapping;
+
 
     //escadas
     let stairHeight = 4 / 8;
@@ -206,7 +219,18 @@ export class Area {
     let box = new THREE.Box3().setFromObject(stair, true);
     this.collidableStairs.push({ box: box, mesh: stair });
 
-    let stairMaterial = this.lambertMaterial('#ffe6d2');
+    stairStoneTexture.repeat.set(7, 0.5);
+    stairStoneNormal.repeat.set(7, 0.5);
+
+    stairStoneTexture.wrapS = THREE.RepeatWrapping;
+    stairStoneTexture.wrapT = THREE.RepeatWrapping;
+    stairStoneNormal.wrapS = THREE.RepeatWrapping;
+    stairStoneNormal.wrapT = THREE.RepeatWrapping;
+
+    let stairMaterial = new THREE.MeshStandardMaterial();
+    stairMaterial.map = stairStoneTexture;
+    stairMaterial.normalMap = stairStoneNormal;
+
     for (let i = 0; i < 8; i++) {
       let stairStepGeometry = new THREE.BoxGeometry(25.0, stairHeight, stairHeight * (1 + 7 - i));
       let stairStep = new THREE.Mesh(stairStepGeometry, stairMaterial);
@@ -221,25 +245,21 @@ export class Area {
       cube.add(stairStep);
     }
 
-    const loader = new THREE.TextureLoader();
+    stoneTexture.repeat.set(3, 1);
+    stoneNormal.repeat.set(3, 1);
+
     const pillarDisplacement = loader.load('./assets/textures/a1/pillars_displacement.png');
     pillarDisplacement.wrapS = THREE.RepeatWrapping;
     pillarDisplacement.wrapT = THREE.RepeatWrapping;
-    pillarDisplacement.repeat.set(8, 8);
+    pillarDisplacement.repeat.set(9, 2);
 
-    const stoneTexture = textureLoader.load('./assets/textures/a1/plastered_stone.jpg');
-    const stoneNormal = textureLoader.load('./assets/textures/a1/plastered_stone_normal.jpg');
-    stoneTexture.wrapS = THREE.MirroredRepeatWrapping;
-    stoneTexture.wrapT = THREE.MirroredRepeatWrapping;
-    stoneNormal.wrapS = THREE.MirroredRepeatWrapping;
-    stoneNormal.wrapT = THREE.MirroredRepeatWrapping;
-    
+
     for (let i = 0; i < 12; i++) {
 
-      let pilarGeometry = new THREE.CylinderGeometry(2.5, 2.5, 20.0, 300);
-      let pilarMaterial = this.lambertMaterial("#fffde0");
-      pilarMaterial.displacementScale = 0.2;
-      
+      let pilarGeometry = new THREE.CylinderGeometry(2.5, 2.5, 20.0, 256);
+      let pilarMaterial = new THREE.MeshStandardMaterial();
+      pilarMaterial.displacementScale = 0.4;
+
       pilarMaterial.map = stoneTexture;
       pilarMaterial.normalMap = stoneNormal;
       pilarMaterial.displacementMap = pillarDisplacement;
@@ -271,43 +291,35 @@ export class Area {
       this.collidableAreas.push({ box: boxPilarRight, mesh: pilarRight });
     }
 
-    let blocoMaterial = [
-      new THREE.MeshStandardMaterial(),
-      new THREE.MeshStandardMaterial(),
-      new THREE.MeshStandardMaterial(),
-      new THREE.MeshStandardMaterial(),
-      new THREE.MeshStandardMaterial(),
-      new THREE.MeshStandardMaterial(),
-    ];
+    let blocoMaterial = new THREE.MeshStandardMaterial();
 
-    
-    let r1 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), blocoMaterial);
-    r1.position.set(0.0, 24.5, -48.0);
-    r1.castShadow = true;
-    r1.receiveShadow = true;
-    cube.add(r1);
-    
-    let r2 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), blocoMaterial);
-    r2.rotateY(Math.PI / 2);
-    r2.position.set(50.0, 24.5, 2.0);
-    r2.castShadow = true;
-    r2.receiveShadow = true;
-    cube.add(r2);
-    
-    let r3 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), blocoMaterial);
-    r3.rotateY(Math.PI / -2);
-    r3.position.set(-50.0, 24.5, 2.0);
-    r3.castShadow = true;
-    r3.receiveShadow = true;
-    cube.add(r3);
-    applyTexturesToCube(r1, [
-      { texture: stoneTexture, normalMap: stoneNormal, x: 2, y: 0.5 }, // +X (right)
-      { texture: stoneTexture, normalMap: stoneNormal, x: 2, y: 0.5 }, // -X (left)
-      { texture: stoneTexture, normalMap: stoneNormal, x: 5, y: 0.5 }, // +Y (top)
-      { texture: stoneTexture, normalMap: stoneNormal, x: 5, y: 0.5 }, // -Y (bottom)
-      { texture: stoneTexture, normalMap: stoneNormal, x: 10, y: 0.5 }, // +Z (front)
-      { texture: stoneTexture, normalMap: stoneNormal, x: 10, y: 0.5 }, // -Z (back)
-    ])
+    const blockPositions = [
+      [-50.0, 24.5, 47.0],
+      [-50.0, 24.5, 34.0],
+      [-50.0, 24.5, 10.0],
+      [-50.0, 24.5, -30.0],
+      [-50.0, 24.5, -43.0],
+      [-42.0, 24.5, -48.0],
+      [-29.0, 24.5, -48.0],
+      [-16.0, 24.5, -48.0],
+      [10.0, 24.5, -48.0],
+      [23.0, 24.5, -48.0],
+      [50.0, 24.5, -35.0],
+      [50.0, 24.5, -10.0],
+      [50.0, 24.5, 3.0],
+      [50.0, 24.5, 37.0],
+      [50.0, 24.5, 50.0],
+    ];
+    blockPositions.forEach((position) => {
+      let block = new THREE.Mesh(new THREE.BoxGeometry(13, 5.0, 13), blocoMaterial);
+      block.position.set(position[0], position[1], position[2]);
+      block.castShadow = true;
+      block.receiveShadow = true;
+      cube.add(block);
+
+      block.material.map = stoneTexture;
+      block.material.normalMap = stoneNormal;
+    })
 
     let altar = new THREE.Mesh(new THREE.BoxGeometry(4.0, 6.0, 4.0), this.lambertMaterial('#a7a7a7'));
     altar.castShadow = true;
