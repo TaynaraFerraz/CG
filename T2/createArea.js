@@ -9,6 +9,7 @@ import { EnemiesHandler } from './EnemiesHandler.js';
 import { GLTFLoader } from '../build/jsm/loaders/GLTFLoader.js';
 import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
 import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
+import { hangarLight, light } from './camera.js';
 
 
 export class Area {
@@ -49,8 +50,9 @@ export class Area {
     this.createArea3(scene)
   }
 
+  //tudo relacionado a área 3
   static createArea3(scene) {
-    this.enemiesA3.addEnemy('soldier', new THREE.Vector3(117, 3, -151));
+    this.enemiesA3.addEnemy('soldier', new THREE.Vector3(117, 0.89, -151));
     function normalizeAndRescale(obj, newScale) {
       var scale = getMaxSize(obj);
       obj.scale.set(newScale * (1.0 / scale),
@@ -69,6 +71,7 @@ export class Area {
       return obj;
     }
 
+    let hangarBox;
     var loader = new GLTFLoader();
     loader.load('./assets/hangar/' + 'hangar' + '.glb', function (gltf) {
       var obj = gltf.scene;
@@ -84,6 +87,7 @@ export class Area {
       obj.position.set(150, 0.05, -155)
       obj.rotateY(Math.PI / 2)
       scene.add(obj);
+      hangarBox = new THREE.Box3().setFromObject(obj, true);
       //assetManager[modelName] = obj;        
     });
 
@@ -125,8 +129,8 @@ export class Area {
     doorHangar.position.set(92, 0.89999, -155.5)
     doorHangar2.position.set(205.3, 0.89999, -155.5)
     doorHangar3.position.set(148, 0.89999, -193)
-    doorHangar4.position.set(108.5, 0.89999, -117.5)
-    doorHangar5.position.set(189, 0.89999, -117.5)
+    doorHangar4.position.set(108.5, 0.89999, -117)
+    doorHangar5.position.set(189, 0.89999, -117)
 
     doorHangar.rotateY(Math.PI / 2)
     doorHangar2.rotateY(Math.PI / 2)
@@ -181,7 +185,7 @@ export class Area {
     const doorTexture = textureLoader.load('./assets/texturaHangar.png');
     doorTexture.wrapS = THREE.RepeatWrapping;
     doorTexture.wrapT = THREE.RepeatWrapping;
-    doorTexture.repeat.set(2,2); // mudar os valores para repetir mais ou menos
+    doorTexture.repeat.set(2, 2); // mudar os valores para repetir mais ou menos
     let materialDoor = new THREE.MeshPhongMaterial({ map: doorTexture });
     let geometryDoor = new THREE.BoxGeometry(40, 50, 1)
     let doorLeft = new THREE.Mesh(geometryDoor, materialDoor);
@@ -206,6 +210,21 @@ export class Area {
     let areaEnterBox = new THREE.Box3().setFromObject(areaEnter, true);
     this.agroArea.push(areaEnterBox);
 
+    function updateLighting(playerPosition) {
+      if (!hangarBox) return;
+
+      if (hangarBox.containsPoint(playerPosition)) {
+        light.visible = false;
+        hangarLight.visible = true;
+      } else {
+        light.visible = true;
+        hangarLight.visible = false;
+      }
+    }
+
+    // exportar a função ou registrar no loop principal para ser chamada a cada frame
+    this.updateLighting = updateLighting;
+
     let altar = new THREE.Mesh(new THREE.BoxGeometry(4.0, 3.0, 4.0), this.lambertMaterial('#a7a7a7'));
     altar.castShadow = true;
     altar.receiveShadow = true;
@@ -217,6 +236,7 @@ export class Area {
     this.collidableAreas.push({ box: boxAltar, mesh: altar });
     this.altares.push(altar);
   }
+  //fim da criação da área 3
 
   static openArea3() {
     let doorLeft = this.doorArea3[0];

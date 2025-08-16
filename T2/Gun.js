@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 import { Collidables } from './Collidables.js';
 import { PLAYER_HEIGHT } from './constants.js';
+import { SpriteMixer } from '../libs/sprites/SpriteMixer.js';
+import { Vector3 } from '../build/three.module.js';
 
 export class Gun {
     #arma
@@ -9,34 +11,45 @@ export class Gun {
     #scene
     #bulletsCollisionHandler
     enemiesAreas
+    #actionSprite = null
+    #spriteMixer
+    #action
+    #clock
+    isFiring
+    onLoaded = null;
 
     constructor(camera, scene, bulletsCollisionHandler, enemiesAreas) {
         this.#camera = camera;
+        this.#clock = new THREE.Clock()
         this.#scene = scene;
         this.enemiesAreas = enemiesAreas
         this.#bulletsCollisionHandler = bulletsCollisionHandler
+        this.#spriteMixer = SpriteMixer();
+        let loader = new THREE.TextureLoader();
+        loader.load("./assets/guns/gun.png", (texture) => {
+            this.#actionSprite = this.#spriteMixer.ActionSprite(texture, 4, 1);
+            this.#actionSprite.setFrame(0, 0);
+            this.#actionSprite.castShadow = true;
+            this.#actionSprite.position.set(0, -0.1, -0.35);
+            this.#actionSprite.scale.set(0.1, 0.1, 0.1);
 
-        const armaGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 32);
-        const armaMaterial = new THREE.MeshLambertMaterial({
-            color: '#3b3b3b'
+            if (typeof this.onLoaded === "function") {
+                this.onLoaded();
+            }
         })
-        const arma = new THREE.Mesh(armaGeometry, armaMaterial);
-        arma.rotateX(Math.PI / 2);
-        this.#arma = arma;
+
     }
 
     add() {
-        this.#scene.add(this.#arma);
-        this.#camera.add(this.#arma);
-        this.#arma.position.set(0, -0.1, -0.1); // direita, baixo, frente
+        this.#camera.add(this.#actionSprite);
     }
 
     shootBall() {
-        let armaMundo = new THREE.Vector3();
-        this.#arma.getWorldPosition(armaMundo); // pega as coordenadas globais da arma
+        if (!this.#actionSprite) return;
 
-        let worldPosition = new THREE.Vector3();
-        this.#camera.getWorldPosition(worldPosition)
+        this.#action = this.#spriteMixer.Action(this.#actionSprite, 100, 0, 0, 0, 3);
+        this.isFiring = true;
+        this.#action.playOnce();
 
         const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 16);
         const materialSphere = new THREE.MeshLambertMaterial({
@@ -44,14 +57,19 @@ export class Gun {
         });
         let sphere = new THREE.Mesh(sphereGeometry, materialSphere);
 
-        sphere.position.copy(armaMundo);
+        sphere.position.copy(this.#actionSprite.getWorldPosition(new Vector3()));
 
         this.#scene.add(sphere);
         this.#bulletsCollisionHandler.addSphere(sphere);
     }
 
+    spriteUpdate() {
+        const delta = this.#clock.getDelta();
+        this.#spriteMixer.update(delta);
+    }
+
     remove() {
-        this.#camera.remove(this.#arma)
+        this.#camera.remove(this.#actionSprite)
     }
 
     handleGun() {

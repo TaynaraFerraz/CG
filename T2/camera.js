@@ -16,9 +16,12 @@ import { Key } from './Key.js';
 import { ChainGun } from './ChainGun.js';
 import { Player } from './Player.js';
 import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
+import { Gun } from './Gun.js';
 
 const clock = new THREE.Clock();
-let scene, renderer, camera, cameraHolder, light, keyboard; // Initial variables
+let scene, renderer, camera, cameraHolder, keyboard; 
+export let light;
+// Initial variables
 scene = new THREE.Scene();    // Create main scene
 renderer = new THREE.WebGLRenderer();
 renderer.shadowMap.enabled = true;
@@ -52,9 +55,13 @@ scene.add(light);
 let secondLight;
 secondLight = new THREE.HemisphereLight('white', 'darkslategray', 0.3);
 secondLight.castShadow = false;
-
 scene.add(secondLight);
 
+export const hangarLight = new THREE.DirectionalLight('rgb(255,255,255)', 1);
+hangarLight.position.set(0, 20, 0);
+hangarLight.castShadow = true;
+scene.add(hangarLight);
+hangarLight.visible = false;
 
 const lightCamera = new THREE.OrthographicCamera(
     light.shadow.camera.left,
@@ -213,15 +220,17 @@ function render() {
             return;
         }
     }
-    //console.log(cameraHolder.getWorldPosition(new THREE.Vector3()))
+    console.log(cameraHolder.getWorldPosition(new THREE.Vector3()))
     if (controls.isLocked) {
         moveAnimate(clock.getDelta());
     }
 
-    const targetPosition = new THREE.Vector3(139.49360,0.89999,-92.77344);
-    const playerPosition = cameraHolder.getWorldPosition(new THREE.Vector3());
-    const distance = playerPosition.distanceTo(targetPosition);
-    if (distance < 7)
+    if (Area.updateLighting) {
+        Area.updateLighting(cameraHolder.getWorldPosition(new THREE.Vector3()));
+    }
+
+    const targetPosition = -92.77344;
+    if (cameraHolder.getWorldPosition(new THREE.Vector3()).z < targetPosition)
         isOpening = true;
     if(isOpening)
         Area.openArea3()
@@ -235,7 +244,7 @@ function render() {
     //lidando com as colisões
     playerCollisionHandler.handleCollisions()
 
-    if (player.activeGun instanceof ChainGun && player.activeGun.isFiring) {
+    if ((player.activeGun instanceof ChainGun || player.activeGun instanceof Gun) && player.activeGun.isFiring) {
         player.activeGun.spriteUpdate(); // animação do sprite tem que ser no render
     }
 

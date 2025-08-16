@@ -31,8 +31,10 @@ export class Player {
         this.#gun = new Gun(camera, scene, bulletsCollisionHandler, enemiesAreas);
         this.#chainGun = new ChainGun(camera, scene, bulletsCollisionHandler, enemiesAreas)
         this.keys = [];
-        this.activeGun = this.#gun
-        this.activeGun.add()
+        this.#gun.onLoaded = () => {
+            this.activeGun = this.#gun;
+            this.activeGun.add();
+        };
     }
 
     handlePlayer() {
@@ -161,7 +163,7 @@ export class Player {
     }
 
     checkArea3(enemiesAreas) {
-        if (enemiesAreas.inimigos.area3.length === 0 ) {
+        if (enemiesAreas.inimigos.area3.length === 0) {
             if (!this.thirdkey)
                 this.thirdkey = new Key("rgba(15, 108, 247, 1)");
             else

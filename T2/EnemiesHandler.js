@@ -101,7 +101,6 @@ export class EnemiesHandler {
                 let actionSprite = spriteMixer.ActionSprite(texture, 8, 8);
                 actionSprite.position.set(position.x, position.y, position.z )
                 actionSprite.setFrame(0, 0);
-                actionSprite.scale.set(5, 5, 5)
                 scene.add(actionSprite)
                 enemies.push(new Soldier(actionSprite, classThis.#player, position, spriteMixer));
                 //console.log('zombie adicionado', enemies)
