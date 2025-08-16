@@ -287,4 +287,4 @@ function render() {
     requestAnimationFrame(render);
 }
 
-export { scene };
+export { scene , camera};
