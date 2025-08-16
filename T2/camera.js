@@ -205,12 +205,12 @@ enemiesAreas.inimigos = {
 
 
 let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
-let player = new Player(scene, cameraHolder, camera, bulletsCollisionHandler, enemiesAreas);
-let playerCollisionHandler = new PlayerCollisionHandler(player.object, Collidables.collidables);
+let globalPlayer = new Player(scene, cameraHolder, camera, bulletsCollisionHandler, enemiesAreas);
+let playerCollisionHandler = new PlayerCollisionHandler(globalPlayer, Collidables.collidables);
 
 window.addEventListener('keydown', (event) => {
     if (event.key === 'h') { // pressione 'h' para alternar
-        player.damage(50);
+        globalPlayer.damage(50);
         console.log('damage');
     }
     if (event.key === 'l') {
@@ -218,7 +218,7 @@ window.addEventListener('keydown', (event) => {
     }
 });
 
-player.actions(controls)
+globalPlayer.actions(controls)
 let inimigosNaArea1 = false
 
 // Listen window size changes
@@ -238,9 +238,8 @@ audioLoader.load('../0_assetsT3/sounds/doom.mp3', function (buffer) {
 });
 camera.add(doomSound);
 
-function firstPlaySound(){
+function firstPlaySound() {
     if (firstPlay && doomSoundLoaded) {
-        console.log("tocando");
         doomSound.play();
         firstPlay = false;
     }
@@ -264,9 +263,25 @@ function render() {
         moveAnimate(clock.getDelta());
     }
 
+    globalPlayer.checkArea1(enemiesAreas)
+    globalPlayer.checkArea2(enemiesAreas)
+    globalPlayer.handlePlayer();
+    //lidando com as colisões
+    playerCollisionHandler.handleCollisions()
+
+    if (globalPlayer.activeGun instanceof ChainGun && globalPlayer.activeGun.isFiring) {
+        globalPlayer.activeGun.spriteUpdate(); // animação do sprite tem que ser no render
+    }
+
     //lidando com inimigos
     Area.handleEnemiesArea(cameraHolder);
-    
+    enemiesAreas.inimigos = {
+        area1: Area.enemiesA1.enemies,
+        area2: Area.enemiesA2.enemies,
+        area3: Area.enemiesA3.enemies,
+        area4: Area.enemiesA4.enemies,
+    };
+
     //paredes da area 4
     Area.area4Walls();
 
@@ -274,15 +289,6 @@ function render() {
     desertArea.tumbleweedAnimate();
 
 
-    player.checkArea1(enemiesAreas)
-    player.checkArea2(enemiesAreas)
-    player.handlePlayer();
-    //lidando com as colisões
-    playerCollisionHandler.handleCollisions()
-
-    if (player.activeGun instanceof ChainGun && player.activeGun.isFiring) {
-        player.activeGun.spriteUpdate(); // animação do sprite tem que ser no render
-    }
 
     // Render principal
     renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
@@ -294,9 +300,9 @@ function render() {
     renderer.setViewport(10, window.innerHeight - 210, 200, 200);
     renderer.setScissor(10, window.innerHeight - 210, 200, 200);
     renderer.setScissorTest(true);
-    //renderer.render(scene, lightCamera);
+
 
     requestAnimationFrame(render);
 }
 
-export { scene , camera};
+export { scene, camera, globalPlayer, clock };

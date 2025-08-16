@@ -13,7 +13,6 @@ import { desertArea } from './Area4.js';
 const applyTexturesToCube = (cube, paramsVec) => {
   paramsVec.forEach(({ texture, normalMap, x, y, offsetX = 0, offsetY = 0 }, i) => {
     const texCopy = new THREE.Texture().copy(texture);
-    console.log(cube.map);
 
     cube.material[i].map = texCopy;
     if (normalMap) {
@@ -356,10 +355,10 @@ export class Area {
   }
 
   static createAreaCubes(scene) {
+    this.enemiesA2.addEnemy('painelemental', new THREE.Vector3(-25.0, 6.0, -135.0));
     this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(10.0, 23.0, -112.0));
     this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(10.0, 23.0, -195.0));
     this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(-35.0, 30.0, -135.0));
-    this.enemiesA2.addEnemy('painelemental', new THREE.Vector3(-25.0, 6.0, -135.0));
 
 
     let position = new THREE.Vector3(0.0, 3.0, -162.0);

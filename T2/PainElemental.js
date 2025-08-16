@@ -1,4 +1,4 @@
-import { BulletsCollisionHandler } from "./BulletsCollisionHandler.js";
+import { EnemiesHandler } from "./EnemiesHandler.js";
 import { scene } from "./camera.js";
 import { Collidables } from "./Collidables.js";
 import { Enemy } from "./Enemy.js";
@@ -7,13 +7,14 @@ import * as THREE from 'three';
 export class PainElemental extends Enemy {
     #randomized = false;
     #canShoot = true;
-    #remainingSkulls = 5;
-    #enemiesHandler
+    #remainingSkulls = 1;
+    enemiesHandler;
 
-    constructor(object, player, initialPosition) {
+    constructor(object, player, initialPosition, enemiesHandler) {
         super(object, player, 40, undefined, initialPosition);
         object.name = "painelemental";
 
+        this.enemiesHandler = enemiesHandler;
         this.randomizerCallback();
     }
 
@@ -64,7 +65,11 @@ export class PainElemental extends Enemy {
     }
 
     #shoot() {
+        if(this.#remainingSkulls > 0){
+            this.enemiesHandler.addEnemy("lostsoul", this.object.position, true);
+            this.#remainingSkulls--;
 
+        }
     }
 
     handleShooting() {
@@ -74,16 +79,18 @@ export class PainElemental extends Enemy {
 
             setTimeout(() => {
                 this.#canShoot = true;
-            }, 5000);
+            }, 10000);
         }
     }
 
     handle() {
+        this.angry = true;
         if (!this.dying) {
             this.handleMovement();
             this.handleShooting();
         }
         this.handleCollisions();
         this.handleHealth();
+        //console.log("handle");
     }
 };
