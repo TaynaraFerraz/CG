@@ -121,13 +121,15 @@ export class EnemiesHandler {
                 if (enemy.dead) {
                     this.#killedEnemies++;
 
-                    scene.remove(enemy.object);
-                    enemy.object.children.forEach((child) => {
-                        if (child.isMesh) {
-                            child.geometry.dispose();
-                            child.material.dispose();
-                        }
-                    })
+                    if(!enemy.object.isSprite){
+                        scene.remove(enemy.object);
+                        enemy.object.children.forEach((child) => {
+                            if (child.isMesh) {
+                                child.geometry.dispose();
+                                child.material.dispose();
+                            }
+                        })
+                    }
                     this.#notBeggining = true;
                     return false;
                 }

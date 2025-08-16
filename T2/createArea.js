@@ -38,7 +38,7 @@ export class Area {
       enemiesAreas.inimigos.area2 = [];
       console.log("Área 2 limpa. Inimigos removidos.");
     });
-    this.enemiesA3 = new EnemiesHandler(scene, player, 1, () => {
+    this.enemiesA3 = new EnemiesHandler(scene, player, 8, () => {
       enemiesAreas.inimigos.area3 = [];
       console.log("Área 3 limpa. Inimigos removidos");
     });
@@ -53,6 +53,13 @@ export class Area {
   //tudo relacionado a área 3
   static createArea3(scene) {
     this.enemiesA3.addEnemy('soldier', new THREE.Vector3(117, 0.89, -151));
+    this.enemiesA3.addEnemy('soldier', new THREE.Vector3(194, 0.89, -175));
+    this.enemiesA3.addEnemy('soldier', new THREE.Vector3(158, 0.89, -185));
+    this.enemiesA3.addEnemy('soldier', new THREE.Vector3(99, 0.89, -189));
+    this.enemiesA3.addEnemy('soldier', new THREE.Vector3(189, 0.89, -125));
+    this.enemiesA3.addEnemy('soldier', new THREE.Vector3(154, 0.89, -136));
+    this.enemiesA3.addEnemy('soldier', new THREE.Vector3(192, 0.89, -152));
+    this.enemiesA3.addEnemy('soldier', new THREE.Vector3(130, 0.89, -175));
     function normalizeAndRescale(obj, newScale) {
       var scale = getMaxSize(obj);
       obj.scale.set(newScale * (1.0 / scale),
@@ -228,7 +235,7 @@ export class Area {
     let altar = new THREE.Mesh(new THREE.BoxGeometry(4.0, 3.0, 4.0), this.lambertMaterial('#a7a7a7'));
     altar.castShadow = true;
     altar.receiveShadow = true;
-    altar.position.set(183, -3, -170);
+    altar.position.set(147, -3, -91);
 
     scene.add(altar);
 
@@ -632,8 +639,8 @@ export class Area {
 
   static terceiroAltar(key) {
     let altar = this.altares[2];
-    console.log(this.altares.length)
-    altar.position.lerp(new THREE.Vector3(183, 0, -170), 0.01);
+    //console.log(this.altares.length)
+    altar.position.lerp(new THREE.Vector3(147, 0, -91), 0.01);
     if (key) {
       altar.add(key)
       key.position.set(0, 1.8, 0)

@@ -165,6 +165,9 @@ export class Enemy {
             console.log('está morrendo');
             if(!this.object.isSprite)
                 dimMeshesOpacities(this.object);
+            else{
+                this.dead = true;
+            }
             if (opacity <= 0) {
                 console.log('sim')
                 this.#healthBar.remove();

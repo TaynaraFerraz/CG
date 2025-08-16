@@ -33,9 +33,9 @@ export class HealthBar {
 
     #positionBars() {
         if (this.#enemy.constructor.name == 'Soldier') {
-            this.#greenBar.position.set(this.#enemy.object.position.x, this.#enemy.object.position.y + 2, this.#enemy.object.position.z);
+            this.#greenBar.position.set(this.#enemy.object.position.x, this.#enemy.object.position.y + 1, this.#enemy.object.position.z);
             this.#greenBar.translateY(2.3);
-            this.#redBar.position.set(this.#enemy.object.position.x, this.#enemy.object.position.y + 2, this.#enemy.object.position.z);
+            this.#redBar.position.set(this.#enemy.object.position.x, this.#enemy.object.position.y + 1, this.#enemy.object.position.z);
             this.#redBar.translateY(2.3);
         }
         else {

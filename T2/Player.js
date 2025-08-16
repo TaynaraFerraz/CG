@@ -21,6 +21,8 @@ export class Player {
     initialKey
     secondKey
     thirdkey
+    colectedAll = false
+    isOpening = false;
 
     constructor(scene, object, camera, bulletsCollisionHandler, enemiesAreas) {
         this.#scene = scene;
@@ -106,6 +108,19 @@ export class Player {
             else
                 this.#switchGun(this.#chainGun)
         });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.code === 'KeyC') {
+                const message = document.getElementById('message');
+                message.style.display = 'block';
+
+                setTimeout(() => {
+                    message.style.display = 'none';
+                }, 2000);
+
+                this.colectedAll = true;
+            }
+        });
     }
 
     #addKey(key) {
@@ -123,6 +138,7 @@ export class Player {
 
     checkArea1(enemiesAreas) {
         console.log(this.initialKey)
+        console.log(this.keys.length)
         if (enemiesAreas.inimigos.area1.length === 0 && this.keys.length === 0) {
             if (!this.initialKey)
                 this.initialKey = new Key("rgb(223, 47, 47)");
@@ -147,6 +163,9 @@ export class Player {
             if (this.initialKey.csgFinal.position.equals(new THREE.Vector3(37.5, 1.8, -92.0)))
                 Area.doorDown();
         }
+        else if (this.colectedAll)
+            Area.doorDown();
+
     }
 
     checkArea2(enemiesAreas) {
@@ -166,13 +185,24 @@ export class Player {
         if (enemiesAreas.inimigos.area3.length === 0) {
             if (!this.thirdkey)
                 this.thirdkey = new Key("rgba(15, 108, 247, 1)");
-            else
+            else if(!this.colectedAll)
                 Area.terceiroAltar(this.thirdkey.csgFinal);
         }
 
         if (this.thirdkey && !this.thirdkey.coletada) {
             this.#addKey(this.thirdkey);
         }
+    }
+
+    openArea3(cameraHolder) {
+        const targetPosition = -92.77344;
+        if (cameraHolder.getWorldPosition(new THREE.Vector3()).z < targetPosition && this.keys.length == 2)
+            this.isOpening = true;
+
+        if (this.isOpening)
+            Area.openArea3()
+        else if (this.colectedAll)
+            Area.openArea3();
     }
 
 }

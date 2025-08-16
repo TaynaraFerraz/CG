@@ -8,10 +8,14 @@ export class Soldier extends Enemy {
     state = "IDLE";
     stateTime = 0;
     deathAnimationPlayed = false;
-
     movementSpeed = 0.05;
-    minDistance = 2;
     indexRight = true;
+    hangarLimits = {
+        minX: 94,
+        maxX: 203,
+        minZ: -191,
+        maxZ: -119
+    };
     // Ações de animação
     anim = {};
 
@@ -25,17 +29,38 @@ export class Soldier extends Enemy {
         this.spriteMixer = spriteMixer;
 
         this.#initAnimations();
+
+        const startStates = ["MOVE_LEFT", "MOVE_RIGHT", "MOVE_FORWARD_SHOOT", "MOVE_BACKWARD"];
+        this.#setState(startStates[Math.floor(Math.random() * startStates.length)]);
+
+        // tempos diferentes para cada soldado
+        this.randomDurations = {
+            side: 1.5 + Math.random() * 2,    // 1.5s ~ 3.5s
+            forward: 2 + Math.random() * 2,   // 2s ~ 4s
+            backward: 2 + Math.random() * 2   // 2s ~ 4s
+        };
     }
 
     #initAnimations() {
-        // IMPORTANTE: ajustar ranges de frames conforme seu spritesheet
-        // Cada Action: (mesh, numTilesHoriz, numTilesVert, startTile, endTile, tilesDisplayDuration)
-        this.anim.idle = this.spriteMixer.Action(this.object, 100, 0, 0, 0, 0);
-        this.anim.walkLeft = this.spriteMixer.Action(this.object, 100, 0, 1, 5, 1);
-        this.anim.walkRight = this.spriteMixer.Action(this.object, 100, 0, 6, 5, 6);
-        this.anim.shoot = this.spriteMixer.Action(this.object, 100, 0, 0, 5, 0);
-        this.anim.death = this.spriteMixer.Action(this.object, 100, 7, 0, 7, 4);
+        this.anim.idle = this.spriteMixer.Action(this.object, 100, 0, 0, 0, 0); //parado
+        this.anim.walkLeft = this.spriteMixer.Action(this.object, 100, 0, 1, 5, 1); //esquerda
+        this.anim.walkRight = this.spriteMixer.Action(this.object, 100, 0, 6, 5, 6); //direita
+        this.anim.shoot = this.spriteMixer.Action(this.object, 100, 0, 0, 5, 0); //atira andando
+        this.anim.back = this.spriteMixer.Action(this.object, 100, 0, 4, 4, 4); //atira andando
+        this.anim.death = this.spriteMixer.Action(this.object, 100, 7, 0, 7, 4); // morrendo
     }
+
+    #keepInsideHangar() {
+        if (!this.hangarLimits) return;
+
+        const pos = this.object.position;
+        const { minX, maxX, minZ, maxZ } = this.hangarLimits;
+
+        // trava posição dentro da área do hangar
+        pos.x = THREE.MathUtils.clamp(pos.x, minX, maxX);
+        pos.z = THREE.MathUtils.clamp(pos.z, minZ, maxZ);
+    }
+
 
     #setState(newState) {
         this.state = newState;
@@ -54,6 +79,9 @@ export class Soldier extends Enemy {
             case "MOVE_RIGHT":
                 this.anim.walkRight.playLoop();
                 break;
+            case "MOVE_BACKWARD":
+                this.anim.back.playLoop();
+                break;
             case "DYING":
                 this.anim.death.playOnce();
                 break;
@@ -62,12 +90,16 @@ export class Soldier extends Enemy {
         }
     }
 
+    #atFrontLimit() {
+        if (!this.hangarLimits) return false;
+        return this.object.position.z >= this.hangarLimits.maxZ - 0.1;
+    }
+
     handle() {
         const delta = this.clock.getDelta();
         this.spriteMixer.update(delta);
         this.stateTime += delta;
-        
-        super.handleCollisions();
+
         if (this.dying) {
             if (!this.deathAnimationPlayed) {
                 this.#setState("DYING");
@@ -92,15 +124,22 @@ export class Soldier extends Enemy {
 
             case "MOVE_LEFT":
                 this.object.translateX(-this.movementSpeed);
+                this.#keepInsideHangar();
                 super.handleCollisions();
-                if (this.stateTime > 2) this.#setState("MOVE_FORWARD_SHOOT");
+                if (this.stateTime > this.randomDurations.side) this.#setState("MOVE_FORWARD_SHOOT");
                 break;
 
             case "MOVE_FORWARD_SHOOT":
                 this.lookAtPlayer();
                 this.object.translateZ(this.movementSpeed);
+                this.#keepInsideHangar();
                 super.handleCollisions();
-                if (this.stateTime > 3) {
+
+                if (this.#atFrontLimit()) {
+                    this.#setState("MOVE_BACKWARD");
+                }
+
+                if (this.stateTime > this.randomDurations.forward) {
                     if (this.indexRight) {
                         this.#setState("MOVE_RIGHT");
                     } else {
@@ -110,10 +149,24 @@ export class Soldier extends Enemy {
                 }
                 break;
 
+            case "MOVE_BACKWARD":
+                this.lookAtPlayer();
+                this.object.translateZ(-this.movementSpeed);
+                this.#keepInsideHangar();
+
+                // se já voltou por 2s → vai para lado
+                if (this.stateTime > this.randomDurations.backward) {
+                    // aleatório: esquerda ou direita
+                    const next = Math.random() > 0.5 ? "MOVE_LEFT" : "MOVE_RIGHT";
+                    this.#setState(next);
+                }
+                break;
+
             case "MOVE_RIGHT":
                 this.object.translateX(this.movementSpeed);
+                this.#keepInsideHangar();
                 super.handleCollisions();
-                if (this.stateTime > 2) this.#setState("MOVE_FORWARD_SHOOT");
+                if (this.stateTime > this.randomDurations.side) this.#setState("MOVE_FORWARD_SHOOT");
                 break;
         }
 

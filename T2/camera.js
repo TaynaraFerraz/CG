@@ -229,17 +229,14 @@ function render() {
         Area.updateLighting(cameraHolder.getWorldPosition(new THREE.Vector3()));
     }
 
-    const targetPosition = -92.77344;
-    if (cameraHolder.getWorldPosition(new THREE.Vector3()).z < targetPosition)
-        isOpening = true;
-    if(isOpening)
-        Area.openArea3()
+    
     //lidando com inimigos
     Area.handleEnemiesArea(cameraHolder);
 
     player.checkArea1(enemiesAreas)
     player.checkArea2(enemiesAreas)
     player.checkArea3(enemiesAreas)
+    player.openArea3(cameraHolder)
     player.handlePlayer();
     //lidando com as colisões
     playerCollisionHandler.handleCollisions()
