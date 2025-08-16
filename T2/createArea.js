@@ -9,7 +9,7 @@ import { EnemiesHandler } from './EnemiesHandler.js';
 import { GLTFLoader } from '../build/jsm/loaders/GLTFLoader.js';
 import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
 import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
-import { deserArea } from './Area4.js';
+import { desertArea } from './Area4.js';
 import { hangarLight, light } from './camera.js';
 
 
@@ -48,6 +48,7 @@ export class Area {
     this.createTerrain(scene);
     this.createAreaPilars(scene);
     this.createAreaCubes(scene);
+    this.createArea3(scene);
 
     desertArea.createAreaDesert(scene, this.collidableAreas, this.collidableStairs);
   }

@@ -166,7 +166,7 @@ class desertArea {
     cilindro.position.copy(position);
     cilindro.translateZ(28);
     cilindro.translateY(6);
-    // cilindro.visible = false;
+    cilindro.visible = false;
     father.add(cilindro);
     let boxCilindro = new THREE.Box3().setFromObject(cilindro, true);
     collidableAreas.push({ box: boxCilindro, mesh: cilindro });

@@ -29,7 +29,7 @@ export class playerHealthBar {
 
     #positionBars() {
         // Barra sempre fixa na frente da câmera do player
-        let offset = new THREE.Vector3(0, 0.07, -0.2); // ajuste conforme necessário
+        let offset = new THREE.Vector3(-0.092, 0.07, -0.2); // ajuste conforme necessário
         this.#greenBar.position.copy(offset);
         this.#redBar.position.copy(offset);
     }

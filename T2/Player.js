@@ -44,7 +44,7 @@ export class Player {
             this.activeGun.add();
         };
         this.player = object;
-        this.#healthBar = new playerHealthBar(this,camera, 0.3, 0.015);
+        this.#healthBar = new playerHealthBar(this,camera, 0.15, 0.015);
 
         // Carrega o som de dano
         const listener = new THREE.AudioListener();
