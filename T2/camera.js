@@ -73,11 +73,6 @@ lightCamera.lookAt(light.target.position);
 const shadowCameraHelper = new THREE.CameraHelper(light.shadow.camera);
 //scene.add(shadowCameraHelper);
 
-window.addEventListener('keydown', (event) => {
-    if (event.key === 'h') { // pressione 'h' para alternar
-        shadowCameraHelper.visible = !shadowCameraHelper.visible;
-    }
-});
 
 //inicio da configuração da camera
 camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -88,7 +83,7 @@ camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, Area.lambertMaterial('red'));
-cameraHolder.position.set(0, PLAYER_HEIGHT+14, 80);
+cameraHolder.position.set(0, PLAYER_HEIGHT, 0);
 cameraHolder.add(camera);
 
 //inicializando o PointerLockControls customizado
@@ -201,6 +196,15 @@ let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
 let player = new Player(scene, cameraHolder, camera, bulletsCollisionHandler, enemiesAreas);
 let playerCollisionHandler = new PlayerCollisionHandler(player.object, Collidables.collidables);
 
+window.addEventListener('keydown', (event) => {
+    if (event.key === 'h') { // pressione 'h' para alternar
+        player.damage(50);
+        console.log('damage');
+    }
+    if (event.key === 'l') {
+        window.location.reload();
+    }
+});
 
 player.actions(controls)
 let inimigosNaArea1 = false
@@ -250,10 +254,13 @@ function render() {
 
     //lidando com inimigos
     Area.handleEnemiesArea(cameraHolder);
-
+    
+    //paredes da area 4
     Area.area4Walls();
 
+    //animação do objeto do deserto
     desertArea.tumbleweedAnimate();
+
 
     player.checkArea1(enemiesAreas)
     player.checkArea2(enemiesAreas)

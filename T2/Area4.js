@@ -144,7 +144,7 @@ class desertArea {
     const numDegraus = 21;
     const larguraBase = 14 * scale;
     const larguraTopo = 1 * scale // largura da escada
-    const profundidade = 0.5 * scale; // profundidade de cada degrau
+    const profundidade = 1 * scale; // profundidade de cada degrau
     const alturaDegrau = 0.5 * scale;
     const visibilidade = false;
 
@@ -158,7 +158,7 @@ class desertArea {
       traseira.position.set(
         position.x,
         position.y-correcao+alturaDegrau*i,
-        position.z + 7 *scale- profundidade/1.5*i
+        position.z + 7.35 *scale - profundidade/1.5*i
       );
       traseira.visible = visibilidade;
       father.add(traseira);
@@ -174,7 +174,7 @@ class desertArea {
             this.lambertMaterial("darkgray")
         );
         degrauDir.position.set(
-            position.x + 7 * scale - profundidade / 1.5 * i,
+            position.x + 7.35 * scale - profundidade / 1.5 * i,
             position.y - correcao + alturaDegrau * i,
             position.z
         );
@@ -192,7 +192,7 @@ class desertArea {
             this.lambertMaterial("darkgray")
         );
         degrauEsq.position.set(
-            position.x - 7 * scale + profundidade / 1.5 * i,
+            position.x - 7.35 * scale + profundidade / 1.5 * i,
             position.y - correcao + alturaDegrau * i,
             position.z
         );
