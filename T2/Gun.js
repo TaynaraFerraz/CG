@@ -9,6 +9,7 @@ export class Gun {
     #scene
     #bulletsCollisionHandler
     enemiesAreas
+    #shootSound;
 
     constructor(camera, scene, bulletsCollisionHandler, enemiesAreas) {
         this.#camera = camera;
@@ -23,6 +24,16 @@ export class Gun {
         const arma = new THREE.Mesh(armaGeometry, armaMaterial);
         arma.rotateX(Math.PI / 2);
         this.#arma = arma;
+
+        // Carrega o som de disparo
+        const listener = new THREE.AudioListener();
+        camera.add(listener);
+        this.#shootSound = new THREE.Audio(listener);
+        const audioLoader = new THREE.AudioLoader();
+        audioLoader.load('../0_assetsT3/sounds/rocketFiring.wav', (buffer) => {
+            this.#shootSound.setBuffer(buffer);
+            this.#shootSound.setVolume(0.5);
+        });
     }
 
     add() {
@@ -32,6 +43,12 @@ export class Gun {
     }
 
     shootBall() {
+        // Toca o som de disparo
+        if (this.#shootSound.isPlaying) {
+            this.#shootSound.stop();
+        }
+        this.#shootSound.play();
+
         let armaMundo = new THREE.Vector3();
         this.#arma.getWorldPosition(armaMundo); // pega as coordenadas globais da arma
 

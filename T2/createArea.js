@@ -5,6 +5,10 @@ import {
 
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
 import { EnemiesHandler } from './EnemiesHandler.js';
+import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
+import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
+import { GLTFLoader } from '../build/jsm/loaders/GLTFLoader.js';
+import { desertArea } from './Area4.js';
 
 const applyTexturesToCube = (cube, paramsVec) => {
   paramsVec.forEach(({ texture, normalMap, x, y, offsetX = 0, offsetY = 0 }, i) => {
@@ -80,6 +84,8 @@ export class Area {
     this.createTerrain(scene);
     this.createAreaPilars(scene);
     this.createAreaCubes(scene);
+
+    desertArea.createAreaDesert(scene, this.collidableAreas, this.collidableStairs);
   }
 
   static createAreaPilars(scene) {
@@ -660,6 +666,9 @@ export class Area {
     plane.material.map = floorTexture;
 
     scene.add(plane);
+
+    let planeBox = new THREE.Box3().setFromObject(plane, true);
+    this.collidableAreas.push({ box: planeBox, mesh: plane });
   }
 
   static lambertMaterial(color) {
@@ -730,6 +739,10 @@ export class Area {
     }
     return false;
   }
+  static area4Walls(){
+    desertArea.wallDown(this.collidableAreas);
+  }
+
 }
 
 export class enemiesAreas {
