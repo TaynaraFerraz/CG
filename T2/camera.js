@@ -51,7 +51,7 @@ light.shadow.radius = 4;
 scene.add(light);
 
 let secondLight;
-secondLight = new THREE.HemisphereLight('white', 'darkslategray', 0.3);
+secondLight = new THREE.HemisphereLight('white', 'darkslategray', 0.8);
 secondLight.castShadow = false;
 /* secondLight = new THREE.DirectionalLight('rgb(255,255,255)', 0.5);
 secondLight.position.set(-140.0, 100.0, -120.0);
@@ -92,6 +92,7 @@ window.addEventListener('keydown', (event) => {
 
 //skybox
 let cubeTexture = new CubeTextureLoaderSingleFile().loadSingle('./assets/skybox/skybox.png', 1);
+
 scene.background = cubeTexture;
 
 
@@ -104,7 +105,7 @@ camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, Area.lambertMaterial('red'));
-cameraHolder.position.set(-180, PLAYER_HEIGHT + 8 + 10, -50);
+cameraHolder.position.set(0, PLAYER_HEIGHT + 10, -120);
 cameraHolder.add(camera);
 
 //inicializando o PointerLockControls customizado
