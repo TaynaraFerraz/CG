@@ -150,7 +150,7 @@ export class Enemy {
 
         const dimMeshesOpacities = (object) => {
             object.traverse((child) => {
-                if (child.isMesh) {
+                if (child.isMesh || child.isSprite) {
                     child.material.transparent = true;
                     child.material.opacity -= 0.01;
                     opacity = child.material.opacity;
@@ -162,9 +162,14 @@ export class Enemy {
             }
         }
         if (this.dying) {
-            // console.log(this.object);
-            dimMeshesOpacities(this.object);
+            console.log('está morrendo');
+            if(!this.object.isSprite)
+                dimMeshesOpacities(this.object);
+            else{
+                this.dead = true;
+            }
             if (opacity <= 0) {
+                console.log('sim')
                 this.#healthBar.remove();
                 this.dead = true;
             }

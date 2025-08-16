@@ -32,7 +32,7 @@ export class ChainGun {
         this.isFiring = false
 
         let loader = new THREE.TextureLoader();
-        loader.load("./spriteChainGun.png", (texture) => {
+        loader.load("./assets/guns/spriteChainGun.png", (texture) => {
             this.#actionSprite = this.#spriteMixer.ActionSprite(texture, 5, 1);
             this.#actionSprite.setFrame(0, 0);
             this.#actionSprite.castShadow = true;
@@ -80,7 +80,7 @@ export class ChainGun {
             ...Collidables.collidables.walls.map(obj => obj.mesh),
             ...enemyMeshes
         ];
-        
+        raycaster.camera = this.#camera;
         const intersect = raycaster.intersectObjects(collidableMeshes, true);
         
         if (intersect.length > 0) {

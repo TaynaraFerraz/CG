@@ -17,9 +17,12 @@ import { ChainGun } from './ChainGun.js';
 import { Player } from './Player.js';
 import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 import { CubeTextureLoaderSingleFile } from '../libs/util/cubeTextureLoaderSingleFile.js';
+import { Gun } from './Gun.js';
 
 const clock = new THREE.Clock();
-let scene, renderer, camera, cameraHolder, light, keyboard; // Initial variables
+let scene, renderer, camera, cameraHolder, keyboard; 
+export let light;
+// Initial variables
 scene = new THREE.Scene();    // Create main scene
 renderer = new THREE.WebGLRenderer();
 renderer.shadowMap.enabled = true;
@@ -53,21 +56,13 @@ scene.add(light);
 let secondLight;
 secondLight = new THREE.HemisphereLight('white', 'darkslategray', 0.3);
 secondLight.castShadow = false;
-/* secondLight = new THREE.DirectionalLight('rgb(255,255,255)', 0.5);
-secondLight.position.set(-140.0, 100.0, -120.0);
-secondLight.shadow.mapSize.width = 1024;
-secondLight.shadow.mapSize.height = 1024;
-secondLight.shadow.camera.near = 0.1;
-secondLight.shadow.camera.far = 600;
-secondLight.shadow.camera.left = -500;
-secondLight.shadow.camera.right = 500;
-secondLight.shadow.camera.bottom = -500;
-secondLight.shadow.camera.top = 500;
-secondLight.shadow.bias = -0.0005;
-secondLight.shadow.radius = 4; */
-
 scene.add(secondLight);
 
+export const hangarLight = new THREE.DirectionalLight('rgb(255,255,255)', 1);
+hangarLight.position.set(0, 20, 0);
+hangarLight.castShadow = true;
+scene.add(hangarLight);
+hangarLight.visible = false;
 
 const lightCamera = new THREE.OrthographicCamera(
     light.shadow.camera.left,
@@ -214,6 +209,7 @@ let playerCollisionHandler = new PlayerCollisionHandler(player.object, Collidabl
 
 player.actions(controls)
 let inimigosNaArea1 = false
+let isOpening = false;
 
 // Listen window size changes
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
@@ -230,21 +226,28 @@ function render() {
             return;
         }
     }
-
+    console.log(cameraHolder.getWorldPosition(new THREE.Vector3()))
     if (controls.isLocked) {
         moveAnimate(clock.getDelta());
     }
 
+    if (Area.updateLighting) {
+        Area.updateLighting(cameraHolder.getWorldPosition(new THREE.Vector3()));
+    }
+
+    
     //lidando com inimigos
     Area.handleEnemiesArea(cameraHolder);
 
     player.checkArea1(enemiesAreas)
     player.checkArea2(enemiesAreas)
+    player.checkArea3(enemiesAreas)
+    player.openArea3(cameraHolder)
     player.handlePlayer();
     //lidando com as colisões
     playerCollisionHandler.handleCollisions()
 
-    if (player.activeGun instanceof ChainGun && player.activeGun.isFiring) {
+    if ((player.activeGun instanceof ChainGun || player.activeGun instanceof Gun) && player.activeGun.isFiring) {
         player.activeGun.spriteUpdate(); // animação do sprite tem que ser no render
     }
 
