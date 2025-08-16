@@ -18,6 +18,7 @@ export class ChainGun {
     currentFrame
     totalFrames
     isFiring
+    #shootSound;
 
     constructor(camera, scene, bulletsCollisionHandler, enemiesArea) {
         this.#camera = camera
@@ -39,6 +40,15 @@ export class ChainGun {
             this.#actionSprite.position.set(0, -0.1, -0.3);
             this.#actionSprite.scale.set(0.1, 0.1, 0.1);
         })
+
+        const listener = new THREE.AudioListener();
+        camera.add(listener);
+        this.#shootSound = new THREE.Audio(listener);
+        const audioLoader = new THREE.AudioLoader();
+        audioLoader.load('../0_assetsT3/sounds/rocketFiring.wav', (buffer) => {
+            this.#shootSound.setBuffer(buffer);
+            this.#shootSound.setVolume(0.5);
+        });
     }
 
     add() {
@@ -51,6 +61,11 @@ export class ChainGun {
 
     shootBall() {
         if (!this.#actionSprite) return;
+
+        if (this.#shootSound.isPlaying) {
+            this.#shootSound.stop();
+        }
+        this.#shootSound.play();
 
         // Só inicia a animação uma vez
         if (!this.isFiring) {

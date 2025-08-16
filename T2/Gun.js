@@ -17,6 +17,7 @@ export class Gun {
     #clock
     isFiring
     onLoaded = null;
+    #shootSound;
 
     constructor(camera, scene, bulletsCollisionHandler, enemiesAreas) {
         this.#camera = camera;
@@ -38,6 +39,16 @@ export class Gun {
             }
         })
 
+
+        // Carrega o som de disparo
+        const listener = new THREE.AudioListener();
+        camera.add(listener);
+        this.#shootSound = new THREE.Audio(listener);
+        const audioLoader = new THREE.AudioLoader();
+        audioLoader.load('../0_assetsT3/sounds/rocketFiring.wav', (buffer) => {
+            this.#shootSound.setBuffer(buffer);
+            this.#shootSound.setVolume(0.5);
+        });
     }
 
     add() {
@@ -45,6 +56,12 @@ export class Gun {
     }
 
     shootBall() {
+        // Toca o som de disparo
+        if (this.#shootSound.isPlaying) {
+            this.#shootSound.stop();
+        }
+        this.#shootSound.play();
+
         if (!this.#actionSprite) return;
 
         this.#action = this.#spriteMixer.Action(this.#actionSprite, 100, 0, 0, 0, 3);

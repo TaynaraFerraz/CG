@@ -73,6 +73,7 @@ export class Enemy {
     damage(amount) {
         if (this.angry && !this.dying) {
             if (this.#health > 0) {
+                this.playInjuredSound();
                 this.#health -= amount;
             }
             if (this.#health <= 0) {
@@ -80,6 +81,10 @@ export class Enemy {
             }
         }
     };
+
+    playInjuredSound() {};
+
+    playAttackSound() {};
 
     handleCollisions() {
         //console.log(this.#minHeight);

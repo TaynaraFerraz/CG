@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constants.js';
 import { Collidables } from './Collidables.js';
 import { Area } from './createArea.js';
+import { desertArea } from './Area4.js';
 
 export class PlayerCollisionHandler {
     #fallingSpeed = 0.7;
@@ -16,8 +17,12 @@ export class PlayerCollisionHandler {
     #usefulBoxCheckingDelaySeconds = 2;
     #movimentoCompleto = true;
     #isUp = true;
+    #playerClass;
+    #lastDamageTime = 0;
+    #damageCooldown = 500;
 
-    constructor(player) {
+    constructor(player, playerClass) {
+        this.#playerClass = playerClass;
         this.#player = player;
         this.#originalCollidables = Collidables.collidables;
         this.#currentCollidables = { ...Collidables.collidables };
@@ -146,6 +151,23 @@ export class PlayerCollisionHandler {
         //vendo se está em cima de áreas ou escadas
         let isAboveArea = this.#handleGroupCollisions(this.#currentCollidables.areas, "areas");
         let isAboveStair = this.#handleGroupCollisions(this.#currentCollidables.stairs, "stairs", true);
+
+        // --- DANO DE CACTO ---
+        // Atualiza bounding box do player
+        this.#boundingBox.setFromObject(this.#player);
+
+        // Percorre todos os cactos e verifica colisão
+        const now = performance.now();
+        for (let c of desertArea.cactus) {
+            if (c.box && this.#boundingBox.intersectsBox(c.box)) {
+                
+                if (now - this.#lastDamageTime >= this.#damageCooldown) {
+                console.log("cacto");
+                this.#playerClass.damage(5);
+                this.#lastDamageTime = now;
+                }
+            }
+        }
 
         this.#isFiltering = false; //para de filtrar
 

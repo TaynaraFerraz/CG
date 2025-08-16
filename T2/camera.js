@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import KeyboardState from '../libs/util/KeyboardState.js'
 import { PointerLockControls } from './PointerLockControls.js'
 import { Area, enemiesAreas } from './createArea.js';
+import { desertArea } from './Area4.js';
 import {
     initRenderer,
     initDefaultBasicLight,
@@ -19,6 +20,7 @@ import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 import { CubeTextureLoaderSingleFile } from '../libs/util/cubeTextureLoaderSingleFile.js';
 import { Gun } from './Gun.js';
 
+let firstPlay = true;
 const clock = new THREE.Clock();
 let scene, renderer, camera, cameraHolder, keyboard; 
 export let light;
@@ -33,14 +35,14 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.getElementById("webgl-output").appendChild(renderer.domElement);
 
-//light = initDefaultBasicLight(scene); // Create a basic light to illuminate the scene
+
 keyboard = new KeyboardState();
 
 light = new THREE.DirectionalLight('rgb(255,255,255)', 3);
 light.position.set(140.0, 220.0, 120.0);
 light.castShadow = true;
-light.shadow.mapSize.width = 1024 * 2;
-light.shadow.mapSize.height = 1024 * 2;
+light.shadow.mapSize.width = 1024;
+light.shadow.mapSize.height = 1024;
 light.shadow.camera.near = 0.01;
 light.shadow.camera.far = 600;
 light.shadow.camera.left = -450;
@@ -56,6 +58,7 @@ scene.add(light);
 let secondLight;
 secondLight = new THREE.HemisphereLight('white', 'darkslategray', 0.3);
 secondLight.castShadow = false;
+
 scene.add(secondLight);
 
 export const hangarLight = new THREE.DirectionalLight('rgb(255,255,255)', 1);
@@ -79,11 +82,6 @@ lightCamera.lookAt(light.target.position);
 const shadowCameraHelper = new THREE.CameraHelper(light.shadow.camera);
 //scene.add(shadowCameraHelper);
 
-window.addEventListener('keydown', (event) => {
-    if (event.key === 'h') { // pressione 'h' para alternar
-        shadowCameraHelper.visible = !shadowCameraHelper.visible;
-    }
-});
 
 //skybox
 let cubeTexture = new CubeTextureLoaderSingleFile().loadSingle('./assets/skybox/skybox.png', 1);
@@ -99,7 +97,7 @@ camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, Area.lambertMaterial('red'));
-cameraHolder.position.set(-180, PLAYER_HEIGHT + 8 + 10, -50);
+cameraHolder.position.set(0, PLAYER_HEIGHT, 0);
 cameraHolder.add(camera);
 
 //inicializando o PointerLockControls customizado
@@ -120,12 +118,14 @@ controls.addEventListener('lock', function () {
     instructions.style.display = 'none';
     blocker.style.display = 'none';
     crosshair.style.display = 'block'; // Mostra a mira
+    firstPlaySound();
 });
 
 controls.addEventListener('unlock', function () {
     blocker.style.display = 'block';
     instructions.style.display = '';
     crosshair.style.display = 'none'; // Esconde a mira
+    firstPlaySound();
 });
 
 scene.add(controls.getObject());
@@ -143,7 +143,11 @@ window.addEventListener('keyup', (event) => movementControls(event.keyCode, fals
 
 //mapeia as teclas para os movimentos
 function movementControls(key, value) {
+    firstPlaySound();
     switch (key) {
+        case 'p':
+        case 80:
+            break;
         case 16: // SHIFT
             shift = value;
             break;
@@ -204,8 +208,17 @@ enemiesAreas.inimigos = {
 
 let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
 let player = new Player(scene, cameraHolder, camera, bulletsCollisionHandler, enemiesAreas);
-let playerCollisionHandler = new PlayerCollisionHandler(player.object, Collidables.collidables);
+let playerCollisionHandler = new PlayerCollisionHandler(player.object, player);
 
+window.addEventListener('keydown', (event) => {
+    if (event.key === 'h') { // pressione 'h' para alternar
+        player.damage(50);
+        console.log('damage');
+    }
+    if (event.key === 'l') {
+        window.location.reload();
+    }
+});
 
 player.actions(controls)
 let inimigosNaArea1 = false
@@ -213,6 +226,29 @@ let isOpening = false;
 
 // Listen window size changes
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
+
+var listener = new THREE.AudioListener();
+camera.add(listener);
+
+let audioLoader = new THREE.AudioLoader();
+let doomSoundLoaded = false;
+const doomSound = new THREE.PositionalAudio(listener);
+audioLoader.load('../0_assetsT3/sounds/doom.mp3', function (buffer) {
+    doomSound.setBuffer(buffer);
+    doomSound.setLoop(true);
+    doomSoundLoaded = true;
+
+});
+camera.add(doomSound);
+
+function firstPlaySound(){
+    if (firstPlay && doomSoundLoaded) {
+        console.log("tocando");
+        doomSound.play();
+        firstPlay = false;
+    }
+}
+
 render();
 
 function render() {
@@ -238,6 +274,13 @@ function render() {
     
     //lidando com inimigos
     Area.handleEnemiesArea(cameraHolder);
+    
+    //paredes da area 4
+    Area.area4Walls();
+
+    //animação do objeto do deserto
+    desertArea.tumbleweedAnimate();
+
 
     player.checkArea1(enemiesAreas)
     player.checkArea2(enemiesAreas)
@@ -266,4 +309,4 @@ function render() {
     requestAnimationFrame(render);
 }
 
-export { scene };
+export { scene , camera};

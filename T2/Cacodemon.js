@@ -1,6 +1,6 @@
 import { setDefaultMaterial } from "../libs/util/util.js";
 import { BulletsCollisionHandler } from "./BulletsCollisionHandler.js";
-import { scene } from "./camera.js";
+import { scene, camera } from "./camera.js";
 import { Collidables } from "./Collidables.js";
 import { Enemy } from "./Enemy.js";
 import * as THREE from 'three';
@@ -9,6 +9,8 @@ export class Cacodemon extends Enemy {
     #randomized = false;
     #canShoot = true;
     #bulletsCollisionHandler;
+    #injuredSound;
+    #attackSound;
 
     constructor(object, player, initialPosition) {
         super(object, player, 40, undefined, initialPosition);
@@ -16,6 +18,23 @@ export class Cacodemon extends Enemy {
         this.#bulletsCollisionHandler = new BulletsCollisionHandler(scene, this.object);
         this.#bulletsCollisionHandler.speed = 1.2;
 
+        const listener = new THREE.AudioListener();
+        camera.add(listener);
+
+        this.#injuredSound = new THREE.Audio(listener);
+        this.#attackSound = new THREE.Audio(listener);
+
+        const audioLoader = new THREE.AudioLoader();
+        audioLoader.load('../0_assetsT3/sounds/cacoDemon/cacodemonInjured.wav', (buffer) => {
+            this.#injuredSound.setBuffer(buffer);
+            this.#injuredSound.setVolume(0.5);
+        });
+        
+        audioLoader.load('../0_assetsT3/sounds/cacoDemon/cacodemonAttack.wav', (buffer) => {
+            this.#attackSound.setBuffer(buffer);
+            this.#attackSound.setVolume(0.5);
+        });
+        
         this.randomizerCallback();
     }
 
@@ -66,6 +85,7 @@ export class Cacodemon extends Enemy {
     }
 
     #shoot() {
+        this.playAttackSound();
         let worldPosition = new THREE.Vector3();
         this.object.getWorldPosition(worldPosition);
 
@@ -89,6 +109,22 @@ export class Cacodemon extends Enemy {
                 this.#canShoot = true;
             }, 800);
         }
+    }
+
+    playInjuredSound() {
+        if (this.#injuredSound && this.#injuredSound.buffer) {
+            if (this.#injuredSound.isPlaying) this.#injuredSound.stop();
+            this.#injuredSound.play();
+        }
+        super.playInjuredSound();
+    }
+
+    playAttackSound() {
+        if (this.#attackSound && this.#attackSound.buffer) {
+            if (this.#attackSound.isPlaying) this.#attackSound.stop();
+            this.#attackSound.play();
+        }
+        super.playAttackSound();
     }
 
     handle() {

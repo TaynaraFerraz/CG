@@ -3,6 +3,7 @@ import { ChainGun } from "./ChainGun.js";
 import { Gun } from "./Gun.js";
 import { Area } from './createArea.js';
 import { Key } from './Key.js';
+import { playerHealthBar } from './playerHealthBar.js';
 
 export class Player {
 
@@ -23,8 +24,13 @@ export class Player {
     thirdkey
     colectedAll = false
     isOpening = false;
+    #healthBar
+    #health
+    #maxhealth = 200
+    #damageSound;
 
     constructor(scene, object, camera, bulletsCollisionHandler, enemiesAreas) {
+        this.#health = this.#maxhealth;
         this.#scene = scene;
         this.#camera = camera;
         this.object = object;
@@ -37,9 +43,22 @@ export class Player {
             this.activeGun = this.#gun;
             this.activeGun.add();
         };
+        this.player = object;
+        this.#healthBar = new playerHealthBar(this,camera, 0.3, 0.015);
+
+        // Carrega o som de dano
+        const listener = new THREE.AudioListener();
+        camera.add(listener);
+        this.#damageSound = new THREE.Audio(listener);
+        const audioLoader = new THREE.AudioLoader();
+        audioLoader.load('../0_assetsT3/sounds/playerInjured.wav', (buffer) => {
+            this.#damageSound.setBuffer(buffer);
+            this.#damageSound.setVolume(0.5); // ajuste o volume se quiser
+        });
     }
 
     handlePlayer() {
+        this.#healthBar.update(this.#health, this.#maxhealth);
         this.activeGun.handleGun();
     }
 
@@ -108,7 +127,6 @@ export class Player {
             else
                 this.#switchGun(this.#chainGun)
         });
-
         document.addEventListener('keydown', (event) => {
             if (event.code === 'KeyC') {
                 const message = document.getElementById('message');
@@ -122,6 +140,20 @@ export class Player {
             }
         });
     }
+
+    damage(amount) {
+        if (this.#health > 0) {
+            this.#health -= amount;
+            // Toca o som de dano
+            if (this.#damageSound.isPlaying) {
+                this.#damageSound.stop();
+            }
+            this.#damageSound.play();
+        }
+        if (this.#health <= 0) {
+            window.location.reload();
+        }
+    };
 
     #addKey(key) {
         let position = this.#camera.getWorldPosition(new THREE.Vector3())
