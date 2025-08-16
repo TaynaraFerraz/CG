@@ -277,6 +277,7 @@ function render() {
     
     //paredes da area 4
     Area.area4Walls();
+    Area.finalScene(scene, cameraHolder, playerCollisionHandler);
 
     //animação do objeto do deserto
     desertArea.tumbleweedAnimate();

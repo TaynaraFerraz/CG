@@ -3,6 +3,7 @@ import { GLTFLoader } from '../build/jsm/loaders/GLTFLoader.js';
 import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
 import { Area } from './createArea.js';
+import { PLAYER_HEIGHT } from './constants.js';
 
 class desertArea {
 
@@ -11,6 +12,7 @@ class desertArea {
   static tumbleweed;
   static tumbleweedgoing = true;
   static tumbleweedup = true;
+  static #plataform;
 
   static createAreaDesert(scene, collidableAreas, collidableStairs) {
     let position = new THREE.Vector3(0.0, 6.0, 130.0);
@@ -45,15 +47,19 @@ class desertArea {
     this.piramideColision(scene, cube, collidableAreas, new THREE.Vector3(0, height / 2 + 25, 25), 25, 5);
 
 
+    let stairTex = textureLoader.load('./assets/area4/cobblestone.jpg');
+    let stairMaterial = [
+      this.setMaterial('./assets/area4/cobblestone.jpg', 4, 1, "lightgray"),
+      this.setMaterial('./assets/area4/cobblestone.jpg', 4, 1, "lightgray"),
+      this.setMaterial('./assets/area4/cobblestone.jpg', 1, 2, "lightgray"),
+      this.setMaterial('./assets/area4/cobblestone.jpg', 1, 2, "lightgray"),
+      this.setMaterial('./assets/area4/cobblestone.jpg', 4, 1, "lightgray"),
+      this.setMaterial('./assets/area4/cobblestone.jpg', 4, 1, "lightgray")
+    ]
     let stair = new THREE.Mesh(
         new THREE.BoxGeometry(6, 2.2, 18),
-        this.lambertMaterial("lightgray")
+        stairMaterial
     );
-    let stairTex = textureLoader.load('./assets/area4/cobblestone.jpg');
-    stairTex.wrapS = THREE.RepeatWrapping;
-    stairTex.wrapT = THREE.RepeatWrapping;
-    stair.material.map = stairTex;
-    stair.material.map.repeat.set(1, 2);
     stair.rotateX(-Math.PI/ 3.9);
     stair.castShadow = true;
     stair.receiveShadow = true;
@@ -152,6 +158,18 @@ class desertArea {
     for(let i = 0; i < positions.length; i++) {
       this.cactusLoader(scene, cube, collidableAreas, positions[i], 1);
     }
+
+    this.#plataform = new THREE.Mesh(
+      new THREE.CylinderGeometry(6, 6, 1, 32),
+      this.lambertMaterial('lightblue')
+    )
+    this.#plataform.castShadow = true;
+    this.#plataform.receiveShadow = true;
+    this.#plataform.material.opacity = 0.5;
+    this.#plataform.material.transparent = true;
+    this.#plataform.position.set(0, 11, 90);
+    scene.add(this.#plataform);
+
     
   }
 
@@ -337,6 +355,19 @@ class desertArea {
     return new THREE.MeshLambertMaterial({ color: color });
   }
 
+  static setMaterial(file, repeatU = 1, repeatV = 1, color = 'white'){
+    let loader = new THREE.TextureLoader();
+    let mat = new THREE.MeshBasicMaterial({
+      map: loader.load(file),
+      color: color});
+      mat.map.wrapS = THREE.RepeatWrapping;
+      mat.map.wrapT = THREE.RepeatWrapping;
+      mat.map.minFilter = THREE.LinearFilter;
+      mat.map.magFilter = THREE.LinearFilter;
+      mat.map.repeat.set(repeatU, repeatV);
+      return mat;
+  }
+
   static wallDown(collidableAreas){
     for(let i = 0; i < this.outerWalls.length; ++i){
       if(this.outerWalls[i].position.y > - 31)
@@ -374,6 +405,22 @@ class desertArea {
     this.tumbleweed.rotation.y += 0.01;
     this.tumbleweed.rotation.x += 0.01;
     this.tumbleweed.rotation.z += 0.01;
+  }
+
+  static extration(scene, player, playerHandler){
+    if(this.#plataform.position.y < 12.5)
+      this.#plataform.translateY(0.1);
+    
+    let playerBox = new THREE.Box3().setFromObject(player, true);
+    let boundingBox = new THREE.Box3().setFromObject(this.#plataform, true);
+    if( boundingBox.intersectsBox(playerBox)){
+      playerHandler.gravity(false);
+      this.#plataform.translateY(0.05);
+      player.position.copy(this.#plataform.position);
+      player.position.y += PLAYER_HEIGHT/2;
+    }
+
+
   }
 }
 

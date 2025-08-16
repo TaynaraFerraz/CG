@@ -143,6 +143,13 @@ export class PlayerCollisionHandler {
         }
         return isAbove;
     }
+
+    gravity(status) {
+        if(status)
+            this.#fallingSpeed = 0.7;
+        if(!status)
+            this.#fallingSpeed = 0.0;
+    }
     
     handleCollisions() {
         //testando paredes

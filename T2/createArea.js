@@ -839,6 +839,9 @@ export class Area {
     desertArea.wallDown(this.collidableAreas);
   }
 
+  static finalScene(scene, player, playerHandler){
+    desertArea.extration(scene, player, playerHandler);
+  }
 }
 
 export class enemiesAreas {
