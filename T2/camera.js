@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import KeyboardState from '../libs/util/KeyboardState.js'
 import { PointerLockControls } from './PointerLockControls.js'
 import { Area, enemiesAreas } from './createArea.js';
+import { desertArea } from './Area4.js';
 import {
     initRenderer,
     initDefaultBasicLight,
@@ -17,6 +18,7 @@ import { ChainGun } from './ChainGun.js';
 import { Player } from './Player.js';
 import { BulletsCollisionHandler } from './BulletsCollisionHandler.js';
 
+let firstPlay = true;
 const clock = new THREE.Clock();
 let scene, renderer, camera, cameraHolder, light, keyboard; // Initial variables
 scene = new THREE.Scene();    // Create main scene
@@ -29,7 +31,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.getElementById("webgl-output").appendChild(renderer.domElement);
 
-//light = initDefaultBasicLight(scene); // Create a basic light to illuminate the scene
+
 keyboard = new KeyboardState();
 
 light = new THREE.DirectionalLight('rgb(255,255,255)', 3);
@@ -52,18 +54,6 @@ scene.add(light);
 let secondLight;
 secondLight = new THREE.HemisphereLight('white', 'darkslategray', 0.3);
 secondLight.castShadow = false;
-/* secondLight = new THREE.DirectionalLight('rgb(255,255,255)', 0.5);
-secondLight.position.set(-140.0, 100.0, -120.0);
-secondLight.shadow.mapSize.width = 1024;
-secondLight.shadow.mapSize.height = 1024;
-secondLight.shadow.camera.near = 0.1;
-secondLight.shadow.camera.far = 600;
-secondLight.shadow.camera.left = -500;
-secondLight.shadow.camera.right = 500;
-secondLight.shadow.camera.bottom = -500;
-secondLight.shadow.camera.top = 500;
-secondLight.shadow.bias = -0.0005;
-secondLight.shadow.radius = 4; */
 
 scene.add(secondLight);
 
@@ -98,7 +88,7 @@ camera.lookAt(new THREE.Vector3(0.0, 1.0, -100.0));
 //criando o camera holder
 let cameraHolderGeometry = new THREE.CylinderGeometry(PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT);
 cameraHolder = new THREE.Mesh(cameraHolderGeometry, Area.lambertMaterial('red'));
-cameraHolder.position.set(0, PLAYER_HEIGHT + 14, 80);
+cameraHolder.position.set(0, PLAYER_HEIGHT+14, 80);
 cameraHolder.add(camera);
 
 //inicializando o PointerLockControls customizado
@@ -119,12 +109,14 @@ controls.addEventListener('lock', function () {
     instructions.style.display = 'none';
     blocker.style.display = 'none';
     crosshair.style.display = 'block'; // Mostra a mira
+    firstPlaySound();
 });
 
 controls.addEventListener('unlock', function () {
     blocker.style.display = 'block';
     instructions.style.display = '';
     crosshair.style.display = 'none'; // Esconde a mira
+    firstPlaySound();
 });
 
 scene.add(controls.getObject());
@@ -142,7 +134,11 @@ window.addEventListener('keyup', (event) => movementControls(event.keyCode, fals
 
 //mapeia as teclas para os movimentos
 function movementControls(key, value) {
+    firstPlaySound();
     switch (key) {
+        case 'p':
+        case 80:
+            break;
         case 16: // SHIFT
             shift = value;
             break;
@@ -211,6 +207,29 @@ let inimigosNaArea1 = false
 
 // Listen window size changes
 window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
+
+var listener = new THREE.AudioListener();
+camera.add(listener);
+
+let audioLoader = new THREE.AudioLoader();
+let doomSoundLoaded = false;
+const doomSound = new THREE.PositionalAudio(listener);
+audioLoader.load('../0_assetsT3/sounds/doom.mp3', function (buffer) {
+    doomSound.setBuffer(buffer);
+    doomSound.setLoop(true);
+    doomSoundLoaded = true;
+
+});
+camera.add(doomSound);
+
+function firstPlaySound(){
+    if (firstPlay && doomSoundLoaded) {
+        console.log("tocando");
+        doomSound.play();
+        firstPlay = false;
+    }
+}
+
 render();
 
 function render() {
@@ -231,6 +250,10 @@ function render() {
 
     //lidando com inimigos
     Area.handleEnemiesArea(cameraHolder);
+
+    Area.area4Walls();
+
+    desertArea.tumbleweedAnimate();
 
     player.checkArea1(enemiesAreas)
     player.checkArea2(enemiesAreas)
