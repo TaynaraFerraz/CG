@@ -219,6 +219,33 @@ class desertArea {
         let boxDegrauTras = new THREE.Box3().setFromObject(degrauTras, true);
         collidableAreas.push({ box: boxDegrauTras, mesh: degrauTras });
     }
+
+    let auxEsq = new THREE.Mesh(
+      new THREE.BoxGeometry(larguraBase/2-4, alturaDegrau, profundidade*2),
+      this.lambertMaterial("darkgray")
+    );
+    auxEsq.position.set(
+      position.x - larguraBase/4 - scale+2,
+      position.y - correcao + alturaDegrau,
+      position.z - 7 * scale + 2.5
+    );
+    auxEsq.visible = visibilidade;
+    father.add(auxEsq);
+    let auxDir = new THREE.Mesh(
+      new THREE.BoxGeometry(larguraBase/2-4, alturaDegrau, profundidade*2),
+      this.lambertMaterial("darkgray")
+    );
+    auxDir.position.set(
+      position.x + larguraBase/4 + scale-2,
+      position.y - correcao + alturaDegrau,
+      position.z - 7 * scale + 2.5
+    );
+    auxDir.visible = visibilidade;
+    father.add(auxDir);
+    let boxAuxEsq = new THREE.Box3().setFromObject(auxEsq, true);
+    let boxAuxDir = new THREE.Box3().setFromObject(auxDir, true);
+    collidableAreas.push({ box: boxAuxEsq, mesh: auxEsq });
+    collidableAreas.push({ box: boxAuxDir, mesh: auxDir });
 }
 
   static piramideLoader(scene, father, collidableAreas, position, height, scale, rotation) {
