@@ -5,6 +5,7 @@ import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
 
 class desertArea {
 
+  static cactus = [];
   static outerWalls = [];
   static tumbleweed;
   static tumbleweedgoing = true;
@@ -136,7 +137,58 @@ class desertArea {
       cube.add(obj);
       desertArea.tumbleweed = obj;
     });
+
+
+    let positions = [
+        new THREE.Vector3(98.36, 0, -40.34),
+        new THREE.Vector3(40.24, 0, -81.26),
+        new THREE.Vector3(-31.10, 0, 39.86),
+        new THREE.Vector3(61.63, 0, 14.51),
+        new THREE.Vector3(-102.75, 0, -36.42),
+        new THREE.Vector3(-8.15, 0, -45.35),
+        new THREE.Vector3(30, 0, -40)
+    ];
+    for(let i = 0; i < positions.length; i++) {
+      this.cactusLoader(scene, cube, collidableAreas, positions[i], 1);
+    }
     
+  }
+
+  static cactusLoader(scene, father, collidableAreas, position, scale) {
+    let correcao = new THREE.Vector3(30, -1, +140);
+    let ajuste = position.clone().add(correcao)
+    let gtfLoader = new GLTFLoader();
+
+    let cilindro = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.7, 1.7, 15),
+      this.lambertMaterial('green')
+    )
+    cilindro.position.copy(position);
+    cilindro.translateZ(28);
+    cilindro.translateY(6);
+    // cilindro.visible = false;
+    father.add(cilindro);
+    let boxCilindro = new THREE.Box3().setFromObject(cilindro, true);
+    collidableAreas.push({ box: boxCilindro, mesh: cilindro });
+    this.cactus.push({ box: boxCilindro, mesh: cilindro });
+    
+    gtfLoader.load('./assets/area4/cactus_dr.glb', function (response) {
+      let obj = response.scene;
+
+      obj.position.copy(ajuste);
+      // obj.scale.set(scale, scale, scale);
+      obj.traverse(child => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+          child.material.side = THREE.DoubleSide;
+          // child.material.transparent = true;
+          child.material.depthTest = true;
+          child.material.depthWrite = true;
+        }
+      });
+      father.add(obj);
+    });
   }
 
   static piramideColision(scene, father, collidableAreas, position, correcao, scale) {
@@ -214,7 +266,7 @@ class desertArea {
             position.y - correcao + alturaDegrau * i,
             position.z - 7 * scale + profundidade / 1.5 * i
         );
-        degrauTras.visible = visibilidade;0
+        degrauTras.visible = visibilidade;
         father.add(degrauTras);
         let boxDegrauTras = new THREE.Box3().setFromObject(degrauTras, true);
         collidableAreas.push({ box: boxDegrauTras, mesh: degrauTras });
@@ -325,4 +377,4 @@ class desertArea {
   }
 }
 
-export { desertArea };
+export { desertArea};

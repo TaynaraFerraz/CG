@@ -194,7 +194,7 @@ enemiesAreas.inimigos = {
 
 let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
 let player = new Player(scene, cameraHolder, camera, bulletsCollisionHandler, enemiesAreas);
-let playerCollisionHandler = new PlayerCollisionHandler(player.object, Collidables.collidables);
+let playerCollisionHandler = new PlayerCollisionHandler(player.object, player);
 
 window.addEventListener('keydown', (event) => {
     if (event.key === 'h') { // pressione 'h' para alternar
