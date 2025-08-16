@@ -419,8 +419,9 @@ class desertArea {
       player.position.copy(this.#plataform.position);
       player.position.y += PLAYER_HEIGHT/2;
     }
-
-
+    if(this.#plataform.position.y > 120.0){
+      window.location.reload();
+    }
   }
 }
 
