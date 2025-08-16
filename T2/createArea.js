@@ -569,7 +569,7 @@ export class Area {
       { texture: metalGroundTexture, normalMap: metalGroundNormal, x: 1, y: 1 }, // -Z (back)
     ]);
 
-    altar.position.set(0.0, 3, 0.0);
+    altar.position.set(0.0, -3, 0.0);
     altar.castShadow = true;
     altar.receiveShadow = true;
     cube.add(altar);
