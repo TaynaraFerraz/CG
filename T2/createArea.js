@@ -746,9 +746,6 @@ export class Area {
     plane.material.map = floorTexture;
 
     scene.add(plane);
-
-    let planeBox = new THREE.Box3().setFromObject(plane, true);
-    this.collidableAreas.push({ box: planeBox, mesh: plane });
   }
 
   static lambertMaterial(color) {
@@ -837,6 +834,7 @@ export class Area {
     }
     return false;
   }
+  
   static area4Walls(){
     desertArea.wallDown(this.collidableAreas);
   }

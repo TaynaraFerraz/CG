@@ -1,6 +1,7 @@
 import { SpriteMixer } from "../libs/sprites/SpriteMixer.js";
 import { Enemy } from "./Enemy.js";
 import * as THREE from "three";
+import {camera} from './camera.js';
 
 export class Soldier extends Enemy {
     clock;
@@ -18,6 +19,8 @@ export class Soldier extends Enemy {
     };
     // Ações de animação
     anim = {};
+    #injuredSound;
+    #attackSound;
 
     constructor(object, player, initialPosition, spriteMixer) {
         super(object, player, 30, 2, initialPosition);
@@ -39,6 +42,23 @@ export class Soldier extends Enemy {
             forward: 2 + Math.random() * 2,   // 2s ~ 4s
             backward: 2 + Math.random() * 2   // 2s ~ 4s
         };
+
+        const listener = new THREE.AudioListener();
+        camera.add(listener);
+
+        this.#injuredSound = new THREE.Audio(listener);
+        this.#attackSound = new THREE.Audio(listener);
+
+        const audioLoader = new THREE.AudioLoader();
+        audioLoader.load('../0_assetsT3/sounds/soldier/injured.wav', (buffer) => {
+            this.#injuredSound.setBuffer(buffer);
+            this.#injuredSound.setVolume(0.5);
+        });
+        
+        audioLoader.load('../0_assetsT3/sounds/soldier/soldierAttack.wav', (buffer) => {
+            this.#attackSound.setBuffer(buffer);
+            this.#attackSound.setVolume(0.5);
+        });
     }
 
     #initAnimations() {
@@ -181,4 +201,21 @@ export class Soldier extends Enemy {
             this.object.rotation.y = Math.atan2(dir.x, dir.z);
         }
     }
+    
+    playInjuredSound() {
+        if (this.#injuredSound && this.#injuredSound.buffer) {
+            if (this.#injuredSound.isPlaying) this.#injuredSound.stop();
+            this.#injuredSound.play();
+        }
+        super.playInjuredSound();
+    }
+
+    playAttackSound() {
+        if (this.#attackSound && this.#attackSound.buffer) {
+            if (this.#attackSound.isPlaying) this.#attackSound.stop();
+            this.#attackSound.play();
+        }
+        super.playAttackSound();
+    }
+
 }

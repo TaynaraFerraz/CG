@@ -2,6 +2,7 @@ import * as THREE from '../build/three.module.js';
 import { GLTFLoader } from '../build/jsm/loaders/GLTFLoader.js';
 import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
+import { Area } from './createArea.js';
 
 class desertArea {
 
@@ -351,7 +352,6 @@ class desertArea {
     if (this.tumbleweedgoing) {
       this.tumbleweed.position.x += 0.1;
       if (this.tumbleweed.position.x > 100) {
-        console.log("tumbleweed");
         this.tumbleweedgoing = false;
       }
     } else {

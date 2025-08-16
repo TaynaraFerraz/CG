@@ -172,9 +172,12 @@ export class PlayerCollisionHandler {
         this.#isFiltering = false; //para de filtrar
 
         //vendo se pode cair
-        if (this.#player.position.y > PLAYER_HEIGHT / 2 && !isAboveArea && !isAboveStair && !this.isElevador(this.#player)) {
+        if (this.#player.position.y > (PLAYER_HEIGHT / 2) && !isAboveArea && !isAboveStair && !this.isElevador(this.#player)) {
             this.#player.position.y -= this.#fallingSpeed;
         }
+        //correção caso entre no chão
+        if(this.#player.position.y < PLAYER_HEIGHT /2)
+            this.#player.position.y = PLAYER_HEIGHT /2;
 
         if (!this.#movimentoCompleto || this.elevadorNear(this.#player)) {
             if (Area.isDown && (this.isElevador() || !this.#movimentoCompleto)) {
