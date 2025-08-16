@@ -18,7 +18,7 @@ export class EnemiesHandler {
     #player;
     //carregador de assets
 
-    constructor(scene, player, amountOfEnemies = 100, clearanceCallback = ()=>{}) {
+    constructor(scene, player, amountOfEnemies = 100, clearanceCallback = () => { }) {
         this.#scene = scene;
         this.#player = player;
         this.#amountOfEnemies = amountOfEnemies;
@@ -47,9 +47,9 @@ export class EnemiesHandler {
     #addModel(enemyName, classThis, enemies, position) {
         if (enemyName == "cacodemon") {
             let gtfLoader = new GLTFLoader();
-            gtfLoader.load(`./assets/cacodemon.glb`, function (response) {
+            gtfLoader.load(`../0_assetsT3/objects/cacodemon.glb`, function (response) {
                 let obj = response.scene;
-                if(obj.material){
+                if (obj.material) {
                     obj.material.transparent = true;
                 }
                 obj.traverse(function (child) {
@@ -67,14 +67,14 @@ export class EnemiesHandler {
 
                 enemies.push(new Cacodemon(obj, classThis.#player, position));
             })
-        } else {
+        } else if (enemyName == "lostsoul") {
             let mtlLoader = new MTLLoader();
-            mtlLoader.load("./assets/skull/skull.mtl", function (materials) {
+            mtlLoader.load("../0_assetsT3/objects/skull/skull.mtl", function (materials) {
                 materials.preload();
 
                 const objLoader = new OBJLoader();
                 objLoader.setMaterials(materials);
-                objLoader.load("./assets/skull.obj", function (obj) {
+                objLoader.load("../0_assetsT3/objects/skull.obj", function (obj) {
 
                     obj.traverse(function (child) {
                         if (child.isMesh) {
@@ -91,10 +91,32 @@ export class EnemiesHandler {
                     enemies.push(new LostSoul(obj, classThis.#player, position));
                 });
             });
+        } else if (enemyName == "painelemental") {
+            let gtfLoader = new GLTFLoader();
+            gtfLoader.load(`../0_assetsT3/objects/pain/painElemental.glb`, function (response) {
+                let obj = response.scene;
+                if (obj.material) {
+                    obj.material.transparent = true;
+                }
+                obj.traverse(function (child) {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                        child.material.transparent = true;
+                    }
+                });
+
+                obj = classThis.normalizeAndRescale(obj, 6);
+                obj = classThis.fixPosition(obj);
+
+                scene.add(obj);
+
+                enemies.push(new Cacodemon(obj, classThis.#player, position));
+            })
         }
     }
 
-    addEnemy(enemyName,position) {
+    addEnemy(enemyName, position) {
         this.#addModel(enemyName, this, this.enemies, position);
     }
 
@@ -121,7 +143,7 @@ export class EnemiesHandler {
             });
         }
 
-        
+
         if (((this.#killedEnemies === this.#amountOfEnemies) || (this.#notBeggining && this.enemies.length == 0)) && !this.#cleared) {
             console.log("rodou");
             console.log(this.#killedEnemies, this.#amountOfEnemies, this.#killedEnemies === this.#amountOfEnemies);

@@ -9,7 +9,7 @@ export class LostSoul extends Enemy {
 
     constructor(object, player, initialPosition) {
         super(object, player, 20, 2, initialPosition);
-        object.name = "LostSoul";
+        object.name = "lostsoul";
 
         this.randomizerCallback();
         this.dashingCallBack();
