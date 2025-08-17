@@ -84,7 +84,7 @@ export class PainElemental extends Enemy {
     }
 
     handle() {
-        this.angry = true;
+        // this.angry = true;
         if (!this.dying) {
             this.handleMovement();
             this.handleShooting();

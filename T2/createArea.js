@@ -92,6 +92,19 @@ export class Area {
     this.createArea3(scene);
 
     desertArea.createAreaDesert(scene, this.collidableAreas, this.collidableStairs);
+    this.enemiesA4.addEnemy('painelemental', new THREE.Vector3(0.0, 50.0, 135.0));
+    this.enemiesA4.addEnemy('cacodemon', new THREE.Vector3(80.0, 20.0, 145.0));
+    this.enemiesA4.addEnemy('cacodemon', new THREE.Vector3(50.0, 20.0, 135.0));
+    this.enemiesA4.addEnemy('cacodemon', new THREE.Vector3(-40.0, 20.0, 125.0));
+    this.enemiesA4.addEnemy('cacodemon', new THREE.Vector3(-50.0, 30.0, 135.0));
+
+    let enter = new THREE.Mesh(new THREE.BoxGeometry(6,6,6), this.lambertMaterial("red"));
+    enter.position.set(0, 11, 60);
+    enter.visible = false;
+    scene.add(enter);
+    
+    let boxEnter = new THREE.Box3().setFromObject(enter, true);
+    this.agroArea.push(boxEnter);
   }
 
   //tudo relacionado a área 3
@@ -569,7 +582,6 @@ export class Area {
   }
 
   static createAreaCubes(scene) {
-    this.enemiesA2.addEnemy('painelemental', new THREE.Vector3(-25.0, 6.0, -135.0));
     this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(10.0, 23.0, -112.0));
     this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(10.0, 23.0, -195.0));
     this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(-35.0, 30.0, -135.0));
@@ -946,6 +958,8 @@ export class Area {
       this.#agressiveEnemies(this.enemiesA2);
     if (this.enterArea(player, 2))
       this.#agressiveEnemies(this.enemiesA3);
+    if(this.enterArea(player, 3))
+      this.#agressiveEnemies(this.enemiesA4);
     this.enemiesA1.handleEnemies();
     this.enemiesA2.handleEnemies();
     this.enemiesA3.handleEnemies();
@@ -963,6 +977,7 @@ export class Area {
     let playerBox = new THREE.Box3().setFromObject(player, true);
     let boxArea = this.agroArea[area];
     if (playerBox.intersectsBox(boxArea)) {
+      console.log('entrou')
       return true;
     }
     return false;
