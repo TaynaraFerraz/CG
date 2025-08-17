@@ -79,7 +79,7 @@ export class EnemiesHandler {
                 obj = classThis.fixPosition(obj);
 
                 scene.add(obj);
-                
+
                 classThis.enemies.push(new Cacodemon(obj, classThis.#player, position));
             })
         } else if (enemyName == "lostsoul") {
@@ -103,7 +103,7 @@ export class EnemiesHandler {
                     obj = classThis.fixPosition(obj);
                     scene.add(obj);
                     const lostSoul = new LostSoul(obj, classThis.#player, position);
-                    if(startAngry){
+                    if (startAngry) {
                         lostSoul.angry = true;
                         lostSoul.dashing = true;
                     }
@@ -130,7 +130,7 @@ export class EnemiesHandler {
                 obj = classThis.fixPosition(obj);
 
                 scene.add(obj);
-                
+
                 const painElemental = new PainElemental(obj, classThis.#player, position, classThis);
                 classThis.enemies.push(painElemental);
             })
@@ -139,7 +139,7 @@ export class EnemiesHandler {
             let spriteMixer = SpriteMixer();
             let texture = loader.load("./assets/soldier/zombieman.png", (texture) => {
                 let actionSprite = spriteMixer.ActionSprite(texture, 8, 8);
-                actionSprite.position.set(position.x, position.y, position.z )
+                actionSprite.position.set(position.x, position.y, position.z)
                 actionSprite.setFrame(0, 0);
                 scene.add(actionSprite)
                 classThis.enemies.push(new Soldier(actionSprite, classThis.#player, position, spriteMixer));
@@ -152,16 +152,16 @@ export class EnemiesHandler {
         this.#addModel(enemyName, this, position, startAngry);
     }
 
-    handleEnemies() {  
+    handleEnemies() {
         if (this.enemies.length != 0) {
             this.enemies = this.enemies.filter((enemy) => {
-                
+
                 enemy.handle();
 
                 if (enemy.dead) {
                     this.#killedEnemies++;
 
-                    if(!enemy.object.isSprite){
+                    if (!enemy.object.isSprite) {
                         scene.remove(enemy.object);
                         enemy.object.children.forEach((child) => {
                             if (child.isMesh) {
