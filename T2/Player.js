@@ -58,7 +58,9 @@ export class Player {
 
     handlePlayer() {
         this.#healthBar.update(this.#health, this.#maxhealth);
-        this.activeGun.handleGun();
+        if(this.activeGun){
+            this.activeGun.handleGun();
+        }
         console.log(this.#health);
     }
 
@@ -176,11 +178,11 @@ export class Player {
                 Area.primeiroAltar(this.initialKey);
         }
 
-        if (this.initialKey && !this.initialKey.coletada && this.initialKey.visible) {
+        if (this.initialKey && !this.initialKey?.coletada && this.initialKey.visible) {
             this.#addKey(this.initialKey);
         }
 
-        if (this.keys.length === 1 && this.initialKey.coletada) {
+        if (this.keys.length === 1 && this.initialKey?.coletada) {
             let position = this.#camera.getWorldPosition(new THREE.Vector3())
             let target = new THREE.Vector3(37.5, 1.8, -92.0);
             let distance = position.distanceTo(target)

@@ -142,11 +142,10 @@ export class EnemiesHandler {
                 actionSprite.position.set(position.x, position.y, position.z )
                 actionSprite.setFrame(0, 0);
                 scene.add(actionSprite)
-                enemies.push(new Soldier(actionSprite, classThis.#player, position, spriteMixer));
+                classThis.enemies.push(new Soldier(actionSprite, classThis.#player, position, spriteMixer));
                 //console.log('zombie adicionado', enemies)
             })
         }
-    }
     }
 
     addEnemy(enemyName, position, startAngry) {

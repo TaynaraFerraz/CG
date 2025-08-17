@@ -3,6 +3,7 @@ import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constant
 import { Collidables } from './Collidables.js';
 import { Area } from './createArea.js';
 import { desertArea } from './Area4.js';
+import { globalPlayer } from './camera.js';
 
 export class PlayerCollisionHandler {
     #fallingSpeed = 0.7;
@@ -18,13 +19,11 @@ export class PlayerCollisionHandler {
     #usefulBoxCheckingDelaySeconds = 2;
     #movimentoCompleto = true;
     #isUp = true;
-    #playerClass;
     #lastDamageTime = 0;
     #damageCooldown = 500;
 
-    constructor(player, playerClass) {
+    constructor(player) {
         this.#playerObject = player.object;
-        this.#playerClass = playerClass;
         this.#player = player;
         this.#originalCollidables = Collidables.collidables;
         this.#currentCollidables = { ...Collidables.collidables };
@@ -158,7 +157,7 @@ export class PlayerCollisionHandler {
 
         // --- DANO DE CACTO ---
         // Atualiza bounding box do player
-        this.#boundingBox.setFromObject(this.#player);
+        this.#boundingBox.setFromObject(this.#playerObject);
 
         // Percorre todos os cactos e verifica colisão
         const now = performance.now();
@@ -167,7 +166,7 @@ export class PlayerCollisionHandler {
                 
                 if (now - this.#lastDamageTime >= this.#damageCooldown) {
                 console.log("cacto");
-                this.#playerClass.damage(5);
+                globalPlayer.damage(5);
                 this.#lastDamageTime = now;
                 }
             }
@@ -180,8 +179,8 @@ export class PlayerCollisionHandler {
             this.#playerObject.position.y -= this.#fallingSpeed;
         }
         //correção caso entre no chão
-        if(this.#player.position.y < PLAYER_HEIGHT /2)
-            this.#player.position.y = PLAYER_HEIGHT /2;
+        if(this.#playerObject.position.y < PLAYER_HEIGHT /2)
+            this.#playerObject.position.y = PLAYER_HEIGHT /2;
 
         if (!this.#movimentoCompleto || this.elevadorNear(this.#playerObject)) {
             if (Area.isDown && (this.isElevador() || !this.#movimentoCompleto)) {
