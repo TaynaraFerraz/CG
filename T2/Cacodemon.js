@@ -1,6 +1,6 @@
 import { setDefaultMaterial } from "../libs/util/util.js";
 import { BulletsCollisionHandler } from "./BulletsCollisionHandler.js";
-import { scene, camera } from "./camera.js";
+import { scene, camera, globalPlayer } from "./camera.js";
 import { Collidables } from "./Collidables.js";
 import { Enemy } from "./Enemy.js";
 import * as THREE from 'three';
@@ -94,6 +94,7 @@ export class Cacodemon extends Enemy {
             color: '#c2a500'
         });
         let sphere = new THREE.Mesh(sphereGeometry, materialSphere);
+        sphere.name = "cacodemon_shot"
         sphere.position.copy(worldPosition);
 
         scene.add(sphere);
@@ -134,6 +135,6 @@ export class Cacodemon extends Enemy {
         }
         this.handleCollisions();
         this.handleHealth();
-        this.#bulletsCollisionHandler.handleBulletsCollisions(Collidables.collidables);
+        this.#bulletsCollisionHandler.handleCollisionsGun(Collidables.collidables, {inimigos: {player: [globalPlayer]}}, 8);
     }
 };

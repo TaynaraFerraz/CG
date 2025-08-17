@@ -17,6 +17,8 @@ export class HealthBar {
         this.#greenBar = new THREE.Mesh(greenPlaneGeometry, greenPlaneMaterial);
 
 
+
+
         let redPlaneGeometry = new THREE.PlaneGeometry(0, barHeight);
         let redPlaneMaterial = new THREE.MeshBasicMaterial({ color: '#8d0000', side: THREE.DoubleSide });
         this.#redBar = new THREE.Mesh(redPlaneGeometry, redPlaneMaterial);
@@ -24,6 +26,7 @@ export class HealthBar {
 
         this.#greenBar.position.copy(enemy.object.position)
         scene.add(this.#greenBar);
+
 
         this.#redBar.position.copy(enemy.object.position)
         scene.add(this.#redBar);
@@ -37,12 +40,28 @@ export class HealthBar {
             this.#greenBar.translateY(2.3);
             this.#redBar.position.set(this.#enemy.object.position.x, this.#enemy.object.position.y + 1, this.#enemy.object.position.z);
             this.#redBar.translateY(2.3);
-        }
-        else {
+        } else {
+            let offsetY = 0;
+            switch (this.#enemy.object.name) {
+                case "cacodemon":
+                    offsetY = 2.5
+                    break;
+                case "lostsoul":
+                    offsetY = 2.3
+                    break;
+                case "painelemental":
+                    offsetY = 5
+                    break;
+    
+                default:
+                    offsetY = 2.3
+                    break;
+            }
+    
             this.#greenBar.position.copy(this.#enemy.object.position);
-            this.#greenBar.translateY(2.3);
+            this.#greenBar.translateY(offsetY);
             this.#redBar.position.copy(this.#enemy.object.position);
-            this.#redBar.translateY(2.3);
+            this.#redBar.translateY(offsetY);
         }
     }
 

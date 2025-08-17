@@ -3,10 +3,12 @@ import { PLAYER_HEIGHT, PLAYER_WIDTH, SHIFT_MULTIPLIER, SPEED } from './constant
 import { Collidables } from './Collidables.js';
 import { Area } from './createArea.js';
 import { desertArea } from './Area4.js';
+import { globalPlayer } from './camera.js';
 
 export class PlayerCollisionHandler {
     #fallingSpeed = 0.7;
     #player;
+    #playerObject;
     #originalCollidables = {};
     #currentCollidables = {};
     #oldPos;
@@ -17,23 +19,22 @@ export class PlayerCollisionHandler {
     #usefulBoxCheckingDelaySeconds = 2;
     #movimentoCompleto = true;
     #isUp = true;
-    #playerClass;
     #lastDamageTime = 0;
     #damageCooldown = 500;
 
-    constructor(player, playerClass) {
-        this.#playerClass = playerClass;
+    constructor(player) {
+        this.#playerObject = player.object;
         this.#player = player;
         this.#originalCollidables = Collidables.collidables;
         this.#currentCollidables = { ...Collidables.collidables };
 
         this.#oldPos = new THREE.Vector3();
-        this.#player.getWorldPosition(this.#oldPos);
+        this.#playerObject.getWorldPosition(this.#oldPos);
         this.#raycaster = new THREE.Raycaster();
         this.#raycaster.far = 20;
 
         this.#boundingBox = new THREE.Box3();
-        this.#boundingBox.setFromObject(this.#player);
+        this.#boundingBox.setFromObject(this.#playerObject);
 
         this.#usefulCollisionAreaBox = new THREE.Box3();
         this.#isFiltering = false;
@@ -44,7 +45,7 @@ export class PlayerCollisionHandler {
     #isAbove(object) {
         let isAbove = false;
         let isAboveTestPosition = new THREE.Vector3();
-        isAboveTestPosition.copy(this.#player.position);
+        isAboveTestPosition.copy(this.#playerObject.position);
         let yAxis = new THREE.Vector3(0, 1, 0);
         let testDelta = new THREE.Vector3(0, 0, PLAYER_WIDTH / 2); //vetor para somar na posição e testar as quatro bordas
 
@@ -70,22 +71,17 @@ export class PlayerCollisionHandler {
         let deltaMovement = new THREE.Vector3(0, 0, 0);
         let currentPos = new THREE.Vector3();
         let filteredCollidables = this.#isFiltering ? this.#originalCollidables[key] : collidables; //se tiver que filtrar pega o original
-        this.#boundingBox.setFromObject(this.#player);
-        this.#player.getWorldPosition(currentPos);
+        this.#boundingBox.setFromObject(this.#playerObject);
+        this.#playerObject.getWorldPosition(currentPos);
 
         //apenas para quando for filtrar
         //cria uma box com a maior distância que o jogador consegue percorrer no intervalo estipulado
-        const min = new THREE.Vector3(this.#player.position.x - SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds, 0, this.#player.position.z - SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds);
-        const max = new THREE.Vector3(this.#player.position.x + SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds, 40, this.#player.position.z + SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds);
+        const min = new THREE.Vector3(this.#playerObject.position.x - SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds, 0, this.#playerObject.position.z - SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds);
+        const max = new THREE.Vector3(this.#playerObject.position.x + SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds, 40, this.#playerObject.position.z + SPEED * SHIFT_MULTIPLIER * this.#usefulBoxCheckingDelaySeconds);
         this.#usefulCollisionAreaBox.set(min, max);
 
         filteredCollidables = filteredCollidables.filter((object) => {
             if (this.#boundingBox.intersectsBox(object.box)) {
-                /* if(Math.abs(this.#player.position.x) > 249 || Math.abs(this.#player.position.z) > 249){
-                    this.#player.position.copy(this.#oldPos);
-                    return;
-                } */
-
                 if ((this.#oldPos.x != currentPos.x ||
                     this.#oldPos.y != currentPos.y ||
                     this.#oldPos.z != currentPos.z) //se tiver variação de posição do player
@@ -123,9 +119,9 @@ export class PlayerCollisionHandler {
                         posAfterCollision.add(deltaMovement); //adiciona o movimento apenas na direção correta
 
                         //seta as coordenadas para o resultado
-                        this.#player.position.copy(posAfterCollision);
+                        this.#playerObject.position.copy(posAfterCollision);
                     } else if (isStair) {
-                        this.#player.position.y += (this.#fallingSpeed); //caso caia embaixo da escada, espero que nunca mais rode
+                        this.#playerObject.position.y += (this.#fallingSpeed); //caso caia embaixo da escada, espero que nunca mais rode
                     }
                 }
             }
@@ -161,7 +157,7 @@ export class PlayerCollisionHandler {
 
         // --- DANO DE CACTO ---
         // Atualiza bounding box do player
-        this.#boundingBox.setFromObject(this.#player);
+        this.#boundingBox.setFromObject(this.#playerObject);
 
         // Percorre todos os cactos e verifica colisão
         const now = performance.now();
@@ -170,7 +166,7 @@ export class PlayerCollisionHandler {
                 
                 if (now - this.#lastDamageTime >= this.#damageCooldown) {
                 console.log("cacto");
-                this.#playerClass.damage(5);
+                globalPlayer.damage(5);
                 this.#lastDamageTime = now;
                 }
             }
@@ -179,24 +175,24 @@ export class PlayerCollisionHandler {
         this.#isFiltering = false; //para de filtrar
 
         //vendo se pode cair
-        if (this.#player.position.y > (PLAYER_HEIGHT / 2) && !isAboveArea && !isAboveStair && !this.isElevador(this.#player)) {
-            this.#player.position.y -= this.#fallingSpeed;
+        if (this.#playerObject.position.y > PLAYER_HEIGHT / 2 && !isAboveArea && !isAboveStair && !this.isElevador(this.#playerObject)) {
+            this.#playerObject.position.y -= this.#fallingSpeed;
         }
         //correção caso entre no chão
-        if(this.#player.position.y < PLAYER_HEIGHT /2)
-            this.#player.position.y = PLAYER_HEIGHT /2;
+        if(this.#playerObject.position.y < PLAYER_HEIGHT /2)
+            this.#playerObject.position.y = PLAYER_HEIGHT /2;
 
-        if (!this.#movimentoCompleto || this.elevadorNear(this.#player)) {
+        if (!this.#movimentoCompleto || this.elevadorNear(this.#playerObject)) {
             if (Area.isDown && (this.isElevador() || !this.#movimentoCompleto)) {
-                this.#movimentoCompleto = this.elevadorUp(this.#player);
+                this.#movimentoCompleto = this.elevadorUp(this.#playerObject);
             }else if (!Area.isDown && this.#isUp) {
-                this.#movimentoCompleto = this.elevadorDown(this.#player);
+                this.#movimentoCompleto = this.elevadorDown(this.#playerObject);
             }
         }
         if(!this.elevadorNear() && !this.#isUp && !Area.isDown && this.#movimentoCompleto){
             this.#isUp = true;
         }
-        this.#player.getWorldPosition(this.#oldPos);
+        this.#playerObject.getWorldPosition(this.#oldPos);
     }
 
     elevadorUp() {
@@ -205,7 +201,7 @@ export class PlayerCollisionHandler {
     const velocidade = 0.08;
     const targetY = 0.0;
 
-    if (this.isElevador(this.#player) || this.#boundingBox.intersectsBox(Area.elevadorCheck)) {
+    if (this.isElevador(this.#playerObject) || this.#boundingBox.intersectsBox(Area.elevadorCheck)) {
         // Move elevador para cima
         if (elevador.position.y + velocidade < targetY) {
             elevador.position.y += velocidade;
@@ -216,7 +212,7 @@ export class PlayerCollisionHandler {
         let elevadorWorldY = new THREE.Vector3();
         elevador.getWorldPosition(elevadorWorldY);
         if(elevadorWorldY.y >= -3.0)
-        this.#player.position.y = elevadorWorldY.y + PLAYER_HEIGHT / 2 + 3;
+        this.#playerObject.position.y = elevadorWorldY.y + PLAYER_HEIGHT / 2 + 3;
     } else {
         // Só o elevador sobe
         if (elevador.position.y + velocidade < targetY) {
@@ -250,14 +246,14 @@ export class PlayerCollisionHandler {
     const velocidade = 0.08; // ajuste conforme desejado
     const targetY = -6.1;
 
-    if (this.isElevador(this.#player) && this.#player.position.y > PLAYER_HEIGHT / 2) {
+    if (this.isElevador(this.#playerObject) && this.#playerObject.position.y > PLAYER_HEIGHT / 2) {
         // Move elevador e player juntos para baixo
         if (elevador.position.y - velocidade > targetY) {
             elevador.position.y -= velocidade;
-            this.#player.position.y -= velocidade;
+            this.#playerObject.position.y -= velocidade;
         } else {
             elevador.position.y = targetY;
-            this.#player.position.y = PLAYER_HEIGHT / 2;
+            this.#playerObject.position.y = PLAYER_HEIGHT / 2;
         }
     } else {
         // Só o elevador desce
@@ -283,14 +279,14 @@ export class PlayerCollisionHandler {
 }
 
   elevadorNear() {
-    this.#boundingBox.setFromObject(this.#player);
+    this.#boundingBox.setFromObject(this.#playerObject);
     return this.#boundingBox.intersectsBox(Area.elevadorCheck);
   }
 
   isElevador() {
     let elevadorMesh = Area.elevador[0].mesh;
 
-    let origin = this.#player.position.clone();
+    let origin = this.#playerObject.position.clone();
     let direction = new THREE.Vector3(0, -1, 0);
 
     let raycaster = new THREE.Raycaster(origin, direction, 0, 10);

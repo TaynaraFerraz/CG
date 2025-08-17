@@ -56,7 +56,7 @@ light.shadow.radius = 4;
 scene.add(light);
 
 let secondLight;
-secondLight = new THREE.HemisphereLight('white', 'darkslategray', 0.3);
+secondLight = new THREE.HemisphereLight('white', 'darkslategray', 0.8);
 secondLight.castShadow = false;
 
 scene.add(secondLight);
@@ -82,9 +82,15 @@ lightCamera.lookAt(light.target.position);
 const shadowCameraHelper = new THREE.CameraHelper(light.shadow.camera);
 //scene.add(shadowCameraHelper);
 
+/* window.addEventListener('keydown', (event) => {
+    if (event.key === 'h') { // pressione 'h' para alternar
+        shadowCameraHelper.visible = !shadowCameraHelper.visible;
+    }
+}); */
 
 //skybox
 let cubeTexture = new CubeTextureLoaderSingleFile().loadSingle('./assets/skybox/skybox.png', 1);
+
 scene.background = cubeTexture;
 
 
@@ -207,12 +213,12 @@ enemiesAreas.inimigos = {
 
 
 let bulletsCollisionHandler = new BulletsCollisionHandler(scene, camera);
-let player = new Player(scene, cameraHolder, camera, bulletsCollisionHandler, enemiesAreas);
-let playerCollisionHandler = new PlayerCollisionHandler(player.object, player);
+let globalPlayer = new Player(scene, cameraHolder, camera, bulletsCollisionHandler, enemiesAreas);
+let playerCollisionHandler = new PlayerCollisionHandler(globalPlayer, Collidables.collidables);
 
 window.addEventListener('keydown', (event) => {
     if (event.key === 'h') { // pressione 'h' para alternar
-        player.damage(50);
+        globalPlayer.damage(50);
         console.log('damage');
     }
     if (event.key === 'l') {
@@ -220,7 +226,7 @@ window.addEventListener('keydown', (event) => {
     }
 });
 
-player.actions(controls)
+globalPlayer.actions(controls)
 let inimigosNaArea1 = false
 let isOpening = false;
 
@@ -241,9 +247,8 @@ audioLoader.load('../0_assetsT3/sounds/doom.mp3', function (buffer) {
 });
 camera.add(doomSound);
 
-function firstPlaySound(){
+function firstPlaySound() {
     if (firstPlay && doomSoundLoaded) {
-        console.log("tocando");
         doomSound.play();
         firstPlay = false;
     }
@@ -267,6 +272,16 @@ function render() {
         moveAnimate(clock.getDelta());
     }
 
+    globalPlayer.checkArea1(enemiesAreas)
+    globalPlayer.checkArea2(enemiesAreas)
+    globalPlayer.handlePlayer();
+    //lidando com as colisões
+    playerCollisionHandler.handleCollisions()
+
+    if (globalPlayer.activeGun instanceof ChainGun && globalPlayer.activeGun.isFiring) {
+        globalPlayer.activeGun.spriteUpdate(); // animação do sprite tem que ser no render
+    }
+
     if (Area.updateLighting) {
         Area.updateLighting(cameraHolder.getWorldPosition(new THREE.Vector3()));
     }
@@ -274,7 +289,13 @@ function render() {
     
     //lidando com inimigos
     Area.handleEnemiesArea(cameraHolder);
-    
+    enemiesAreas.inimigos = {
+        area1: Area.enemiesA1.enemies,
+        area2: Area.enemiesA2.enemies,
+        area3: Area.enemiesA3.enemies,
+        area4: Area.enemiesA4.enemies,
+    };
+
     //paredes da area 4
     Area.area4Walls();
     Area.finalScene(scene, cameraHolder, playerCollisionHandler);
@@ -283,16 +304,16 @@ function render() {
     desertArea.tumbleweedAnimate();
 
 
-    player.checkArea1(enemiesAreas)
-    player.checkArea2(enemiesAreas)
-    player.checkArea3(enemiesAreas)
-    player.openArea3(cameraHolder)
-    player.handlePlayer();
+    globalPlayer.checkArea1(enemiesAreas)
+    globalPlayer.checkArea2(enemiesAreas)
+    globalPlayer.checkArea3(enemiesAreas)
+    globalPlayer.openArea3(cameraHolder)
+    globalPlayer.handlePlayer();
     //lidando com as colisões
     playerCollisionHandler.handleCollisions()
 
-    if ((player.activeGun instanceof ChainGun || player.activeGun instanceof Gun) && player.activeGun.isFiring) {
-        player.activeGun.spriteUpdate(); // animação do sprite tem que ser no render
+    if ((globalPlayer.activeGun instanceof ChainGun || globalPlayer.activeGun instanceof Gun) && globalPlayer.activeGun.isFiring) {
+        globalPlayer.activeGun.spriteUpdate(); // animação do sprite tem que ser no render
     }
 
     // Render principal
@@ -305,9 +326,9 @@ function render() {
     renderer.setViewport(10, window.innerHeight - 210, 200, 200);
     renderer.setScissor(10, window.innerHeight - 210, 200, 200);
     renderer.setScissorTest(true);
-    //renderer.render(scene, lightCamera);
+
 
     requestAnimationFrame(render);
 }
 
-export { scene , camera};
+export { scene, camera, globalPlayer, clock };

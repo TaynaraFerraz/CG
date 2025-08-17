@@ -87,8 +87,6 @@ export class Enemy {
     playAttackSound() {};
 
     handleCollisions() {
-        //console.log(this.#minHeight);
-
         let currentPos = new THREE.Vector3();
         let deltaMovement = new THREE.Vector3();
         this.object.getWorldPosition(currentPos);
