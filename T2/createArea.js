@@ -98,11 +98,11 @@ export class Area {
     this.enemiesA4.addEnemy('cacodemon', new THREE.Vector3(-40.0, 20.0, 125.0));
     this.enemiesA4.addEnemy('cacodemon', new THREE.Vector3(-50.0, 30.0, 135.0));
 
-    let enter = new THREE.Mesh(new THREE.BoxGeometry(6,6,6), this.lambertMaterial("red"));
+    let enter = new THREE.Mesh(new THREE.BoxGeometry(6, 6, 6), this.lambertMaterial("red"));
     enter.position.set(0, 11, 60);
     enter.visible = false;
     scene.add(enter);
-    
+
     let boxEnter = new THREE.Box3().setFromObject(enter, true);
     this.agroArea.push(boxEnter);
   }
@@ -299,6 +299,14 @@ export class Area {
     let boxAltar = new THREE.Box3().setFromObject(altar, true);
     this.collidableAreas.push({ box: boxAltar, mesh: altar });
     this.altares.push(altar);
+
+    let fechadura = new THREE.BoxGeometry(3.0, 1, 3.0);
+    let fechaduraMaterial = this.lambertMaterial('rgb(180, 72, 0)');
+    let fechaduraMesh = new THREE.Mesh(fechadura, fechaduraMaterial);
+    fechaduraMesh.position.set(7.56, 0.5, 6);
+    fechaduraMesh.castShadow = true;
+    fechaduraMesh.receiveShadow = true;
+    scene.add(fechaduraMesh);
   }
   //fim da criação da área 3
 
@@ -582,9 +590,9 @@ export class Area {
   }
 
   static createAreaCubes(scene) {
-    this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(10.0, 23.0, -112.0));
-    this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(10.0, 23.0, -195.0));
-    this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(-35.0, 30.0, -135.0));
+    // this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(10.0, 23.0, -112.0));
+    // this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(10.0, 23.0, -195.0));
+    // this.enemiesA2.addEnemy('cacodemon', new THREE.Vector3(-35.0, 30.0, -135.0));
 
 
     let position = new THREE.Vector3(0.0, 3.0, -162.0);
@@ -958,7 +966,7 @@ export class Area {
       this.#agressiveEnemies(this.enemiesA2);
     if (this.enterArea(player, 2))
       this.#agressiveEnemies(this.enemiesA3);
-    if(this.enterArea(player, 3))
+    if (this.enterArea(player, 3))
       this.#agressiveEnemies(this.enemiesA4);
     this.enemiesA1.handleEnemies();
     this.enemiesA2.handleEnemies();
@@ -982,12 +990,12 @@ export class Area {
     }
     return false;
   }
-  
-  static area4Walls(){
+
+  static area4Walls() {
     desertArea.wallDown(this.collidableAreas);
   }
 
-  static finalScene(scene, player, playerHandler){
+  static finalScene(scene, player, playerHandler) {
     desertArea.extration(scene, player, playerHandler);
   }
 }

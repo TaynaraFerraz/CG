@@ -297,7 +297,7 @@ function render() {
     };
 
     //paredes da area 4
-    Area.area4Walls();
+    //Area.area4Walls();
     Area.finalScene(scene, cameraHolder, playerCollisionHandler);
 
     //animação do objeto do deserto
@@ -308,6 +308,7 @@ function render() {
     globalPlayer.checkArea2(enemiesAreas)
     globalPlayer.checkArea3(enemiesAreas)
     globalPlayer.openArea3(cameraHolder)
+    globalPlayer.checkArea4(enemiesAreas)
     globalPlayer.handlePlayer();
     //lidando com as colisões
     playerCollisionHandler.handleCollisions()

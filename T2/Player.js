@@ -43,7 +43,7 @@ export class Player {
             this.activeGun.add();
         };
         this.player = object;
-        this.#healthBar = new playerHealthBar(this,camera, 0.15, 0.015);
+        this.#healthBar = new playerHealthBar(this, camera, 0.15, 0.015);
 
         // Carrega o som de dano
         const listener = new THREE.AudioListener();
@@ -58,7 +58,7 @@ export class Player {
 
     handlePlayer() {
         this.#healthBar.update(this.#health, this.#maxhealth);
-        if(this.activeGun){
+        if (this.activeGun) {
             this.activeGun.handleGun();
         }
         console.log(this.#health);
@@ -214,10 +214,10 @@ export class Player {
     }
 
     checkArea3(enemiesAreas) {
-        if (enemiesAreas.inimigos.area3.length === 0) {
+        if (enemiesAreas.inimigos.area3.length === 0 && this.keys.length == 2) {
             if (!this.thirdkey)
                 this.thirdkey = new Key("rgba(15, 108, 247, 1)");
-            else if(!this.colectedAll)
+            else if (!this.colectedAll)
                 Area.terceiroAltar(this.thirdkey.csgFinal);
         }
 
@@ -227,14 +227,36 @@ export class Player {
     }
 
     openArea3(cameraHolder) {
-        const targetPosition = -92.77344;
-        if (cameraHolder.getWorldPosition(new THREE.Vector3()).z < targetPosition && this.keys.length == 2)
+        let position = cameraHolder.getWorldPosition(new THREE.Vector3())
+        let target = new THREE.Vector3(146, 0.6, -96);
+        let distance = position.distanceTo(target)
+        if (distance < 20 && this.keys.length == 2)
             this.isOpening = true;
 
         if (this.isOpening)
             Area.openArea3()
         else if (this.colectedAll)
             Area.openArea3();
+    }
+
+    checkArea4(enemiesAreas) {
+        if (this.keys.length === 3 && this.thirdkey.coletada) {
+            let position = this.#camera.getWorldPosition(new THREE.Vector3())
+            let target = new THREE.Vector3(7.56, 1.3, 6);
+            let distance = position.distanceTo(target)
+            if (distance < 3.5) {
+                this.thirdkey.csgFinal.position.set(7.56, 1.3, 6)
+                this.thirdkey.csgFinal.visible = true
+                this.#scene.add(this.thirdkey.csgFinal)
+            }
+
+            if (this.thirdkey.csgFinal.position.equals(new THREE.Vector3(7.56, 1.3, 6)))
+                Area.area4Walls();
+
+        }
+
+        if (this.colectedAll)
+            Area.area4Walls();
     }
 
 }
