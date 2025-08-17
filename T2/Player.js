@@ -30,6 +30,7 @@ export class Player {
 
     constructor(scene, object, camera, bulletsCollisionHandler, enemiesAreas) {
         this.#health = this.#maxhealth;
+        this.god = false;
         this.#scene = scene;
         this.#camera = camera;
         this.object = object;
@@ -144,16 +145,18 @@ export class Player {
     }
 
     damage(amount) {
-        if (this.#health > 0) {
-            this.#health -= amount;
-            // Toca o som de dano
-            if (this.#damageSound.isPlaying) {
-                this.#damageSound.stop();
+        if (!this.god) {
+            if (this.#health > 0) {
+                this.#health -= amount;
+                // Toca o som de dano
+                if (this.#damageSound.isPlaying) {
+                    this.#damageSound.stop();
+                }
+                this.#damageSound.play();
             }
-            this.#damageSound.play();
-        }
-        if (this.#health <= 0) {
-            window.location.reload();
+            if (this.#health <= 0) {
+                window.location.reload();
+            }
         }
     };
 

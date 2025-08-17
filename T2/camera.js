@@ -217,6 +217,9 @@ let globalPlayer = new Player(scene, cameraHolder, camera, bulletsCollisionHandl
 let playerCollisionHandler = new PlayerCollisionHandler(globalPlayer, Collidables.collidables);
 
 window.addEventListener('keydown', (event) => {
+    if (event.key === 'g') {
+        globalPlayer.god = true;
+    }
     if (event.key === 'h') { // pressione 'h' para alternar
         globalPlayer.damage(50);
         console.log('damage');
