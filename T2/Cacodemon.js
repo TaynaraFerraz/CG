@@ -135,6 +135,6 @@ export class Cacodemon extends Enemy {
         }
         this.handleCollisions();
         this.handleHealth();
-        this.#bulletsCollisionHandler.handleCollisionsGun(Collidables.collidables, {inimigos: {player: [globalPlayer]}}, 8);
+        this.#bulletsCollisionHandler.handleCollisionsGun(Collidables.collidables, {inimigos: {player: [globalPlayer]}}, 8, false);
     }
 };

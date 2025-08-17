@@ -41,7 +41,7 @@ export class BulletsCollisionHandler {
         sphere.translateZ(-0.1); //para sair da boca do cilindro e não do meio
     }
 
-    handleCollisionsGun(collidables, enemiesAreas, damage = 10) {
+    handleCollisionsGun(collidables, enemiesAreas, damage = 10, recursive = true) {
         this.#camera.getWorldDirection(this.direction);
 
         this.#spheres = this.#spheres.filter((sphere) => {
@@ -69,7 +69,7 @@ export class BulletsCollisionHandler {
             //raio para identificar objetos nessa direção
             const raycasterBall = new THREE.Raycaster(prevPositionBall, directionBall, 0, distanceBall);
             raycasterBall.camera = this.#camera;
-            const intersectsBall = raycasterBall.intersectObjects(collidableMeshes, true);
+            const intersectsBall = raycasterBall.intersectObjects(collidableMeshes, recursive);
 
             //verificação da altura para remover caso ultrapassar o chão e o máximo da altura
             if (intersectsBall.length > 0 || sphere.position.y >= 72 || sphere.position.y <= 0) {
