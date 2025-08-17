@@ -245,6 +245,14 @@ export class Area {
     let boxAltar = new THREE.Box3().setFromObject(altar, true);
     this.collidableAreas.push({ box: boxAltar, mesh: altar });
     this.altares.push(altar);
+
+    let fechadura = new THREE.BoxGeometry(3.0, 1, 3.0);
+    let fechaduraMaterial = this.lambertMaterial('rgb(180, 72, 0)');
+    let fechaduraMesh = new THREE.Mesh(fechadura, fechaduraMaterial);
+    fechaduraMesh.position.set(7.56, 0.5, 6);
+    fechaduraMesh.castShadow = true;
+    fechaduraMesh.receiveShadow = true;
+    scene.add(fechaduraMesh);
   }
   //fim da criação da área 3
 
@@ -452,13 +460,13 @@ export class Area {
     stoneTexture.wrapT = THREE.MirroredRepeatWrapping;
     stoneNormal.wrapS = THREE.MirroredRepeatWrapping;
     stoneNormal.wrapT = THREE.MirroredRepeatWrapping;
-    
+
     for (let i = 0; i < 12; i++) {
 
       let pilarGeometry = new THREE.CylinderGeometry(2.5, 2.5, 20.0, 300);
       let pilarMaterial = this.lambertMaterial("#fffde0");
       pilarMaterial.displacementScale = 0.2;
-      
+
       pilarMaterial.map = stoneTexture;
       pilarMaterial.normalMap = stoneNormal;
       pilarMaterial.displacementMap = pillarDisplacement;
@@ -499,20 +507,20 @@ export class Area {
       new THREE.MeshStandardMaterial(),
     ];
 
-    
+
     let r1 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), blocoMaterial);
     r1.position.set(0.0, 24.5, -48.0);
     r1.castShadow = true;
     r1.receiveShadow = true;
     cube.add(r1);
-    
+
     let r2 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), blocoMaterial);
     r2.rotateY(Math.PI / 2);
     r2.position.set(50.0, 24.5, 2.0);
     r2.castShadow = true;
     r2.receiveShadow = true;
     cube.add(r2);
-    
+
     let r3 = new THREE.Mesh(new THREE.BoxGeometry(120.0, 5.0, 20.0), blocoMaterial);
     r3.rotateY(Math.PI / -2);
     r3.position.set(-50.0, 24.5, 2.0);
@@ -747,8 +755,6 @@ export class Area {
 
     scene.add(plane);
 
-    let planeBox = new THREE.Box3().setFromObject(plane, true);
-    this.collidableAreas.push({ box: planeBox, mesh: plane });
   }
 
   static lambertMaterial(color) {
@@ -837,7 +843,7 @@ export class Area {
     }
     return false;
   }
-  static area4Walls(){
+  static area4Walls() {
     desertArea.wallDown(this.collidableAreas);
   }
 

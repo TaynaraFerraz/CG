@@ -274,18 +274,15 @@ function render() {
     
     //lidando com inimigos
     Area.handleEnemiesArea(cameraHolder);
-    
-    //paredes da area 4
-    Area.area4Walls();
 
     //animação do objeto do deserto
     desertArea.tumbleweedAnimate();
-
-
+    
     player.checkArea1(enemiesAreas)
     player.checkArea2(enemiesAreas)
     player.checkArea3(enemiesAreas)
     player.openArea3(cameraHolder)
+    player.checkArea4(enemiesAreas);
     player.handlePlayer();
     //lidando com as colisões
     playerCollisionHandler.handleCollisions()

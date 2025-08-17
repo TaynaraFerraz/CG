@@ -77,7 +77,9 @@ export class Gun {
         sphere.position.copy(this.#actionSprite.getWorldPosition(new Vector3()));
 
         this.#scene.add(sphere);
-        this.#bulletsCollisionHandler.addSphere(sphere);
+        setTimeout(()=>{
+            this.#bulletsCollisionHandler.addSphere(sphere);
+        },200)
     }
 
     spriteUpdate() {
