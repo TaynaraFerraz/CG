@@ -72,6 +72,7 @@ export class LostSoul extends Enemy {
         if (!this.dead) {
             if (this.dashing) {
                 setTimeout(() => {
+                    // this.playAttackSound();
                     this.dashing = false;
                     this.dashingCallBack();
                 }, 1000);
