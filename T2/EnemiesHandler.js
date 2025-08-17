@@ -8,6 +8,7 @@ import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
 import { scene } from './camera.js';
 import { SpriteMixer } from '../libs/sprites/SpriteMixer.js';
 import { Soldier } from './Soldier.js';
+import { PainElemental } from './PainElemental.js';
 
 export class EnemiesHandler {
     enemies = [];
@@ -46,10 +47,22 @@ export class EnemiesHandler {
         return obj;
     };
 
-    #addModel(enemyName, classThis, enemies, position) {
+    #addModel(enemyName, classThis, position, startAngry = false) {
+        function bakeRotation(object3D, rotation) {
+            const matrix = new THREE.Matrix4();
+            matrix.makeRotationFromEuler(rotation);
+
+            object3D.traverse((child) => {
+                if (child.isMesh) {
+                    child.geometry.applyMatrix4(matrix);
+                    child.geometry.computeVertexNormals(); // normals must be updated
+                }
+            });
+        }
+
         if (enemyName == "cacodemon") {
             let gtfLoader = new GLTFLoader();
-            gtfLoader.load(`./assets/cacodemon.glb`, function (response) {
+            gtfLoader.load(`../0_assetsT3/objects/cacodemon.glb`, function (response) {
                 let obj = response.scene;
                 if (obj.material) {
                     obj.material.transparent = true;
@@ -66,17 +79,17 @@ export class EnemiesHandler {
                 obj = classThis.fixPosition(obj);
 
                 scene.add(obj);
-
-                enemies.push(new Cacodemon(obj, classThis.#player, position));
+                
+                classThis.enemies.push(new Cacodemon(obj, classThis.#player, position));
             })
         } else if (enemyName == "lostsoul") {
             let mtlLoader = new MTLLoader();
-            mtlLoader.load("./assets/skull/skull.mtl", function (materials) {
+            mtlLoader.load("../0_assetsT3/objects/skull/skull.mtl", function (materials) {
                 materials.preload();
 
                 const objLoader = new OBJLoader();
                 objLoader.setMaterials(materials);
-                objLoader.load("./assets/skull.obj", function (obj) {
+                objLoader.load("../0_assetsT3/objects/skull.obj", function (obj) {
 
                     obj.traverse(function (child) {
                         if (child.isMesh) {
@@ -89,12 +102,39 @@ export class EnemiesHandler {
                     obj = classThis.normalizeAndRescale(obj, 3);
                     obj = classThis.fixPosition(obj);
                     scene.add(obj);
-
-                    enemies.push(new LostSoul(obj, classThis.#player, position));
+                    const lostSoul = new LostSoul(obj, classThis.#player, position);
+                    if(startAngry){
+                        lostSoul.angry = true;
+                        lostSoul.dashing = true;
+                    }
+                    classThis.enemies.push(lostSoul);
                 });
             });
-        }
-        else {
+        } else if (enemyName == "painelemental") {
+            let gtfLoader = new GLTFLoader();
+            gtfLoader.load(`../0_assetsT3/objects/pain/painElemental.glb`, function (response) {
+                let obj = response.scene;
+                bakeRotation(obj, new THREE.Euler(0, Math.PI / 2, 0));
+                if (obj.material) {
+                    obj.material.transparent = true;
+                }
+                obj.traverse(function (child) {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                        child.material.transparent = true;
+                    }
+                });
+
+                obj = classThis.normalizeAndRescale(obj, 6);
+                obj = classThis.fixPosition(obj);
+
+                scene.add(obj);
+                
+                const painElemental = new PainElemental(obj, classThis.#player, position, classThis);
+                classThis.enemies.push(painElemental);
+            })
+        } else {
             let loader = new THREE.TextureLoader();
             let spriteMixer = SpriteMixer();
             let texture = loader.load("./assets/soldier/zombieman.png", (texture) => {
@@ -107,15 +147,16 @@ export class EnemiesHandler {
             })
         }
     }
-
-    addEnemy(enemyName, position) {
-        console.log(enemyName)
-        this.#addModel(enemyName, this, this.enemies, position);
     }
 
-    handleEnemies() {
+    addEnemy(enemyName, position, startAngry) {
+        this.#addModel(enemyName, this, position, startAngry);
+    }
+
+    handleEnemies() {  
         if (this.enemies.length != 0) {
             this.enemies = this.enemies.filter((enemy) => {
+                
                 enemy.handle();
 
                 if (enemy.dead) {
@@ -138,10 +179,8 @@ export class EnemiesHandler {
             });
         }
 
-        //console.log(this.enemies, 'enemies')
-        if (((this.#killedEnemies === this.#amountOfEnemies) || (this.#notBeggining && this.enemies.length == 0)) && !this.#cleared) {
-            console.log("rodou");
-            console.log(this.#killedEnemies, this.#amountOfEnemies, this.#killedEnemies === this.#amountOfEnemies);
+
+        if (((this.#notBeggining && this.enemies.length == 0)) && !this.#cleared) {
             this.#clearanceCallback();
             this.#cleared = true;
         }

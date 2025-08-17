@@ -41,7 +41,7 @@ export class BulletsCollisionHandler {
         sphere.translateZ(-0.1); //para sair da boca do cilindro e não do meio
     }
 
-    handleCollisionsGun(collidables, enemiesAreas) {
+    handleCollisionsGun(collidables, enemiesAreas, damage = 10) {
         this.#camera.getWorldDirection(this.direction);
 
         this.#spheres = this.#spheres.filter((sphere) => {
@@ -56,6 +56,8 @@ export class BulletsCollisionHandler {
 
             const allEnemies = Object.values(enemiesAreas.inimigos).flat();
             const enemyMeshes = allEnemies.map(e => e.object).filter(Boolean);
+            console.log(allEnemies);
+            
 
             // colidíveis que serão analisados
             const collidableMeshes = [
@@ -78,12 +80,13 @@ export class BulletsCollisionHandler {
                 );
 
                 if (enemyHit) {
-                    console.log('colidiu com inimigo')
-                    console.log(enemyHit)
-                    enemyHit.damage(10)
+                    //console.log('colidiu com inimigo')
+                    //console.log(enemyHit)
+                    enemyHit.damage(damage)
                 }
-                else
-                    console.log('colidiu normal')
+                else{
+                    //console.log('colidiu normal')
+                }
                 this.#scene.remove(sphere);
                 sphere.geometry.dispose();
                 sphere.material.dispose();

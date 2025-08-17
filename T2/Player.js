@@ -6,7 +6,6 @@ import { Key } from './Key.js';
 import { playerHealthBar } from './playerHealthBar.js';
 
 export class Player {
-
     #scene
     #camera
     object
@@ -60,6 +59,7 @@ export class Player {
     handlePlayer() {
         this.#healthBar.update(this.#health, this.#maxhealth);
         this.activeGun.handleGun();
+        console.log(this.#health);
     }
 
     #switchGun(newGun) {
@@ -169,8 +169,6 @@ export class Player {
     }
 
     checkArea1(enemiesAreas) {
-        //console.log(this.initialKey)
-        //console.log(this.keys.length)
         if (enemiesAreas.inimigos.area1.length === 0 && this.keys.length === 0) {
             if (!this.initialKey)
                 this.initialKey = new Key("rgb(223, 47, 47)");

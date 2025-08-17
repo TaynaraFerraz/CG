@@ -1,18 +1,23 @@
 import { Enemy } from "./Enemy.js";
 import * as THREE from 'three';
-import { camera } from './camera.js';
+import { camera, globalPlayer, clock } from './camera.js';
 
 export class LostSoul extends Enemy {
+    #playerBox;
+    #lastDamage;
     #randomized = false;
-    #dashing = false;
-    #dashingTurnSpeed = 0.6;
-    #dynamicTurnSpeed = this.#dashingTurnSpeed;
+    dashing = false;
+    dashingTurnSpeed = 0.6;
+    #dynamicTurnSpeed = this.dashingTurnSpeed;
     #injuredSound;
     #attackSound;
 
     constructor(object, player, initialPosition) {
         super(object, player, 20, 2, initialPosition);
-        object.name = "LostSoul";
+        object.name = "lostsoul";
+
+        this.#playerBox = new THREE.Box3();
+        this.#lastDamage = clock.getElapsedTime();
 
         const listener = new THREE.AudioListener();
         camera.add(listener);
@@ -65,16 +70,16 @@ export class LostSoul extends Enemy {
 
     dashingCallBack() {
         if (!this.dead) {
-            if (this.#dashing) {
+            if (this.dashing) {
                 setTimeout(() => {
-                    this.#dashing = false;
+                    this.dashing = false;
                     this.dashingCallBack();
                 }, 1000);
             } else {
                 const nextDash = Math.random() * 2000 + 2000;
                 setTimeout(() => {
-                    this.#dashing = true;
-                    this.#dynamicTurnSpeed = this.#dashingTurnSpeed;
+                    this.dashing = true;
+                    this.#dynamicTurnSpeed = this.dashingTurnSpeed;
                     this.dashingCallBack();
                 }, nextDash);
             }
@@ -89,10 +94,10 @@ export class LostSoul extends Enemy {
     handleMovement() {
         if(!this.dying)
         if (this.angry) {
-            const speed = this.#dashing ? 0.6 : 0.08;
-            const turnSpeed = this.#dashing ? this.#dynamicTurnSpeed : undefined;
+            const speed = this.dashing ? 0.6 : 0.08;
+            const turnSpeed = this.dashing ? this.#dynamicTurnSpeed : undefined;
 
-            if (this.#dashing) {
+            if (this.dashing) {
                 this.#moveTowardsPlayer(turnSpeed, speed);
                 this.#dynamicTurnSpeed *= 0.7;
             } else {
@@ -106,6 +111,19 @@ export class LostSoul extends Enemy {
         } else {
             this.rotateTowardsQuaternion();
             this.object.translateZ(0.07);
+        }
+    }
+
+    handlePlayerDamage() {
+        this.boundingBox.setFromObject(this.object);
+        this.#playerBox.setFromObject(this.player)
+        const elapsedTime = clock.getElapsedTime();
+        const damageDelta = elapsedTime - this.#lastDamage;
+        console.log(damageDelta);
+        
+        if(this.boundingBox.intersectsBox(this.#playerBox) && damageDelta > 2) {
+            globalPlayer.damage(5);
+            this.#lastDamage = elapsedTime;
         }
     }
 
@@ -128,6 +146,7 @@ export class LostSoul extends Enemy {
     handle(){
         this.handleMovement();
         this.handleCollisions();
+        this.handlePlayerDamage();
         this.handleHealth();
     }
 };

@@ -71,6 +71,7 @@ export class ChainGun {
         if (!this.isFiring) {
             this.#action = this.#spriteMixer.Action(this.#actionSprite, 100, 0, 0, 0, 4);
             this.isFiring = true;
+            this.#action = this.#spriteMixer.Action(this.#actionSprite, 100, 0, 0, 0, 4);
             this.#action.playLoop();
         }
 
